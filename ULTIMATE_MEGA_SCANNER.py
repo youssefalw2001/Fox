@@ -2570,7 +2570,8 @@ class ReportGenerator:
         # Exploitation results
         if 'exploits' in scan_data:
             exploits = scan_data['exploits']
-            successful = [e for e in exploits if e.success]
+            # Handle both ExploitResult objects and dicts
+            successful = [e for e in exploits if (e.success if hasattr(e, 'success') else e.get('success'))]
             
             if successful:
                 md_content += f"""## 💀 EXPLOITATION RESULTS
@@ -2582,15 +2583,20 @@ class ReportGenerator:
 """
                 
                 for i, exploit in enumerate(successful, 1):
-                    md_content += f"""### {i}. {exploit.access_gained}
+                    # Handle both object and dict access
+                    access_gained = exploit.access_gained if hasattr(exploit, 'access_gained') else exploit.get('access_gained')
+                    vuln_type = exploit.vulnerability_type if hasattr(exploit, 'vulnerability_type') else exploit.get('vulnerability_type')
+                    data_extracted = exploit.data_extracted if hasattr(exploit, 'data_extracted') else exploit.get('data_extracted')
+                    
+                    md_content += f"""### {i}. {access_gained}
 
-**Vulnerability:** {exploit.vulnerability_type}  
+**Vulnerability:** {vuln_type}  
 **Status:** ✅ SUCCESSFUL
 
 """
-                    if exploit.data_extracted:
-                        md_content += f"**Data Extracted:** {len(exploit.data_extracted)} items\n\n"
-                        for key, value in list(exploit.data_extracted.items())[:3]:
+                    if data_extracted:
+                        md_content += f"**Data Extracted:** {len(data_extracted)} items\n\n"
+                        for key, value in list(data_extracted.items())[:3]:
                             md_content += f"- **{key}:** `{str(value)[:100]}...`\n"
                     
                     md_content += "\n---\n\n"
@@ -2989,7 +2995,8 @@ class UltimateMegaScanner:
         
         if exploits:
             print(f"\n{Colors.BOLD}EXPLOITATION:{Colors.END}")
-            successful = len([e for e in exploits if e.success])
+            # Handle both ExploitResult objects and dicts
+            successful = len([e for e in exploits if (e.success if hasattr(e, 'success') else e.get('success'))])
             print(f"  Attempted:    {len(exploits)}")
             print(f"  {Colors.critical('Successful:')}  {successful}")
             print(f"  Success Rate: {(successful/len(exploits)*100) if exploits else 0:.1f}%")
