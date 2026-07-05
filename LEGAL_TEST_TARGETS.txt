@@ -1,0 +1,22 @@
+🔥 LEGAL VULNERABLE TEST SITES - AUTHORIZED FOR TESTING 🔥
+═══════════════════════════════════════════════════════════
+
+These sites are INTENTIONALLY VULNERABLE and 100% LEGAL to test:
+
+1. http://testphp.vulnweb.com
+   - SQL Injection vulnerabilities
+   - XSS vulnerabilities
+   - File inclusion vulnerabilities
+
+2. http://testhtml5.vulnweb.com
+   - Modern web vulnerabilities
+   - HTML5 specific issues
+
+3. http://testasp.vulnweb.com
+   - ASP.NET vulnerabilities
+   - MSSQL injection
+
+4. http://testaspnet.vulnweb.com
+   - .NET Framework vulnerabilities
+
+Let's fucking TEST THESE NOW! 💀🔥

