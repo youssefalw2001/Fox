@@ -1,0 +1,52 @@
+[
+  {
+    "payload": {},
+    "status_code": 405,
+    "response_length": 0,
+    "response_preview": ""
+  },
+  {
+    "payload": {
+      "amount": 1
+    },
+    "status_code": 405,
+    "response_length": 0,
+    "response_preview": ""
+  },
+  {
+    "payload": {
+      "address": "test"
+    },
+    "status_code": 405,
+    "response_length": 0,
+    "response_preview": ""
+  },
+  {
+    "payload": {
+      "amount": 1,
+      "address": "test"
+    },
+    "status_code": 405,
+    "response_length": 0,
+    "response_preview": ""
+  },
+  {
+    "payload": {
+      "amount": 1,
+      "to": "test",
+      "token": "SOL"
+    },
+    "status_code": 405,
+    "response_length": 0,
+    "response_preview": ""
+  },
+  {
+    "payload": {
+      "wallet": "test",
+      "amount": 1
+    },
+    "status_code": 405,
+    "response_length": 0,
+    "response_preview": ""
+  }
+]
