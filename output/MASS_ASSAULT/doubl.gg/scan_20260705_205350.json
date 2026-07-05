@@ -1,0 +1,173 @@
+{
+  "scan_id": "3be3f224f296",
+  "timestamp": "2026-07-05T20:50:45.577841",
+  "target": "https://doubl.gg",
+  "config": {
+    "full_scan": true,
+    "exploit": true,
+    "threads": 10,
+    "timeout": 30
+  },
+  "recon": {
+    "target": "https://doubl.gg",
+    "timestamp": "2026-07-05T20:50:45.577893",
+    "subdomains": [
+      "api.doubl.gg",
+      "cdn.doubl.gg",
+      "mail.doubl.gg"
+    ],
+    "open_ports": [
+      {
+        "port": 80,
+        "service": "HTTP",
+        "state": "open"
+      },
+      {
+        "port": 443,
+        "service": "HTTPS",
+        "state": "open"
+      },
+      {
+        "port": 8080,
+        "service": "HTTP-Alt",
+        "state": "open"
+      },
+      {
+        "port": 8443,
+        "service": "HTTPS-Alt",
+        "state": "open"
+      }
+    ],
+    "technologies": {
+      "server": [
+        "cloudflare",
+        "Next.js"
+      ],
+      "framework": [
+        "React",
+        "Next.js"
+      ],
+      "cms": [],
+      "cdn": [
+        "Cloudflare"
+      ],
+      "javascript": [],
+      "analytics": []
+    },
+    "dns_records": {
+      "A": [
+        "104.21.54.202",
+        "172.67.169.4"
+      ],
+      "MX": [],
+      "TXT": []
+    },
+    "ssl_info": {
+      "valid": true,
+      "issuer": {
+        "countryName": "US",
+        "organizationName": "Google Trust Services",
+        "commonName": "WE1"
+      },
+      "expiry": "Aug 24 14:57:49 2026 GMT",
+      "subject": {
+        "commonName": "doubl.gg"
+      }
+    }
+  },
+  "vulnerabilities": [
+    {
+      "type": "MISSING_SECURITY_HEADER",
+      "severity": "LOW",
+      "location": "HTTP Headers",
+      "payload": null,
+      "evidence": null,
+      "description": "Missing security header: Permissions Policy",
+      "remediation": "Add Permissions-Policy header to responses",
+      "cve": null,
+      "exploitable": false,
+      "exploit_code": null,
+      "timestamp": "2026-07-05T20:51:09.347584"
+    },
+    {
+      "type": "INFORMATION_DISCLOSURE",
+      "severity": "LOW",
+      "location": "HTTP Headers",
+      "payload": null,
+      "evidence": "X-Powered-By: Next.js",
+      "description": "X-Powered-By header exposes server technology",
+      "remediation": "Remove X-Powered-By header",
+      "cve": null,
+      "exploitable": false,
+      "exploit_code": null,
+      "timestamp": "2026-07-05T20:51:09.347600"
+    },
+    {
+      "type": "DANGEROUS_HTTP_METHOD",
+      "severity": "MEDIUM",
+      "location": "HTTP Methods",
+      "payload": null,
+      "evidence": "CONNECT returned 400",
+      "description": "Dangerous HTTP method allowed: CONNECT",
+      "remediation": "Disable CONNECT method if not required",
+      "cve": null,
+      "exploitable": true,
+      "exploit_code": null,
+      "timestamp": "2026-07-05T20:51:14.471259"
+    },
+    {
+      "type": "RSA_NO_RATE_LIMITING",
+      "severity": "MEDIUM",
+      "location": "/api/login",
+      "payload": null,
+      "evidence": null,
+      "description": "No rate limiting on authentication endpoint",
+      "remediation": "Implement rate limiting on auth endpoints",
+      "cve": null,
+      "exploitable": true,
+      "exploit_code": null,
+      "timestamp": "2026-07-05T20:51:35.215589"
+    },
+    {
+      "type": "RSA_NO_RATE_LIMITING",
+      "severity": "MEDIUM",
+      "location": "/login",
+      "payload": null,
+      "evidence": null,
+      "description": "No rate limiting on authentication endpoint",
+      "remediation": "Implement rate limiting on auth endpoints",
+      "cve": null,
+      "exploitable": true,
+      "exploit_code": null,
+      "timestamp": "2026-07-05T20:51:38.542206"
+    },
+    {
+      "type": "RSA_NO_RATE_LIMITING",
+      "severity": "MEDIUM",
+      "location": "/api/auth",
+      "payload": null,
+      "evidence": null,
+      "description": "No rate limiting on authentication endpoint",
+      "remediation": "Implement rate limiting on auth endpoints",
+      "cve": null,
+      "exploitable": true,
+      "exploit_code": null,
+      "timestamp": "2026-07-05T20:51:41.851782"
+    },
+    {
+      "type": "RSA_NO_RATE_LIMITING",
+      "severity": "MEDIUM",
+      "location": "/auth/login",
+      "payload": null,
+      "evidence": null,
+      "description": "No rate limiting on authentication endpoint",
+      "remediation": "Implement rate limiting on auth endpoints",
+      "cve": null,
+      "exploitable": true,
+      "exploit_code": null,
+      "timestamp": "2026-07-05T20:51:45.149801"
+    }
+  ],
+  "exploits": [],
+  "reports": {}
+}

@@ -1,0 +1,339 @@
+{
+  "scan_id": "d520affac73e",
+  "timestamp": "2026-07-05T20:54:02.290688",
+  "target": "https://solbet.fun",
+  "config": {
+    "full_scan": true,
+    "exploit": true,
+    "threads": 10,
+    "timeout": 30
+  },
+  "recon": {
+    "target": "https://solbet.fun",
+    "timestamp": "2026-07-05T20:54:02.290742",
+    "subdomains": [
+      "www.solbet.fun"
+    ],
+    "open_ports": [
+      {
+        "port": 80,
+        "service": "HTTP",
+        "state": "open"
+      },
+      {
+        "port": 443,
+        "service": "HTTPS",
+        "state": "open"
+      }
+    ],
+    "technologies": {
+      "server": [
+        "Vercel"
+      ],
+      "framework": [
+        "React",
+        "Next.js"
+      ],
+      "cms": [],
+      "cdn": [],
+      "javascript": [],
+      "analytics": []
+    },
+    "dns_records": {
+      "A": [
+        "216.198.79.1"
+      ],
+      "MX": [],
+      "TXT": []
+    },
+    "ssl_info": {
+      "valid": true,
+      "issuer": {
+        "countryName": "US",
+        "organizationName": "Let's Encrypt",
+        "commonName": "YR1"
+      },
+      "expiry": "Sep 10 21:09:55 2026 GMT",
+      "subject": {
+        "commonName": "solbet.fun"
+      }
+    }
+  },
+  "vulnerabilities": [
+    {
+      "type": "MISSING_SECURITY_HEADER",
+      "severity": "HIGH",
+      "location": "HTTP Headers",
+      "payload": null,
+      "evidence": null,
+      "description": "Missing security header: CSP",
+      "remediation": "Add Content-Security-Policy header to responses",
+      "cve": null,
+      "exploitable": false,
+      "exploit_code": null,
+      "timestamp": "2026-07-05T20:54:29.657027"
+    },
+    {
+      "type": "MISSING_SECURITY_HEADER",
+      "severity": "MEDIUM",
+      "location": "HTTP Headers",
+      "payload": null,
+      "evidence": null,
+      "description": "Missing security header: Clickjacking Protection",
+      "remediation": "Add X-Frame-Options header to responses",
+      "cve": null,
+      "exploitable": false,
+      "exploit_code": null,
+      "timestamp": "2026-07-05T20:54:29.657063"
+    },
+    {
+      "type": "MISSING_SECURITY_HEADER",
+      "severity": "MEDIUM",
+      "location": "HTTP Headers",
+      "payload": null,
+      "evidence": null,
+      "description": "Missing security header: MIME Sniffing Protection",
+      "remediation": "Add X-Content-Type-Options header to responses",
+      "cve": null,
+      "exploitable": false,
+      "exploit_code": null,
+      "timestamp": "2026-07-05T20:54:29.657067"
+    },
+    {
+      "type": "MISSING_SECURITY_HEADER",
+      "severity": "LOW",
+      "location": "HTTP Headers",
+      "payload": null,
+      "evidence": null,
+      "description": "Missing security header: XSS Protection",
+      "remediation": "Add X-XSS-Protection header to responses",
+      "cve": null,
+      "exploitable": false,
+      "exploit_code": null,
+      "timestamp": "2026-07-05T20:54:29.657071"
+    },
+    {
+      "type": "MISSING_SECURITY_HEADER",
+      "severity": "LOW",
+      "location": "HTTP Headers",
+      "payload": null,
+      "evidence": null,
+      "description": "Missing security header: Referrer Policy",
+      "remediation": "Add Referrer-Policy header to responses",
+      "cve": null,
+      "exploitable": false,
+      "exploit_code": null,
+      "timestamp": "2026-07-05T20:54:29.657075"
+    },
+    {
+      "type": "MISSING_SECURITY_HEADER",
+      "severity": "LOW",
+      "location": "HTTP Headers",
+      "payload": null,
+      "evidence": null,
+      "description": "Missing security header: Permissions Policy",
+      "remediation": "Add Permissions-Policy header to responses",
+      "cve": null,
+      "exploitable": false,
+      "exploit_code": null,
+      "timestamp": "2026-07-05T20:54:29.657078"
+    },
+    {
+      "type": "DANGEROUS_HTTP_METHOD",
+      "severity": "MEDIUM",
+      "location": "HTTP Methods",
+      "payload": null,
+      "evidence": "OPTIONS returned 204",
+      "description": "Dangerous HTTP method allowed: OPTIONS",
+      "remediation": "Disable OPTIONS method if not required",
+      "cve": null,
+      "exploitable": true,
+      "exploit_code": null,
+      "timestamp": "2026-07-05T20:54:32.101448"
+    },
+    {
+      "type": "RSA_NO_RATE_LIMITING",
+      "severity": "MEDIUM",
+      "location": "/api/login",
+      "payload": null,
+      "evidence": null,
+      "description": "No rate limiting on authentication endpoint",
+      "remediation": "Implement rate limiting on auth endpoints",
+      "cve": null,
+      "exploitable": true,
+      "exploit_code": null,
+      "timestamp": "2026-07-05T20:54:42.810173"
+    },
+    {
+      "type": "RSA_NO_RATE_LIMITING",
+      "severity": "MEDIUM",
+      "location": "/login",
+      "payload": null,
+      "evidence": null,
+      "description": "No rate limiting on authentication endpoint",
+      "remediation": "Implement rate limiting on auth endpoints",
+      "cve": null,
+      "exploitable": true,
+      "exploit_code": null,
+      "timestamp": "2026-07-05T20:54:44.099860"
+    },
+    {
+      "type": "RSA_NO_RATE_LIMITING",
+      "severity": "MEDIUM",
+      "location": "/api/auth",
+      "payload": null,
+      "evidence": null,
+      "description": "No rate limiting on authentication endpoint",
+      "remediation": "Implement rate limiting on auth endpoints",
+      "cve": null,
+      "exploitable": true,
+      "exploit_code": null,
+      "timestamp": "2026-07-05T20:54:45.360520"
+    },
+    {
+      "type": "RSA_NO_RATE_LIMITING",
+      "severity": "MEDIUM",
+      "location": "/auth/login",
+      "payload": null,
+      "evidence": null,
+      "description": "No rate limiting on authentication endpoint",
+      "remediation": "Implement rate limiting on auth endpoints",
+      "cve": null,
+      "exploitable": true,
+      "exploit_code": null,
+      "timestamp": "2026-07-05T20:54:46.802020"
+    },
+    {
+      "type": "MEMORY_SCAN_SENSITIVE_DATA",
+      "severity": "CRITICAL",
+      "location": "/",
+      "payload": null,
+      "evidence": "Found 8 matches: MzRmNzIxMTAwZGI2MGFj...",
+      "description": "Sensitive pattern exposed: API_KEY_32_CHAR",
+      "remediation": "Remove secrets from responses, use environment variables",
+      "cve": null,
+      "exploitable": true,
+      "exploit_code": null,
+      "timestamp": "2026-07-05T20:55:34.719295"
+    },
+    {
+      "type": "MEMORY_SCAN_SENSITIVE_DATA",
+      "severity": "CRITICAL",
+      "location": "/api",
+      "payload": null,
+      "evidence": "Found 8 matches: MzRmNzIxMTAwZGI2MGFj...",
+      "description": "Sensitive pattern exposed: API_KEY_32_CHAR",
+      "remediation": "Remove secrets from responses, use environment variables",
+      "cve": null,
+      "exploitable": true,
+      "exploit_code": null,
+      "timestamp": "2026-07-05T20:55:34.823581"
+    },
+    {
+      "type": "MEMORY_SCAN_SENSITIVE_DATA",
+      "severity": "CRITICAL",
+      "location": "/config",
+      "payload": null,
+      "evidence": "Found 8 matches: MzRmNzIxMTAwZGI2MGFj...",
+      "description": "Sensitive pattern exposed: API_KEY_32_CHAR",
+      "remediation": "Remove secrets from responses, use environment variables",
+      "cve": null,
+      "exploitable": true,
+      "exploit_code": null,
+      "timestamp": "2026-07-05T20:55:34.927656"
+    },
+    {
+      "type": "MEMORY_SCAN_SENSITIVE_DATA",
+      "severity": "CRITICAL",
+      "location": "/.env",
+      "payload": null,
+      "evidence": "Found 8 matches: MzRmNzIxMTAwZGI2MGFj...",
+      "description": "Sensitive pattern exposed: API_KEY_32_CHAR",
+      "remediation": "Remove secrets from responses, use environment variables",
+      "cve": null,
+      "exploitable": true,
+      "exploit_code": null,
+      "timestamp": "2026-07-05T20:55:35.031745"
+    },
+    {
+      "type": "MEMORY_SCAN_SENSITIVE_DATA",
+      "severity": "CRITICAL",
+      "location": "/debug",
+      "payload": null,
+      "evidence": "Found 8 matches: MzRmNzIxMTAwZGI2MGFj...",
+      "description": "Sensitive pattern exposed: API_KEY_32_CHAR",
+      "remediation": "Remove secrets from responses, use environment variables",
+      "cve": null,
+      "exploitable": true,
+      "exploit_code": null,
+      "timestamp": "2026-07-05T20:55:35.135796"
+    },
+    {
+      "type": "MEMORY_SCAN_SENSITIVE_DATA",
+      "severity": "CRITICAL",
+      "location": "/api/debug",
+      "payload": null,
+      "evidence": "Found 8 matches: MzRmNzIxMTAwZGI2MGFj...",
+      "description": "Sensitive pattern exposed: API_KEY_32_CHAR",
+      "remediation": "Remove secrets from responses, use environment variables",
+      "cve": null,
+      "exploitable": true,
+      "exploit_code": null,
+      "timestamp": "2026-07-05T20:55:35.239825"
+    },
+    {
+      "type": "MEMORY_SCAN_SENSITIVE_DATA",
+      "severity": "CRITICAL",
+      "location": "/health",
+      "payload": null,
+      "evidence": "Found 8 matches: MzRmNzIxMTAwZGI2MGFj...",
+      "description": "Sensitive pattern exposed: API_KEY_32_CHAR",
+      "remediation": "Remove secrets from responses, use environment variables",
+      "cve": null,
+      "exploitable": true,
+      "exploit_code": null,
+      "timestamp": "2026-07-05T20:55:35.344809"
+    },
+    {
+      "type": "MEMORY_SCAN_SENSITIVE_DATA",
+      "severity": "CRITICAL",
+      "location": "/status",
+      "payload": null,
+      "evidence": "Found 8 matches: MzRmNzIxMTAwZGI2MGFj...",
+      "description": "Sensitive pattern exposed: API_KEY_32_CHAR",
+      "remediation": "Remove secrets from responses, use environment variables",
+      "cve": null,
+      "exploitable": true,
+      "exploit_code": null,
+      "timestamp": "2026-07-05T20:55:35.448861"
+    },
+    {
+      "type": "MEMORY_SCAN_SENSITIVE_DATA",
+      "severity": "CRITICAL",
+      "location": "/version",
+      "payload": null,
+      "evidence": "Found 8 matches: MzRmNzIxMTAwZGI2MGFj...",
+      "description": "Sensitive pattern exposed: API_KEY_32_CHAR",
+      "remediation": "Remove secrets from responses, use environment variables",
+      "cve": null,
+      "exploitable": true,
+      "exploit_code": null,
+      "timestamp": "2026-07-05T20:55:35.552958"
+    },
+    {
+      "type": "MEMORY_SCAN_SENSITIVE_DATA",
+      "severity": "CRITICAL",
+      "location": "/api/version",
+      "payload": null,
+      "evidence": "Found 8 matches: MzRmNzIxMTAwZGI2MGFj...",
+      "description": "Sensitive pattern exposed: API_KEY_32_CHAR",
+      "remediation": "Remove secrets from responses, use environment variables",
+      "cve": null,
+      "exploitable": true,
+      "exploit_code": null,
+      "timestamp": "2026-07-05T20:55:35.656890"
+    }
+  ],
+  "exploits": [],
+  "reports": {}
+}

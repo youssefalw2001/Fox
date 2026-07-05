@@ -1,0 +1,39 @@
+{
+  "scan_id": "9bc686940b4b",
+  "timestamp": "2026-07-05T20:55:50.480638",
+  "target": "https://rugsfun.io",
+  "config": {
+    "full_scan": true,
+    "exploit": true,
+    "threads": 10,
+    "timeout": 30
+  },
+  "recon": {
+    "target": "https://rugsfun.io",
+    "timestamp": "2026-07-05T20:55:50.480688",
+    "subdomains": [],
+    "open_ports": [],
+    "technologies": {
+      "server": [],
+      "framework": [],
+      "cms": [],
+      "cdn": [],
+      "javascript": [],
+      "analytics": []
+    },
+    "dns_records": {
+      "A": [],
+      "MX": [],
+      "TXT": []
+    },
+    "ssl_info": {
+      "valid": false,
+      "issuer": null,
+      "expiry": null,
+      "subject": null
+    }
+  },
+  "vulnerabilities": [],
+  "exploits": [],
+  "reports": {}
+}

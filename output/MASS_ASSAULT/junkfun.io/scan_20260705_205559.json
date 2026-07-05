@@ -1,0 +1,39 @@
+{
+  "scan_id": "c609a8e61245",
+  "timestamp": "2026-07-05T20:55:57.685872",
+  "target": "https://junkfun.io",
+  "config": {
+    "full_scan": true,
+    "exploit": true,
+    "threads": 10,
+    "timeout": 30
+  },
+  "recon": {
+    "target": "https://junkfun.io",
+    "timestamp": "2026-07-05T20:55:57.685941",
+    "subdomains": [],
+    "open_ports": [],
+    "technologies": {
+      "server": [],
+      "framework": [],
+      "cms": [],
+      "cdn": [],
+      "javascript": [],
+      "analytics": []
+    },
+    "dns_records": {
+      "A": [],
+      "MX": [],
+      "TXT": []
+    },
+    "ssl_info": {
+      "valid": false,
+      "issuer": null,
+      "expiry": null,
+      "subject": null
+    }
+  },
+  "vulnerabilities": [],
+  "exploits": [],
+  "reports": {}
+}

@@ -1,0 +1,173 @@
+Traceback (most recent call last):
+  File "/projects/sandbox/Fox/ULTIMATE_MEGA_SCANNER.py", line 2922, in scan
+    self._print_final_summary(duration)
+  File "/projects/sandbox/Fox/ULTIMATE_MEGA_SCANNER.py", line 2958, in _print_final_summary
+    critical = len([v for v in vulns if v.severity == "CRITICAL"])
+  File "/projects/sandbox/Fox/ULTIMATE_MEGA_SCANNER.py", line 2958, in <listcomp>
+    critical = len([v for v in vulns if v.severity == "CRITICAL"])
+AttributeError: 'dict' object has no attribute 'severity'
+[91m[1m
+    ╔═══════════════════════════════════════════════════════════════════╗
+    ║                                                                   ║
+    ║   ███╗   ███╗███████╗ ██████╗  █████╗     ███████╗ ██████╗ ██╗  ║
+    ║   ████╗ ████║██╔════╝██╔════╝ ██╔══██╗    ██╔════╝██╔═══██╗╚██╗ ║
+    ║   ██╔████╔██║█████╗  ██║  ███╗███████║    █████╗  ██║   ██║ ╚██╗║
+    ║   ██║╚██╔╝██║██╔══╝  ██║   ██║██╔══██║    ██╔══╝  ██║   ██║ ██╔╝║
+    ║   ██║ ╚═╝ ██║███████╗╚██████╔╝██║  ██║    ██║     ╚██████╔╝██╔╝ ║
+    ║   ╚═╝     ╚═╝╚══════╝ ╚═════╝ ╚═╝  ╚═╝    ╚═╝      ╚═════╝ ╚═╝  ║
+    ║                                                                   ║
+    ║         💀🔥 ULTIMATE MEGA SCANNER - FOX'S ARSENAL 🔥💀           ║
+    ║                                                                   ║
+    ║   [✓] 200+ Vulnerability Checks    [✓] Autonomous A-Z Exploit    ║
+    ║   [✓] All Code Word Techniques     [✓] Memory/Process Ops        ║
+    ║   [✓] Full OSINT & Recon           [✓] Beautiful Reports         ║
+    ║                                                                   ║
+    ║   Built by: Fox (27+ years) | Partner: Jack | No Mercy Mode      ║
+    ╚═══════════════════════════════════════════════════════════════════╝
+    [0m
+[95m[1m
+======================================================================[0m
+[95m[1mINITIATING FULL SPECTRUM ATTACK[0m
+[95m[1m======================================================================[0m
+
+[96mTarget:[0m      [93mhttps://gmgn.ai[0m
+[96mScan ID:[0m     0c3398aad62d
+[96mMode:[0m        SCAN ONLY
+[96mStarted:[0m     2026-07-05 20:20:40
+
+[95m[1m
+[PHASE 1] 🔍 RECONNAISSANCE[0m
+======================================================================
+[96m  [→] Enumerating subdomains for gmgn.ai[0m
+[92m    [✓] Found: www.gmgn.ai[0m
+[92m  [✓] Found 1 subdomains[0m
+[96m  [→] Scanning ports on gmgn.ai[0m
+[92m    [✓] Port 80/HTTP - OPEN[0m
+[92m    [✓] Port 443/HTTPS - OPEN[0m
+[92m    [✓] Port 8080/HTTP-Alt - OPEN[0m
+[92m    [✓] Port 8443/HTTPS-Alt - OPEN[0m
+[92m  [✓] Found 4 open ports[0m
+[96m  [→] Detecting technologies[0m
+[92m  [✓] Detected 6 technologies[0m
+[96m    [SERVER] cloudflare[0m
+[96m    [FRAMEWORK] Next.js[0m
+[96m    [CDN] Cloudflare[0m
+[96m    [JAVASCRIPT] Moment.js[0m
+[96m    [ANALYTICS] Google Analytics, Google Tag Manager[0m
+[96m  [→] Performing DNS reconnaissance[0m
+[92m    [✓] A Records: 104.18.1.179, 104.18.0.179[0m
+[96m  [→] Analyzing SSL/TLS certificate[0m
+[92m    [✓] SSL Certificate valid[0m
+[96m    [Issuer] Google Trust Services[0m
+[96m    [Expires] Aug 23 05:00:41 2026 GMT[0m
+
+[92m[✓] Reconnaissance phase complete[0m
+======================================================================
+[95m[1m
+[PHASE 2] 🔍 VULNERABILITY SCANNING[0m
+======================================================================
+[96m
+[→] Security Headers[0m
+[92m[✓] 1 vulnerabilities[0m
+[96m
+[→] CORS Configuration[0m
+[96m[·] No vulnerabilities found[0m
+[96m
+[→] Sensitive Files[0m
+[96m[·] No vulnerabilities found[0m
+[96m
+[→] HTTP Methods[0m
+[93m[⚠️] 4 vulnerabilities (2 HIGH)[0m
+[96m
+[→] Code Word Attacks[0m
+[95m[1m
+[*] Executing CODE WORD attack modules...[0m
+[96m  [→] SPC - IPC Exploitation[0m
+[96m    [·] No vulnerabilities found[0m
+[96m  [→] BDC - Metrics Exposure[0m
+[96m    [·] No vulnerabilities found[0m
+[96m  [→] FAM - Path Traversal[0m
+[96m    [·] No vulnerabilities found[0m
+[96m  [→] PCM - Command Injection[0m
+[96m    [·] No vulnerabilities found[0m
+[96m  [→] ACS - Config Exposure[0m
+[96m    [·] No vulnerabilities found[0m
+[96m  [→] RSA - Rate Limiting[0m
+[92m    [✓] Found 4 vulnerabilities[0m
+[96m  [→] DAM - Directory Listing[0m
+[96m    [·] No vulnerabilities found[0m
+[92m[✓] 4 vulnerabilities[0m
+[96m
+[→] Web Exploitation[0m
+[95m[1m
+[*] Executing WEB EXPLOITATION modules...[0m
+[96m  [→] XSS - Cross-Site Scripting[0m
+[96m    [·] No vulnerabilities found[0m
+[96m  [→] SQLi - SQL Injection[0m
+[91m[1m    [🔥] Found 15 vulnerabilities (15 CRITICAL)[0m
+[96m  [→] JWT - Token Attacks[0m
+[96m    [·] No vulnerabilities found[0m
+[96m  [→] SSRF - Server-Side Request Forgery[0m
+[96m    [·] No vulnerabilities found[0m
+[96m  [→] CSRF - Cross-Site Request Forgery[0m
+[96m    [·] No vulnerabilities found[0m
+[96m  [→] XXE - XML External Entity[0m
+[96m    [·] No vulnerabilities found[0m
+[96m  [→] IDOR - Insecure Direct Object Refs[0m
+[96m    [·] No vulnerabilities found[0m
+[96m  [→] Open Redirect[0m
+[96m    [·] No vulnerabilities found[0m
+[91m[1m[🔥] 15 vulnerabilities (15 CRITICAL, 0 HIGH)[0m
+[96m
+[→] Reverse Engineering[0m
+[95m[1m
+[*] Executing FOX'S REVERSE ENGINEERING modules...[0m
+[96m  [→] Memory Pattern Scanning[0m
+[91m[1m    [🔥] Found 2 vulnerabilities (2 CRITICAL)[0m
+[96m  [→] Endpoint Hook Discovery[0m
+[96m    [→] Hooking 42 potential endpoints...[0m
+[92m    [✓] Hooked 13 endpoints[0m
+[96m    [·] No vulnerabilities found[0m
+[96m  [→] Header Process Injection[0m
+[96m    [·] No vulnerabilities found[0m
+[96m  [→] JavaScript Disassembly[0m
+[92m    [✓] Found 4 vulnerabilities[0m
+[96m  [→] API VTable Analysis[0m
+[96m    [·] No vulnerabilities found[0m
+[91m[1m[🔥] 6 vulnerabilities (2 CRITICAL, 4 HIGH)[0m
+
+======================================================================
+[95m[1m[SCAN SUMMARY][0m
+======================================================================
+Total Vulnerabilities: 30
+[91m[1m  CRITICAL: 17[0m
+[93m  HIGH:     6[0m
+[96m  MEDIUM:   6[0m
+[96m  LOW:      1[0m
+======================================================================
+[95m[1m
+[PHASE 4] 📊 REPORT GENERATION[0m
+======================================================================
+[92m[✓] JSON report: output/gmgn_ai/scan_20260705_202223.json[0m
+[93m[!] Report generation error: 'dict' object has no attribute 'severity'[0m
+======================================================================
+
+
+══════════════════════════════════════════════════════════════════════
+[95m[1m💀🔥 ULTIMATE MEGA SCANNER - FINAL REPORT 🔥💀[0m
+══════════════════════════════════════════════════════════════════════
+
+[1mSCAN INFORMATION:[0m
+  Target:       https://gmgn.ai
+  Scan ID:      0c3398aad62d
+  Duration:     1.72 minutes
+  Completed:    2026-07-05 20:22:23
+
+[1mRECONNAISSANCE:[0m
+  Subdomains:   1
+  Open Ports:   4
+  Technologies: 6
+
+[1mVULNERABILITIES:[0m
+[91m[1m
+[!] Fatal error: 'dict' object has no attribute 'severity'[0m
