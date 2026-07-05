@@ -414,10 +414,10 @@ class CodeWordAttacks:
         return vulns
     
     # ─────────────────────────────────────────────────────────────────────
-    # ACS - Application Configuration Store (Config File Exposure)
+    # ACS - Application Configuration Store (Config File Exposure) - WITH REAL DATA EXTRACTION
     # ─────────────────────────────────────────────────────────────────────
     def attack_ACS(self, target: str) -> List[Vulnerability]:
-        """Configuration file and secret exposure"""
+        """Configuration file and secret exposure - ONLY report if actual secrets extracted"""
         vulns = []
         
         config_files = [
@@ -431,21 +431,47 @@ class CodeWordAttacks:
         for file_path in config_files:
             try:
                 url = urljoin(target, file_path)
-                r = self.session.get(url, timeout=5)
+                r = self.session.get(url, timeout=5, allow_redirects=False)
                 
+                # PHASE 1: File exists and has content
                 if r.status_code == 200 and len(r.text) > 10:
-                    # Check for secrets
-                    secret_patterns = ['api_key', 'secret', 'password', 'token', 'private_key', 'aws_', 'db_']
-                    if any(pattern in r.text.lower() for pattern in secret_patterns):
-                        vulns.append(Vulnerability(
-                            type="ACS_CONFIG_EXPOSURE",
-                            severity="CRITICAL",
-                            location=file_path,
-                            evidence=r.text[:500],
-                            description=f"Configuration file exposed with secrets: {file_path}",
-                            remediation="Block access to sensitive files via web server config",
-                            exploitable=True
-                        ))
+                    # PHASE 2: Verify it's NOT HTML/SPA fallback
+                    if not r.text.strip().startswith('<html') and not r.text.strip().startswith('<!DOCTYPE'):
+                        
+                        # PHASE 3: Extract ACTUAL secrets (not just keywords)
+                        import re
+                        extracted_secrets = {}
+                        
+                        # API key extraction patterns - must match actual key format
+                        api_patterns = {
+                            'API_KEY': r'(?:api[_-]?key|apikey)\s*[:=]\s*["\']?([A-Za-z0-9_-]{20,})["\']?',
+                            'SECRET': r'(?:secret|secret_key)\s*[:=]\s*["\']?([A-Za-z0-9_-]{20,})["\']?',
+                            'TOKEN': r'(?:token|auth_token)\s*[:=]\s*["\']?([A-Za-z0-9_-]{20,})["\']?',
+                            'PASSWORD': r'(?:password|passwd|pwd)\s*[:=]\s*["\']?([^"\'\s]{8,})["\']?',
+                            'AWS_KEY': r'(?:aws_access_key_id|AWS_ACCESS_KEY_ID)\s*[:=]\s*["\']?(AKIA[0-9A-Z]{16})["\']?',
+                            'DB_STRING': r'(?:database_url|db_uri|connection_string)\s*[:=]\s*["\']?([^"\'\s]{20,})["\']?',
+                        }
+                        
+                        for secret_type, pattern in api_patterns.items():
+                            matches = re.findall(pattern, r.text, re.IGNORECASE)
+                            if matches:
+                                # Filter out obvious false positives
+                                real_secrets = [m for m in matches if m not in ['your_key_here', 'example', 'test', 'xxx', '***', 'null', 'none', '']]
+                                if real_secrets:
+                                    extracted_secrets[secret_type] = real_secrets[0]
+                        
+                        # ONLY report if we actually extracted secrets
+                        if extracted_secrets:
+                            vulns.append(Vulnerability(
+                                type="ACS_CONFIG_EXPOSURE",
+                                severity="CRITICAL",
+                                location=file_path,
+                                evidence=f"Extracted {len(extracted_secrets)} secrets: {', '.join(extracted_secrets.keys())}",
+                                description=f"Configuration file exposed with real secrets: {file_path}",
+                                remediation="Block access to sensitive files via web server config, use environment variables",
+                                exploitable=True
+                            ))
+                
                 time.sleep(self.config.delay)
             except:
                 pass
@@ -491,10 +517,10 @@ class CodeWordAttacks:
         return vulns
     
     # ─────────────────────────────────────────────────────────────────────
-    # DAM - Directory Access Monitor (Directory Listing/Backup Files)
+    # DAM - Directory Access Monitor (Directory Listing/Backup Files) - WITH VERIFICATION
     # ─────────────────────────────────────────────────────────────────────
     def attack_DAM(self, target: str) -> List[Vulnerability]:
-        """Directory listing and backup file discovery"""
+        """Directory listing and backup file discovery - ONLY report if actually downloadable"""
         vulns = []
         
         # Test for directory listing
@@ -507,23 +533,26 @@ class CodeWordAttacks:
         for directory in directories:
             try:
                 url = urljoin(target, directory)
-                r = self.session.get(url, timeout=5)
+                r = self.session.get(url, timeout=5, allow_redirects=False)
                 
-                # Check for directory listing
-                if 'Index of' in r.text or '<title>Directory listing for' in r.text:
-                    vulns.append(Vulnerability(
-                        type="DAM_DIRECTORY_LISTING",
-                        severity="MEDIUM",
-                        location=directory,
-                        description=f"Directory listing enabled: {directory}",
-                        remediation="Disable directory listing in web server config",
-                        exploitable=True
-                    ))
+                # VERIFY: Actual directory listing HTML, not SPA fallback
+                if r.status_code == 200 and ('Index of' in r.text or '<title>Directory listing for' in r.text):
+                    # Double check: must have <a href links to files
+                    if '<a href="' in r.text and ('..' in r.text or 'Parent Directory' in r.text):
+                        vulns.append(Vulnerability(
+                            type="DAM_DIRECTORY_LISTING",
+                            severity="MEDIUM",
+                            location=directory,
+                            description=f"Directory listing enabled: {directory}",
+                            evidence=r.text[:200],
+                            remediation="Disable directory listing in web server config",
+                            exploitable=True
+                        ))
                 time.sleep(self.config.delay)
             except:
                 pass
         
-        # Test for backup files
+        # Test for backup files - VERIFY DOWNLOADABILITY
         backup_files = [
             '/backup.zip', '/backup.tar.gz', '/site.zip', '/www.zip',
             '/db.sql', '/database.sql', '/dump.sql', '/backup.sql'
@@ -532,17 +561,34 @@ class CodeWordAttacks:
         for backup in backup_files:
             try:
                 url = urljoin(target, backup)
-                r = self.session.head(url, timeout=5)
+                r = self.session.get(url, timeout=5, allow_redirects=False, stream=True)
                 
+                # PHASE 1: Check if exists
                 if r.status_code == 200:
-                    vulns.append(Vulnerability(
-                        type="DAM_BACKUP_FILE_EXPOSED",
-                        severity="CRITICAL",
-                        location=backup,
-                        description=f"Backup file accessible: {backup}",
-                        remediation="Remove backup files from public web directory",
-                        exploitable=True
-                    ))
+                    content_type = r.headers.get('content-type', '').lower()
+                    content_length = int(r.headers.get('content-length', 0))
+                    
+                    # PHASE 2: Verify it's an actual file, not HTML/SPA
+                    # Backup files should NOT be text/html and should have reasonable size
+                    if 'text/html' not in content_type or content_length > 100000:
+                        # Read first 512 bytes to verify file type
+                        first_chunk = next(r.iter_content(chunk_size=512), b'')
+                        
+                        # Verify it's not HTML by checking first bytes
+                        is_html = first_chunk.strip().startswith(b'<!DOCTYPE') or first_chunk.strip().startswith(b'<html')
+                        
+                        if not is_html:
+                            # Valid backup file found!
+                            vulns.append(Vulnerability(
+                                type="DAM_BACKUP_FILE_EXPOSED",
+                                severity="CRITICAL",
+                                location=backup,
+                                description=f"Backup file accessible and downloadable: {backup}",
+                                evidence=f"Size: {content_length} bytes, Type: {content_type}",
+                                remediation="Remove backup files from public web directory",
+                                exploitable=True
+                            ))
+                
                 time.sleep(self.config.delay)
             except:
                 pass
@@ -1198,37 +1244,35 @@ class FoxReverseEngineeringToolkit:
             self.session.proxies.update({'http': config.proxy, 'https': config.proxy})
     
     # ─────────────────────────────────────────────────────────────────────
-    # MEMORY SCANNING - AOB (Array of Bytes) Pattern Search
+    # MEMORY SCANNING - AOB (Array of Bytes) Pattern Search - WITH VALIDATION
     # ─────────────────────────────────────────────────────────────────────
     def scan_memory_patterns(self, target: str) -> List[Vulnerability]:
         """
-        Scan for sensitive patterns in application responses.
+        Scan for sensitive patterns in application responses - ONLY report validated keys.
         Adapted from AOB (Array of Bytes) scanning technique.
         """
         vulns = []
         
-        # Patterns to search for (hex signatures of sensitive data)
+        # Patterns to search for with strict validation
         sensitive_patterns = [
-            # API keys patterns
-            (r'[A-Za-z0-9]{32}', 'API_KEY_32_CHAR'),
-            (r'[A-Za-z0-9]{40}', 'API_KEY_40_CHAR'),
-            (r'sk_live_[A-Za-z0-9]{24}', 'STRIPE_SECRET_KEY'),
-            (r'sk_test_[A-Za-z0-9]{24}', 'STRIPE_TEST_KEY'),
+            # Stripe keys (very specific format)
+            (r'sk_live_[A-Za-z0-9]{24}', 'STRIPE_SECRET_KEY', lambda m: m.startswith('sk_live_')),
+            (r'sk_test_[A-Za-z0-9]{24}', 'STRIPE_TEST_KEY', lambda m: m.startswith('sk_test_')),
+            (r'pk_live_[A-Za-z0-9]{24}', 'STRIPE_PUBLIC_KEY', lambda m: m.startswith('pk_live_')),
             
-            # AWS credentials
-            (r'AKIA[0-9A-Z]{16}', 'AWS_ACCESS_KEY'),
-            (r'AWS_SECRET_ACCESS_KEY', 'AWS_SECRET_LABEL'),
+            # AWS credentials (exact format)
+            (r'AKIA[0-9A-Z]{16}', 'AWS_ACCESS_KEY', lambda m: m.startswith('AKIA') and len(m) == 20),
             
-            # Private keys
-            (r'-----BEGIN (RSA|DSA|EC|OPENSSH) PRIVATE KEY-----', 'PRIVATE_KEY'),
+            # Private keys (must have full structure)
+            (r'-----BEGIN (RSA|DSA|EC|OPENSSH) PRIVATE KEY-----[\s\S]{100,}-----END \1 PRIVATE KEY-----', 'PRIVATE_KEY', lambda m: '-----BEGIN' in m and '-----END' in m),
             
-            # JWT tokens
-            (r'eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+', 'JWT_TOKEN'),
+            # JWT tokens (must have 3 parts)
+            (r'eyJ[A-Za-z0-9_-]{20,}\.eyJ[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{20,}', 'JWT_TOKEN', lambda m: m.count('.') == 2 and m.startswith('eyJ')),
             
-            # Database connection strings
-            (r'mongodb(\+srv)?://[^\s]+', 'MONGODB_URI'),
-            (r'postgresql://[^\s]+', 'POSTGRESQL_URI'),
-            (r'mysql://[^\s]+', 'MYSQL_URI'),
+            # Database connection strings (must have protocol + credentials)
+            (r'mongodb(\+srv)?://[^:\s]+:[^@\s]+@[^\s/]+', 'MONGODB_URI', lambda m: '://' in m and '@' in m and ':' in m),
+            (r'postgresql://[^:\s]+:[^@\s]+@[^\s/]+', 'POSTGRESQL_URI', lambda m: 'postgresql://' in m and '@' in m),
+            (r'mysql://[^:\s]+:[^@\s]+@[^\s/]+', 'MYSQL_URI', lambda m: 'mysql://' in m and '@' in m),
         ]
         
         test_endpoints = [
@@ -1239,24 +1283,31 @@ class FoxReverseEngineeringToolkit:
         for endpoint in test_endpoints:
             try:
                 url = urljoin(target, endpoint)
-                r = self.session.get(url, timeout=5)
+                r = self.session.get(url, timeout=5, allow_redirects=False)
                 
-                # Scan response for sensitive patterns
-                for pattern, pattern_name in sensitive_patterns:
-                    import re
-                    matches = re.findall(pattern, r.text)
+                # PHASE 1: Must not be HTML page
+                if r.status_code == 200 and not r.text.strip().startswith('<html'):
                     
-                    if matches:
-                        vulns.append(Vulnerability(
-                            type="MEMORY_SCAN_SENSITIVE_DATA",
-                            severity="CRITICAL",
-                            location=endpoint,
-                            evidence=f"Found {len(matches)} matches: {matches[0][:20]}...",
-                            description=f"Sensitive pattern exposed: {pattern_name}",
-                            remediation="Remove secrets from responses, use environment variables",
-                            exploitable=True
-                        ))
-                        break
+                    # PHASE 2: Scan response for sensitive patterns
+                    for pattern, pattern_name, validator in sensitive_patterns:
+                        import re
+                        matches = re.findall(pattern, r.text, re.DOTALL)
+                        
+                        # PHASE 3: Validate each match
+                        validated_matches = [m for m in matches if validator(m if isinstance(m, str) else m[0] if isinstance(m, tuple) else str(m))]
+                        
+                        if validated_matches:
+                            # ONLY report if we have VALIDATED matches
+                            vulns.append(Vulnerability(
+                                type="MEMORY_SCAN_SENSITIVE_DATA",
+                                severity="CRITICAL",
+                                location=endpoint,
+                                evidence=f"Found validated {pattern_name}: {str(validated_matches[0])[:30]}...",
+                                description=f"Sensitive data exposed: {pattern_name}",
+                                remediation="Remove secrets from responses, use environment variables",
+                                exploitable=True
+                            ))
+                            break
                 
                 time.sleep(self.config.delay)
             except:
@@ -1265,11 +1316,11 @@ class FoxReverseEngineeringToolkit:
         return vulns
     
     # ─────────────────────────────────────────────────────────────────────
-    # HOOK DETECTION - IAT/EAT Analysis (Endpoint Discovery)
+    # HOOK DETECTION - IAT/EAT Analysis (Endpoint Discovery) - WITH 200 STATUS VERIFICATION
     # ─────────────────────────────────────────────────────────────────────
     def hook_endpoint_discovery(self, target: str) -> List[Vulnerability]:
         """
-        Discover hidden endpoints through various hooking techniques.
+        Discover hidden endpoints through various hooking techniques - ONLY report HTTP 200 with content.
         Adapted from IAT/EAT (Import/Export Address Table) analysis.
         """
         vulns = []
@@ -1305,21 +1356,25 @@ class FoxReverseEngineeringToolkit:
                 url = urljoin(target, endpoint)
                 r = self.session.get(url, timeout=3, allow_redirects=False)
                 
-                # Endpoint exists if not 404
-                if r.status_code != 404:
-                    discovered.append((endpoint, r.status_code))
+                # STRICT: Only HTTP 200 with non-HTML content counts
+                if r.status_code == 200 and len(r.text) > 50:
+                    # Verify not HTML/SPA fallback
+                    is_html_page = r.text.strip().startswith('<!DOCTYPE') or r.text.strip().startswith('<html')
                     
-                    # High-value targets
-                    if r.status_code == 200 and endpoint in ['/admin', '/api/admin', '/.env', '/config.json']:
-                        vulns.append(Vulnerability(
-                            type="HOOK_CRITICAL_ENDPOINT_EXPOSED",
-                            severity="CRITICAL" if endpoint in ['/.env', '/config.json'] else "HIGH",
-                            location=endpoint,
-                            evidence=f"Status: {r.status_code}, Size: {len(r.text)}",
-                            description=f"Critical endpoint accessible: {endpoint}",
-                            remediation="Restrict access to sensitive endpoints",
-                            exploitable=True
-                        ))
+                    if not is_html_page or endpoint in ['/.env', '/config.json', '/.git']:  # Config files can't be HTML
+                        discovered.append((endpoint, r.status_code))
+                        
+                        # High-value targets - only if they have actual content
+                        if endpoint in ['/admin', '/api/admin', '/.env', '/config.json', '/.git', '/debug']:
+                            vulns.append(Vulnerability(
+                                type="HOOK_CRITICAL_ENDPOINT_EXPOSED",
+                                severity="CRITICAL" if endpoint in ['/.env', '/config.json', '/.git'] else "HIGH",
+                                location=endpoint,
+                                evidence=f"Status: {r.status_code}, Size: {len(r.text)}, Preview: {r.text[:100]}",
+                                description=f"Critical endpoint accessible with content: {endpoint}",
+                                remediation="Restrict access to sensitive endpoints",
+                                exploitable=True
+                            ))
                 
                 time.sleep(self.config.delay * 0.5)  # Faster scanning
             except:
@@ -2008,42 +2063,44 @@ class VulnerabilityScanner:
         return vulns
     
     # ─────────────────────────────────────────────────────────────────────
-    # SENSITIVE ENDPOINT DISCOVERY
+    # SENSITIVE ENDPOINT DISCOVERY - WITH EXPLOITATION VERIFICATION
     # ─────────────────────────────────────────────────────────────────────
     def discover_sensitive_endpoints(self, target: str) -> List[Vulnerability]:
-        """Discover sensitive endpoints and files"""
+        """Discover sensitive endpoints and files - ONLY report if actually accessible with valid content"""
         vulns = []
         
         sensitive_files = [
-            ('/.git/HEAD', 'Git repository exposed', 'CRITICAL'),
-            ('/.git/config', 'Git config exposed', 'CRITICAL'),
-            ('/.svn/entries', 'SVN repository exposed', 'CRITICAL'),
-            ('/.env', 'Environment file exposed', 'CRITICAL'),
-            ('/.env.local', 'Local env file exposed', 'CRITICAL'),
-            ('/config.json', 'Config file exposed', 'HIGH'),
-            ('/composer.json', 'Composer config exposed', 'MEDIUM'),
-            ('/package.json', 'NPM config exposed', 'MEDIUM'),
-            ('/phpinfo.php', 'PHP info exposed', 'HIGH'),
-            ('/server-status', 'Server status exposed', 'MEDIUM'),
-            ('/crossdomain.xml', 'Crossdomain policy', 'LOW'),
-            ('/robots.txt', 'Robots file', 'INFO'),
-            ('/sitemap.xml', 'Sitemap', 'INFO'),
+            ('/.git/HEAD', 'Git repository exposed', 'CRITICAL', lambda txt: txt.startswith('ref:') and 'refs/' in txt),
+            ('/.git/config', 'Git config exposed', 'CRITICAL', lambda txt: '[' in txt and ']' in txt and 'repository' in txt.lower()),
+            ('/.svn/entries', 'SVN repository exposed', 'CRITICAL', lambda txt: len(txt) > 10 and not txt.startswith('<')),
+            ('/.env', 'Environment file exposed', 'CRITICAL', lambda txt: '=' in txt and '\n' in txt and not txt.strip().startswith('<html')),
+            ('/.env.local', 'Local env file exposed', 'CRITICAL', lambda txt: '=' in txt and not txt.strip().startswith('<html')),
+            ('/config.json', 'Config file exposed', 'HIGH', lambda txt: txt.strip().startswith('{') and '"' in txt),
+            ('/composer.json', 'Composer config exposed', 'MEDIUM', lambda txt: '"require"' in txt or '"name"' in txt),
+            ('/package.json', 'NPM config exposed', 'MEDIUM', lambda txt: '"dependencies"' in txt or '"name"' in txt or '"version"' in txt),
+            ('/phpinfo.php', 'PHP info exposed', 'HIGH', lambda txt: 'PHP Version' in txt or 'phpinfo()' in txt),
+            ('/server-status', 'Server status exposed', 'MEDIUM', lambda txt: 'Apache' in txt or 'Server Version' in txt),
         ]
         
-        for file_path, description, severity in sensitive_files:
+        for file_path, description, severity, validator in sensitive_files:
             try:
                 url = urljoin(target, file_path)
-                r = requests.head(url, timeout=3)
+                # PHASE 1: Check if file exists
+                r = requests.get(url, timeout=5, allow_redirects=False)
                 
-                if r.status_code == 200:
-                    vulns.append(Vulnerability(
-                        type="SENSITIVE_FILE_EXPOSED",
-                        severity=severity,
-                        location=file_path,
-                        description=description,
-                        remediation=f"Remove or restrict access to {file_path}",
-                        exploitable=severity in ['CRITICAL', 'HIGH']
-                    ))
+                # PHASE 2: Verify it's the ACTUAL file, not just HTTP 200 with HTML/SPA fallback
+                if r.status_code == 200 and len(r.text) > 10:
+                    # Validator function checks if content is actually the expected file type
+                    if validator(r.text):
+                        vulns.append(Vulnerability(
+                            type="SENSITIVE_FILE_EXPOSED",
+                            severity=severity,
+                            location=file_path,
+                            description=description,
+                            evidence=r.text[:300],
+                            remediation=f"Remove or restrict access to {file_path}",
+                            exploitable=True
+                        ))
                 
                 time.sleep(self.config.delay * 0.5)
             except:

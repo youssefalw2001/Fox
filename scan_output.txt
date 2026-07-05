@@ -1,0 +1,193 @@
+[91m[1m
+    ╔═══════════════════════════════════════════════════════════════════╗
+    ║                                                                   ║
+    ║   ███╗   ███╗███████╗ ██████╗  █████╗     ███████╗ ██████╗ ██╗  ║
+    ║   ████╗ ████║██╔════╝██╔════╝ ██╔══██╗    ██╔════╝██╔═══██╗╚██╗ ║
+    ║   ██╔████╔██║█████╗  ██║  ███╗███████║    █████╗  ██║   ██║ ╚██╗║
+    ║   ██║╚██╔╝██║██╔══╝  ██║   ██║██╔══██║    ██╔══╝  ██║   ██║ ██╔╝║
+    ║   ██║ ╚═╝ ██║███████╗╚██████╔╝██║  ██║    ██║     ╚██████╔╝██╔╝ ║
+    ║   ╚═╝     ╚═╝╚══════╝ ╚═════╝ ╚═╝  ╚═╝    ╚═╝      ╚═════╝ ╚═╝  ║
+    ║                                                                   ║
+    ║         💀🔥 ULTIMATE MEGA SCANNER - FOX'S ARSENAL 🔥💀           ║
+    ║                                                                   ║
+    ║   [✓] 200+ Vulnerability Checks    [✓] Autonomous A-Z Exploit    ║
+    ║   [✓] All Code Word Techniques     [✓] Memory/Process Ops        ║
+    ║   [✓] Full OSINT & Recon           [✓] Beautiful Reports         ║
+    ║                                                                   ║
+    ║   Built by: Fox (27+ years) | Partner: Jack | No Mercy Mode      ║
+    ╚═══════════════════════════════════════════════════════════════════╝
+    [0m
+[95m[1m
+======================================================================[0m
+[95m[1mINITIATING FULL SPECTRUM ATTACK[0m
+[95m[1m======================================================================[0m
+
+[96mTarget:[0m      [93mhttps://bonkrewards.com[0m
+[96mScan ID:[0m     df2cc1475dab
+[96mMode:[0m        FULL SCAN + EXPLOIT
+[96mStarted:[0m     2026-07-05 22:46:49
+
+[95m[1m
+[PHASE 1] 🔍 RECONNAISSANCE[0m
+======================================================================
+[96m  [→] Enumerating subdomains for bonkrewards.com[0m
+[92m    [✓] Found: www.bonkrewards.com[0m
+[92m    [✓] Found: beta.bonkrewards.com[0m
+[92m    [✓] Found: new.bonkrewards.com[0m
+[92m  [✓] Found 3 subdomains[0m
+[96m  [→] Scanning ports on bonkrewards.com[0m
+[92m    [✓] Port 80/HTTP - OPEN[0m
+[92m    [✓] Port 443/HTTPS - OPEN[0m
+[92m  [✓] Found 2 open ports[0m
+[96m  [→] Detecting technologies[0m
+[92m  [✓] Detected 1 technologies[0m
+[96m    [SERVER] Vercel[0m
+[96m  [→] Performing DNS reconnaissance[0m
+[92m    [✓] A Records: 216.150.1.1[0m
+[96m  [→] Analyzing SSL/TLS certificate[0m
+[92m    [✓] SSL Certificate valid[0m
+[96m    [Issuer] Let's Encrypt[0m
+[96m    [Expires] Aug  9 10:27:11 2026 GMT[0m
+
+[92m[✓] Reconnaissance phase complete[0m
+======================================================================
+[95m[1m
+[PHASE 2] 🔍 VULNERABILITY SCANNING[0m
+======================================================================
+[96m
+[→] Security Headers[0m
+[93m[⚠️] 6 vulnerabilities (1 HIGH)[0m
+[96m
+[→] CORS Configuration[0m
+[96m[·] No vulnerabilities found[0m
+[96m
+[→] Sensitive Files[0m
+[91m[1m[🔥] 13 vulnerabilities (5 CRITICAL, 2 HIGH)[0m
+[96m
+[→] HTTP Methods[0m
+[92m[✓] 1 vulnerabilities[0m
+[96m
+[→] Code Word Attacks[0m
+[95m[1m
+[*] Executing CODE WORD attack modules...[0m
+[96m  [→] SPC - IPC Exploitation[0m
+[92m    [✓] Found 8 vulnerabilities[0m
+[96m  [→] BDC - Metrics Exposure[0m
+[96m    [·] No vulnerabilities found[0m
+[96m  [→] FAM - Path Traversal[0m
+[96m    [·] No vulnerabilities found[0m
+[96m  [→] PCM - Command Injection[0m
+[96m    [·] No vulnerabilities found[0m
+[96m  [→] ACS - Config Exposure[0m
+[96m    [·] No vulnerabilities found[0m
+[96m  [→] RSA - Rate Limiting[0m
+[92m    [✓] Found 4 vulnerabilities[0m
+[96m  [→] DAM - Directory Listing[0m
+[92m    [✓] Found 8 vulnerabilities[0m
+[91m[1m[🔥] 20 vulnerabilities (8 CRITICAL, 0 HIGH)[0m
+[96m
+[→] Web Exploitation[0m
+[95m[1m
+[*] Executing WEB EXPLOITATION modules...[0m
+[96m  [→] XSS - Cross-Site Scripting[0m
+[96m    [·] No vulnerabilities found[0m
+[96m  [→] SQLi - SQL Injection[0m
+[96m    [·] No vulnerabilities found[0m
+[96m  [→] JWT - Token Attacks[0m
+[96m    [·] No vulnerabilities found[0m
+[96m  [→] SSRF - Server-Side Request Forgery[0m
+[96m    [·] No vulnerabilities found[0m
+[96m  [→] CSRF - Cross-Site Request Forgery[0m
+[96m    [·] No vulnerabilities found[0m
+[96m  [→] XXE - XML External Entity[0m
+[96m    [·] No vulnerabilities found[0m
+[96m  [→] IDOR - Insecure Direct Object Refs[0m
+[96m    [·] No vulnerabilities found[0m
+[96m  [→] Open Redirect[0m
+[96m    [·] No vulnerabilities found[0m
+[96m[·] No vulnerabilities found[0m
+[96m
+[→] Reverse Engineering[0m
+[95m[1m
+[*] Executing FOX'S REVERSE ENGINEERING modules...[0m
+[96m  [→] Memory Pattern Scanning[0m
+[91m[1m    [🔥] Found 10 vulnerabilities (10 CRITICAL)[0m
+[96m  [→] Endpoint Hook Discovery[0m
+[96m    [→] Hooking 42 potential endpoints...[0m
+[92m    [✓] Hooked 42 endpoints[0m
+[96m    [·] No vulnerabilities found[0m
+[96m  [→] Header Process Injection[0m
+[96m    [·] No vulnerabilities found[0m
+[96m  [→] JavaScript Disassembly[0m
+[96m    [·] No vulnerabilities found[0m
+[96m  [→] API VTable Analysis[0m
+[96m    [·] No vulnerabilities found[0m
+[91m[1m[🔥] 10 vulnerabilities (10 CRITICAL, 0 HIGH)[0m
+
+======================================================================
+[95m[1m[SCAN SUMMARY][0m
+======================================================================
+Total Vulnerabilities: 50
+[91m[1m  CRITICAL: 23[0m
+[93m  HIGH:     3[0m
+[96m  MEDIUM:   18[0m
+[96m  LOW:      4[0m
+======================================================================
+[95m[1m
+[PHASE 3] 💣 AUTONOMOUS EXPLOITATION[0m
+======================================================================
+[93m[*] Found 38 exploitable vulnerabilities[0m
+[91m[1m[!] Initiating autonomous exploitation...[0m
+
+
+======================================================================
+[95m[1m[EXPLOITATION SUMMARY][0m
+======================================================================
+Exploitation attempts: 0
+[91m[1mSuccessful exploits:   0[0m
+[93mFailed attempts:       0[0m
+======================================================================
+[95m[1m
+[PHASE 4] 📊 REPORT GENERATION[0m
+======================================================================
+[92m[✓] JSON report: output/mega_scan/scan_20260705_224828.json[0m
+[92m[✓] Markdown report: output/mega_scan/scan_20260705_224828.md[0m
+[92m[✓] HTML report: output/mega_scan/scan_20260705_224828.html[0m
+======================================================================
+
+
+══════════════════════════════════════════════════════════════════════
+[95m[1m💀🔥 ULTIMATE MEGA SCANNER - FINAL REPORT 🔥💀[0m
+══════════════════════════════════════════════════════════════════════
+
+[1mSCAN INFORMATION:[0m
+  Target:       https://bonkrewards.com
+  Scan ID:      df2cc1475dab
+  Duration:     1.66 minutes
+  Completed:    2026-07-05 22:48:28
+
+[1mRECONNAISSANCE:[0m
+  Subdomains:   3
+  Open Ports:   2
+  Technologies: 1
+
+[1mVULNERABILITIES:[0m
+  [91m[1mCRITICAL:[0m 23
+  [93mHIGH:    [0m 3
+  [96mMEDIUM:  [0m 18
+  [96mLOW:     [0m 4
+  [1mTOTAL:   50[0m
+
+[1mREPORTS GENERATED:[0m
+  JSON: output/mega_scan/scan_20260705_224828.json
+  MARKDOWN: output/mega_scan/scan_20260705_224828.md
+  HTML: output/mega_scan/scan_20260705_224828.html
+
+[1mRISK ASSESSMENT:[0m
+  Risk Score:   285
+  Risk Level:   [91m[1mCRITICAL[0m
+
+══════════════════════════════════════════════════════════════════════
+[92m✅ SCAN COMPLETE[0m
+══════════════════════════════════════════════════════════════════════
+
