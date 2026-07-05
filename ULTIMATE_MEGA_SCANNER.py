@@ -2475,10 +2475,11 @@ class ReportGenerator:
         # Vulnerability summary
         vulns = scan_data.get('vulnerabilities', [])
         if vulns:
-            critical = len([v for v in vulns if v.severity == "CRITICAL"])
-            high = len([v for v in vulns if v.severity == "HIGH"])
-            medium = len([v for v in vulns if v.severity == "MEDIUM"])
-            low = len([v for v in vulns if v.severity == "LOW"])
+            # Handle both Vulnerability objects and dicts
+            critical = len([v for v in vulns if (v.severity if hasattr(v, 'severity') else v.get('severity')) == "CRITICAL"])
+            high = len([v for v in vulns if (v.severity if hasattr(v, 'severity') else v.get('severity')) == "HIGH"])
+            medium = len([v for v in vulns if (v.severity if hasattr(v, 'severity') else v.get('severity')) == "MEDIUM"])
+            low = len([v for v in vulns if (v.severity if hasattr(v, 'severity') else v.get('severity')) == "LOW"])
             
             md_content += f"""**Total Vulnerabilities:** {len(vulns)}
 
@@ -2525,32 +2526,42 @@ class ReportGenerator:
 
 """
         
-        critical_vulns = [v for v in vulns if v.severity == "CRITICAL"]
+        critical_vulns = [(v, hasattr(v, 'severity')) for v in vulns]
+        critical_vulns = [v[0] for v in critical_vulns if (v[0].severity if v[1] else v[0].get('severity')) == "CRITICAL"]
         for i, vuln in enumerate(critical_vulns[:20], 1):  # Top 20 critical
-            md_content += f"""### {i}. {vuln.type}
+            # Handle both Vulnerability objects and dicts
+            v_type = vuln.type if hasattr(vuln, 'type') else vuln.get('type')
+            v_location = vuln.location if hasattr(vuln, 'location') else vuln.get('location')
+            v_exploitable = vuln.exploitable if hasattr(vuln, 'exploitable') else vuln.get('exploitable')
+            v_description = vuln.description if hasattr(vuln, 'description') else vuln.get('description')
+            v_remediation = vuln.remediation if hasattr(vuln, 'remediation') else vuln.get('remediation')
+            v_payload = vuln.payload if hasattr(vuln, 'payload') else vuln.get('payload')
+            v_exploit_code = vuln.exploit_code if hasattr(vuln, 'exploit_code') else vuln.get('exploit_code')
+            
+            md_content += f"""### {i}. {v_type}
 
-**Location:** `{vuln.location}`  
+**Location:** `{v_location}`  
 **Severity:** 🔴 CRITICAL  
-**Exploitable:** {'✅ YES' if vuln.exploitable else '❌ NO'}
+**Exploitable:** {'✅ YES' if v_exploitable else '❌ NO'}
 
 **Description:**  
-{vuln.description}
+{v_description}
 
 **Remediation:**  
-{vuln.remediation}
+{v_remediation}
 
 """
-            if vuln.payload:
+            if v_payload:
                 md_content += f"""**Payload:**
 ```
-{vuln.payload}
+{v_payload}
 ```
 
 """
-            if vuln.exploit_code:
+            if v_exploit_code:
                 md_content += f"""**Exploit:**
 ```bash
-{vuln.exploit_code}
+{v_exploit_code}
 ```
 
 """
@@ -2625,10 +2636,11 @@ class ReportGenerator:
         html_path = self.output_dir / f"{filename}.html"
         
         vulns = scan_data.get('vulnerabilities', [])
-        critical = len([v for v in vulns if v.severity == "CRITICAL"])
-        high = len([v for v in vulns if v.severity == "HIGH"])
-        medium = len([v for v in vulns if v.severity == "MEDIUM"])
-        low = len([v for v in vulns if v.severity == "LOW"])
+        # Handle both Vulnerability objects and dicts
+        critical = len([v for v in vulns if (v.severity if hasattr(v, 'severity') else v.get('severity')) == "CRITICAL"])
+        high = len([v for v in vulns if (v.severity if hasattr(v, 'severity') else v.get('severity')) == "HIGH"])
+        medium = len([v for v in vulns if (v.severity if hasattr(v, 'severity') else v.get('severity')) == "MEDIUM"])
+        low = len([v for v in vulns if (v.severity if hasattr(v, 'severity') else v.get('severity')) == "LOW"])
         
         html_content = f"""<!DOCTYPE html>
 <html lang="en">
@@ -2760,22 +2772,30 @@ class ReportGenerator:
             <h2>🔥 Vulnerabilities</h2>
 """
             for vuln in vulns[:50]:  # Top 50 vulns
-                severity_class = vuln.severity.lower()
+                # Handle both Vulnerability objects and dicts
+                v_severity = vuln.severity if hasattr(vuln, 'severity') else vuln.get('severity')
+                v_type = vuln.type if hasattr(vuln, 'type') else vuln.get('type')
+                v_location = vuln.location if hasattr(vuln, 'location') else vuln.get('location')
+                v_description = vuln.description if hasattr(vuln, 'description') else vuln.get('description')
+                v_remediation = vuln.remediation if hasattr(vuln, 'remediation') else vuln.get('remediation')
+                v_payload = vuln.payload if hasattr(vuln, 'payload') else vuln.get('payload')
+                
+                severity_class = v_severity.lower()
                 html_content += f"""
             <div class="vuln-card {severity_class}">
                 <div class="vuln-header">
-                    <div class="vuln-type">{vuln.type}</div>
-                    <div class="severity {severity_class}">{vuln.severity}</div>
+                    <div class="vuln-type">{v_type}</div>
+                    <div class="severity {severity_class}">{v_severity}</div>
                 </div>
                 <div class="vuln-details">
-                    <strong>Location:</strong> {vuln.location}<br>
-                    <strong>Description:</strong> {vuln.description}<br>
-                    <strong>Remediation:</strong> {vuln.remediation}
+                    <strong>Location:</strong> {v_location}<br>
+                    <strong>Description:</strong> {v_description}<br>
+                    <strong>Remediation:</strong> {v_remediation}
                 </div>
 """
-                if vuln.payload:
+                if v_payload:
                     html_content += f"""
-                <div class="code-block">{vuln.payload}</div>
+                <div class="code-block">{v_payload}</div>
 """
                 html_content += """
             </div>
@@ -2955,10 +2975,11 @@ class UltimateMegaScanner:
         print(f"  Technologies: {sum(len(v) for v in recon.get('technologies', {}).values())}")
         
         print(f"\n{Colors.BOLD}VULNERABILITIES:{Colors.END}")
-        critical = len([v for v in vulns if v.severity == "CRITICAL"])
-        high = len([v for v in vulns if v.severity == "HIGH"])
-        medium = len([v for v in vulns if v.severity == "MEDIUM"])
-        low = len([v for v in vulns if v.severity == "LOW"])
+        # Handle both Vulnerability objects and dicts
+        critical = len([v for v in vulns if (v.severity if hasattr(v, 'severity') else v.get('severity')) == "CRITICAL"])
+        high = len([v for v in vulns if (v.severity if hasattr(v, 'severity') else v.get('severity')) == "HIGH"])
+        medium = len([v for v in vulns if (v.severity if hasattr(v, 'severity') else v.get('severity')) == "MEDIUM"])
+        low = len([v for v in vulns if (v.severity if hasattr(v, 'severity') else v.get('severity')) == "LOW"])
         
         print(f"  {Colors.critical('CRITICAL:')} {critical}")
         print(f"  {Colors.warning('HIGH:    ')} {high}")
