@@ -785,20 +785,9 @@ class CodeWordAttacks:
                 pass
         
         return vulns
-                                                real_secrets.append(m)
-                                    
-                                    if real_secrets:
-                                        extracted_secrets[secret_type] = real_secrets[0][:30] + '...'
-                        
-                        # ONLY report if we actually extracted VALIDATED secrets
-                        if extracted_secrets:
-                            print(Colors.critical(f"\n      [💀 SECRETS EXTRACTED] {file_path}: {len(extracted_secrets)} secrets"))
-                            for key, val in list(extracted_secrets.items())[:5]:
-                                print(Colors.success(f"        {key}: {val}"))
-                            
-                            vulns.append(Vulnerability(
-                                type="ACS_CONFIG_EXPOSURE",
-                                severity="CRITICAL",
+    
+    # ─────────────────────────────────────────────────────────────────────
+    # RSA - Resource Scheduler Agent (Rate Limiting Bypass)
                                 location=file_path,
                                 evidence=f"Extracted {len(extracted_secrets)} validated secrets: {', '.join(list(extracted_secrets.keys())[:10])}",
                                 description=f"Configuration file exposed with validated secrets: {file_path}",
