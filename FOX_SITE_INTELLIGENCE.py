@@ -9,6 +9,7 @@ All-in-one application intelligence scanner for authorized testing:
 - exposure checks
 - data exposure intelligence
 - Gear 3 adversarial proof mode
+- Red Team Lab Mode proof catalog
 - auth/access matrix with provided sessions
 - proof scoring and attacker-value impact report
 """
@@ -22,6 +23,7 @@ from pathlib import Path
 
 from modules.data_exposure_intel import build_data_exposure_report
 from modules.gear3_adversarial_intel import build_gear3_report
+from modules.redteam_lab_mode import build_lab_mode_report
 from modules.fox_site_intelligence import AuthContext, FoxSiteIntelligence, severity_rank, summarize_findings, write_reports
 
 
@@ -67,6 +69,7 @@ def main() -> None:
     parser.add_argument("--web3", action="store_true", help="Emphasize Web3/Solana findings in report")
     parser.add_argument("--data-intel", action="store_true", help="Run deep data exposure intelligence with redacted proof")
     parser.add_argument("--gear3", action="store_true", help="Run Gear 3 adversarial proof mode: attack paths, BOLA candidates, business logic, GraphQL/Web3 risk")
+    parser.add_argument("--lab-mode", action="store_true", help="Run safe Red Team Lab Mode payload catalog/proof planner")
     parser.add_argument("--headers", help="JSON file with normal-user headers")
     parser.add_argument("--cookies", help="JSON file with normal-user cookies")
     parser.add_argument("--admin-headers", help="JSON file with authorized admin headers for comparison")
@@ -135,6 +138,16 @@ def main() -> None:
         if "data_exposure" in result:
             result["summary"] = result["summary"] | {"data_exposure": result["data_exposure"].get("summary", {})}
 
+    if args.lab_mode:
+        all_urls = sorted(set(
+            (result.get("site_map", {}).get("endpoints") or [])
+            + (result.get("site_map", {}).get("admin_candidates") or [])
+            + (result.get("site_map", {}).get("graphql_candidates") or [])
+        ))
+        lab_report = build_lab_mode_report(all_urls)
+        result["lab_mode"] = lab_report
+        result["summary"] = result.get("summary", {}) | {"lab_mode": lab_report.get("summary", {})}
+
     reports = write_reports(result, args.output)
     result["reports"] = reports
 
@@ -148,13 +161,17 @@ def main() -> None:
         gear3_path = out / "gear3_adversarial_report.json"
         gear3_path.write_text(json.dumps(result.get("gear3", {}), indent=2), encoding="utf-8")
         reports["gear3"] = str(gear3_path)
+    if args.lab_mode:
+        lab_path = out / "redteam_lab_mode.json"
+        lab_path.write_text(json.dumps(result.get("lab_mode", {}), indent=2), encoding="utf-8")
+        reports["lab_mode"] = str(lab_path)
 
     print("\n" + "=" * 70)
     print("FOX SITE INTELLIGENCE COMPLETE")
     print("=" * 70)
     print(f"Target: {result['target']}")
-    print(f"Findings: {result['summary']['total']}")
-    print(f"High confidence: {result['summary']['high_confidence']}")
+    print(f"Findings: {result['summary'].get('total', 0)}")
+    print(f"High confidence: {result['summary'].get('high_confidence', 0)}")
     print(f"JSON: {reports['json']}")
     print(f"Markdown: {reports['markdown']}")
     print(f"HTML: {reports['html']}")
@@ -164,11 +181,17 @@ def main() -> None:
         print(f"Data exposure: {reports['data_exposure']}")
     if args.gear3:
         print(f"Gear 3: {reports['gear3']}")
+    if args.lab_mode:
+        print(f"Lab mode: {reports['lab_mode']}")
 
     if result.get("gear3", {}).get("attack_paths"):
         print("\nGear 3 attack paths:")
         for path in result["gear3"]["attack_paths"][:5]:
             print(f"  {path['severity']:8s} {path['confidence']:3d}%  {path['title']}")
+
+    if result.get("lab_mode", {}).get("summary"):
+        lab = result["lab_mode"]["summary"]
+        print(f"\nLab Mode probes: {lab.get('probe_count', 0)} across {len(lab.get('payload_families', []))} families")
 
     if result.get("findings"):
         print("\nTop findings:")
