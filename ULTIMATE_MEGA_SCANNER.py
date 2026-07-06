@@ -788,23 +788,6 @@ class CodeWordAttacks:
     
     # ─────────────────────────────────────────────────────────────────────
     # RSA - Resource Scheduler Agent (Rate Limiting Bypass)
-                                location=file_path,
-                                evidence=f"Extracted {len(extracted_secrets)} validated secrets: {', '.join(list(extracted_secrets.keys())[:10])}",
-                                description=f"Configuration file exposed with validated secrets: {file_path}",
-                                remediation="Block access to sensitive files via web server config, rotate all exposed credentials",
-                                exploitable=True
-                            ))
-                
-                time.sleep(self.config.delay)
-            except:
-                pass
-        
-        return vulns
-
-
-    
-    # ─────────────────────────────────────────────────────────────────────
-    # RSA - Resource Scheduler Agent (Rate Limiting Bypass)
     # ─────────────────────────────────────────────────────────────────────
     def attack_RSA(self, target: str) -> List[Vulnerability]:
         """Rate limiting and resource exhaustion attacks"""
