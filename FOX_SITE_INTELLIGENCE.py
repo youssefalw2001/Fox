@@ -10,6 +10,7 @@ All-in-one application intelligence scanner for authorized testing:
 - data exposure intelligence
 - Gear 3 adversarial proof mode
 - Red Team Lab Mode proof catalog
+- Judge Review Mode integrity report
 - auth/access matrix with provided sessions
 - proof scoring and attacker-value impact report
 """
@@ -23,6 +24,7 @@ from pathlib import Path
 
 from modules.data_exposure_intel import build_data_exposure_report
 from modules.gear3_adversarial_intel import build_gear3_report
+from modules.judge_review_mode import build_judge_review_report
 from modules.redteam_lab_mode import build_lab_mode_report
 from modules.fox_site_intelligence import AuthContext, FoxSiteIntelligence, severity_rank, summarize_findings, write_reports
 
@@ -70,6 +72,7 @@ def main() -> None:
     parser.add_argument("--data-intel", action="store_true", help="Run deep data exposure intelligence with redacted proof")
     parser.add_argument("--gear3", action="store_true", help="Run Gear 3 adversarial proof mode: attack paths, BOLA candidates, business logic, GraphQL/Web3 risk")
     parser.add_argument("--lab-mode", action="store_true", help="Run safe Red Team Lab Mode payload catalog/proof planner")
+    parser.add_argument("--judge-mode", "--review-mode", action="store_true", help="Write judge review integrity report with hashes, byte lengths, and proof metadata")
     parser.add_argument("--headers", help="JSON file with normal-user headers")
     parser.add_argument("--cookies", help="JSON file with normal-user cookies")
     parser.add_argument("--admin-headers", help="JSON file with authorized admin headers for comparison")
@@ -148,6 +151,10 @@ def main() -> None:
         result["lab_mode"] = lab_report
         result["summary"] = result.get("summary", {}) | {"lab_mode": lab_report.get("summary", {})}
 
+    if args.judge_mode:
+        result["judge_review"] = build_judge_review_report(result)
+        result["summary"] = result.get("summary", {}) | {"judge_review": result["judge_review"].get("summary", {})}
+
     reports = write_reports(result, args.output)
     result["reports"] = reports
 
@@ -165,6 +172,10 @@ def main() -> None:
         lab_path = out / "redteam_lab_mode.json"
         lab_path.write_text(json.dumps(result.get("lab_mode", {}), indent=2), encoding="utf-8")
         reports["lab_mode"] = str(lab_path)
+    if args.judge_mode:
+        judge_path = out / "judge_review_report.json"
+        judge_path.write_text(json.dumps(result.get("judge_review", {}), indent=2), encoding="utf-8")
+        reports["judge_review"] = str(judge_path)
 
     print("\n" + "=" * 70)
     print("FOX SITE INTELLIGENCE COMPLETE")
@@ -183,6 +194,8 @@ def main() -> None:
         print(f"Gear 3: {reports['gear3']}")
     if args.lab_mode:
         print(f"Lab mode: {reports['lab_mode']}")
+    if args.judge_mode:
+        print(f"Judge review: {reports['judge_review']}")
 
     if result.get("gear3", {}).get("attack_paths"):
         print("\nGear 3 attack paths:")
@@ -192,6 +205,10 @@ def main() -> None:
     if result.get("lab_mode", {}).get("summary"):
         lab = result["lab_mode"]["summary"]
         print(f"\nLab Mode probes: {lab.get('probe_count', 0)} across {len(lab.get('payload_families', []))} families")
+
+    if result.get("judge_review", {}).get("summary"):
+        review = result["judge_review"]["summary"]
+        print(f"Judge Review records: {review.get('evidence_records', 0)} integrity entries")
 
     if result.get("findings"):
         print("\nTop findings:")
