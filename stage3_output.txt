@@ -1,0 +1,205 @@
+[0;35m
+╔═══════════════════════════════════════════════════════════════════╗
+║                                                                   ║
+║   ███████╗ ██████╗ ██╗  ██╗    ██████╗ ██╗██████╗ ███████╗██╗    ██╗███╗   ██╗███████╗  ║
+║   ██╔════╝██╔═══██╗╚██╗██╔╝    ██╔══██╗██║██╔══██╗██╔════╝██║    ██║████╗  ██║██╔════╝  ║
+║   █████╗  ██║   ██║ ╚███╔╝     ██████╔╝██║██████╔╝█████╗  ██║    ██║██╔██╗ ██║█████╗    ║
+║   ██╔══╝  ██║   ██║ ██╔██╗     ██╔═══╝ ██║██╔═══╝ ██╔══╝  ██║    ██║██║╚██╗██║██╔══╝    ║
+║   ██║     ╚██████╔╝██╔╝ ██╗    ██║     ██║██║     ███████╗███████╗██║██║ ╚████║███████╗  ║
+║   ╚═╝      ╚═════╝ ╚═╝  ╚═╝    ╚═╝     ╚═╝╚═╝     ╚══════╝╚══════╝╚═╝╚═╝  ╚═══╝╚══════╝  ║
+║                                                                   ║
+║              💀🔥 3-STAGE WEB3 INTELLIGENCE PIPELINE 🔥💀         ║
+║                                                                   ║
+║   Stage 1: Discovery  →  Stage 2: Ranking  →  Stage 3: Exploit  ║
+║                                                                   ║
+╚═══════════════════════════════════════════════════════════════════╝
+[0m
+[0;36m═══════════════════════════════════════════════════════════════════[0m
+[0;36mPIPELINE CONFIGURATION[0m
+[0;36m═══════════════════════════════════════════════════════════════════[0m
+  Sites to discover:  [0;32m20[0m
+  Category filter:    [0;32msolana[0m
+  Top sites to rank:  [0;32m5[0m
+  Stage 3 authorized: [0;32m--authorized[0m
+[0;36m═══════════════════════════════════════════════════════════════════[0m
+
+[0;34m[→] Checking dependencies...[0m
+[0;32m[✓] Dependencies OK[0m
+
+[0;35m═══════════════════════════════════════════════════════════════════[0m
+[0;35mSTAGE 1: WEB3 SITE DISCOVERY[0m
+[0;35m═══════════════════════════════════════════════════════════════════[0m
+
+
+    ╔═══════════════════════════════════════════════════════════════╗
+    ║                                                               ║
+    ║   ██╗    ██╗███████╗██████╗ ██████╗     ██╗  ██╗██╗   ██╗███╗   ██╗████████╗███████╗██████╗   ║
+    ║   ██║    ██║██╔════╝██╔══██╗╚════██╗    ██║  ██║██║   ██║████╗  ██║╚══██╔══╝██╔════╝██╔══██╗  ║
+    ║   ██║ █╗ ██║█████╗  ██████╔╝ █████╔╝    ███████║██║   ██║██╔██╗ ██║   ██║   █████╗  ██████╔╝  ║
+    ║   ██║███╗██║██╔══╝  ██╔══██╗ ╚═══██╗    ██╔══██║██║   ██║██║╚██╗██║   ██║   ██╔══╝  ██╔══██╗  ║
+    ║   ╚███╔███╔╝███████╗██████╔╝██████╔╝    ██║  ██║╚██████╔╝██║ ╚████║   ██║   ███████╗██║  ██║  ║
+    ║    ╚══╝╚══╝ ╚══════╝╚═════╝ ╚═════╝     ╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═══╝   ╚═╝   ╚══════╝╚═╝  ╚═╝  ║
+    ║                                                               ║
+    ║              💀🔥 STAGE 1: WEB3 SITE DISCOVERY 🔥💀           ║
+    ║                                                               ║
+    ║   [✓] Solana Ecosystem    [✓] DeFi Protocols                ║
+    ║   [✓] Crash Games         [✓] NFT Marketplaces              ║
+    ║   [✓] Wallet Apps         [✓] Bridge Apps                   ║
+    ║                                                               ║
+    ║   Built by: Fox | Partner: Jack | Stage 1 of 3              ║
+    ╚═══════════════════════════════════════════════════════════════╝
+    
+
+═══════════════════════════════════════════════════════════════════
+CONFIGURATION
+═══════════════════════════════════════════════════════════════════
+Limit:      20 sites
+Category:   solana
+Output:     candidates.json
+Started:    2026-07-06 01:57:57 UTC
+═══════════════════════════════════════════════════════════════════
+
+
+💀🔥 WEB3 SITE COLLECTOR - DISCOVERING TARGETS 🔥💀
+
+  [→] Checking Solana ecosystem...
+    [✓] Found 11 Solana ecosystem sites
+  [→] Checking DeFi directories...
+    [✓] Found 10 DeFi sites
+  [→] Checking crash game sites...
+    [✓] Found 6 crash game sites
+  [→] Checking NFT marketplaces...
+    [✓] Found 8 NFT marketplace sites
+  [→] Checking wallet apps...
+    [✓] Found 7 wallet app sites
+  [→] Checking bridge apps...
+    [✓] Found 7 bridge app sites
+
+  [✓] Total unique sites discovered: 20
+
+  [→] Filtered to 11 solana sites
+
+═══════════════════════════════════════════════════════════════════
+DISCOVERY COMPLETE
+═══════════════════════════════════════════════════════════════════
+Total sites:     11
+Output file:     candidates.json
+Next step:       python3 PASSIVE_RISK_RANKER.py --input candidates.json
+═══════════════════════════════════════════════════════════════════
+
+💀 Stage 1 complete. Ready for passive ranking.
+
+
+BREAKDOWN BY CATEGORY:
+  solana-dapp           11 sites
+[0;32m[✓] Stage 1 complete: 11 sites discovered[0m
+
+[0;35m═══════════════════════════════════════════════════════════════════[0m
+[0;35mSTAGE 2: PASSIVE RISK RANKING[0m
+[0;35m═══════════════════════════════════════════════════════════════════[0m
+
+
+    ╔═══════════════════════════════════════════════════════════════╗
+    ║                                                               ║
+    ║   ██████╗  █████╗ ███╗   ██╗██╗  ██╗███████╗██████╗        ║
+    ║   ██╔══██╗██╔══██╗████╗  ██║██║ ██╔╝██╔════╝██╔══██╗       ║
+    ║   ██████╔╝███████║██╔██╗ ██║█████╔╝ █████╗  ██████╔╝       ║
+    ║   ██╔══██╗██╔══██║██║╚██╗██║██╔═██╗ ██╔══╝  ██╔══██╗       ║
+    ║   ██║  ██║██║  ██║██║ ╚████║██║  ██╗███████╗██║  ██║       ║
+    ║   ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝       ║
+    ║                                                               ║
+    ║            💀🔥 STAGE 2: PASSIVE RISK RANKING 🔥💀            ║
+    ║                                                               ║
+    ║   [✓] Stack Fingerprinting    [✓] JS Analysis               ║
+    ║   [✓] Attack Surface Scoring  [✓] Top N Selection           ║
+    ║                                                               ║
+    ║   NO ACTIVE EXPLOITATION - PASSIVE INTELLIGENCE ONLY         ║
+    ║                                                               ║
+    ║   Built by: Fox | Partner: Jack | Stage 2 of 3              ║
+    ╚═══════════════════════════════════════════════════════════════╝
+    
+
+═══════════════════════════════════════════════════════════════════
+CONFIGURATION
+═══════════════════════════════════════════════════════════════════
+Input:      candidates.json
+Sites:      11 total
+Top N:      5
+Output:     top3.json
+Started:    2026-07-06 01:57:57 UTC
+═══════════════════════════════════════════════════════════════════
+
+
+💀 STAGE 2A: FINGERPRINTING TECH STACKS
+
+Fingerprinting:   0%|          | 0/11 [00:00<?, ?site/s]Fingerprinting:   9%|▉         | 1/11 [00:01<00:10,  1.01s/site]Fingerprinting:  18%|█▊        | 2/11 [00:01<00:04,  1.83site/s]Fingerprinting:  27%|██▋       | 3/11 [00:01<00:03,  2.41site/s]Fingerprinting:  36%|███▋      | 4/11 [00:01<00:02,  2.91site/s]Fingerprinting:  45%|████▌     | 5/11 [00:02<00:02,  2.31site/s]Fingerprinting:  55%|█████▍    | 6/11 [00:04<00:04,  1.07site/s]Fingerprinting:  73%|███████▎  | 8/11 [00:04<00:01,  1.59site/s]Fingerprinting:  82%|████████▏ | 9/11 [00:06<00:02,  1.02s/site]Fingerprinting:  91%|█████████ | 10/11 [00:07<00:00,  1.19site/s]Fingerprinting: 100%|██████████| 11/11 [00:08<00:00,  1.25site/s]Fingerprinting: 100%|██████████| 11/11 [00:08<00:00,  1.37site/s]
+
+  [✓] Successfully fingerprinted 10 sites
+
+💀 STAGE 2B: RANKING BY ATTACK SURFACE
+
+
+═══════════════════════════════════════════════════════════════════
+RANKING COMPLETE
+═══════════════════════════════════════════════════════════════════
+Sites analyzed:  10
+Output file:     top3.json
+Next step:       python3 FOX_PROOF_SCANNER.py --targets top3.json --authorized
+═══════════════════════════════════════════════════════════════════
+
+
+💀 TOP 5 SITES FOR AUTHORIZED FOLLOWUP:
+
+#1. https://magiceden.io
+    Score:          130
+    Category:       solana-dapp
+    Classification: high_priority_for_authorized_followup
+    Detected:       Next.js, Admin/debug routes, Crash game indicators, API URLs (10), RPC URLs
+    Program IDs:    1 found
+    API URLs:       10 found
+
+#2. https://raydium.io
+    Score:          80
+    Category:       solana-dapp
+    Classification: high_priority_for_authorized_followup
+    Detected:       Next.js, API URLs (10), RPC URLs, Solana Program IDs (1)
+    Program IDs:    1 found
+    API URLs:       10 found
+
+#3. https://jup.ag
+    Score:          80
+    Category:       solana-dapp
+    Classification: high_priority_for_authorized_followup
+    Detected:       Vercel, Next.js, Solana wallet adapter
+
+#4. https://solend.fi
+    Score:          75
+    Category:       solana-dapp
+    Classification: interesting_for_authorized_followup
+    Detected:       API URLs (10), RPC URLs, Solana Program IDs (2), Hidden admin routes, Potential API keys
+    Program IDs:    2 found
+    API URLs:       10 found
+
+#5. https://solanart.io
+    Score:          55
+    Category:       solana-dapp
+    Classification: moderate_interest
+    Detected:       Next.js, RPC URLs
+
+═══════════════════════════════════════════════════════════════════
+
+💀 Stage 2 complete. Top sites selected for active testing.
+   ⚠️  Active testing requires explicit authorization.
+
+[0;32m[✓] Stage 2 complete: Top 5 sites selected[0m
+
+[0;35m═══════════════════════════════════════════════════════════════════[0m
+[0;35mSTAGE 3: ACTIVE PROOF SCANNING[0m
+[0;35m═══════════════════════════════════════════════════════════════════[0m
+
+[0;31m⚠️  AUTHORIZED ACTIVE TESTING ENABLED ⚠️[0m
+
+Traceback (most recent call last):
+  File "/projects/sandbox/Fox/FOX_PROOF_SCANNER.py", line 54, in <module>
+    def run_ultimate_scanner(target: str) -> Dict:
+NameError: name 'Dict' is not defined

@@ -1,0 +1,73 @@
+{
+  "discovered_at": "2026-07-06T01:57:57.285648Z",
+  "total_sites": 11,
+  "category_filter": "solana",
+  "sites": [
+    {
+      "site": "https://raydium.io",
+      "source": "solana_ecosystem_known",
+      "category": "solana-dapp",
+      "discovered_at": "2026-07-06T01:57:57.285330Z"
+    },
+    {
+      "site": "https://jup.ag",
+      "source": "solana_ecosystem_known",
+      "category": "solana-dapp",
+      "discovered_at": "2026-07-06T01:57:57.285347Z"
+    },
+    {
+      "site": "https://marinade.finance",
+      "source": "solana_ecosystem_known",
+      "category": "solana-dapp",
+      "discovered_at": "2026-07-06T01:57:57.285355Z"
+    },
+    {
+      "site": "https://saber.so",
+      "source": "solana_ecosystem_known",
+      "category": "solana-dapp",
+      "discovered_at": "2026-07-06T01:57:57.285361Z"
+    },
+    {
+      "site": "https://orca.so",
+      "source": "solana_ecosystem_known",
+      "category": "solana-dapp",
+      "discovered_at": "2026-07-06T01:57:57.285367Z"
+    },
+    {
+      "site": "https://solend.fi",
+      "source": "solana_ecosystem_known",
+      "category": "solana-dapp",
+      "discovered_at": "2026-07-06T01:57:57.285373Z"
+    },
+    {
+      "site": "https://mango.markets",
+      "source": "solana_ecosystem_known",
+      "category": "solana-dapp",
+      "discovered_at": "2026-07-06T01:57:57.285379Z"
+    },
+    {
+      "site": "https://solanart.io",
+      "source": "solana_ecosystem_known",
+      "category": "solana-dapp",
+      "discovered_at": "2026-07-06T01:57:57.285385Z"
+    },
+    {
+      "site": "https://magiceden.io",
+      "source": "solana_ecosystem_known",
+      "category": "solana-dapp",
+      "discovered_at": "2026-07-06T01:57:57.285391Z"
+    },
+    {
+      "site": "https://phantom.app",
+      "source": "solana_ecosystem_known",
+      "category": "solana-dapp",
+      "discovered_at": "2026-07-06T01:57:57.285398Z"
+    },
+    {
+      "site": "https://solflare.com",
+      "source": "solana_ecosystem_known",
+      "category": "solana-dapp",
+      "discovered_at": "2026-07-06T01:57:57.285404Z"
+    }
+  ]
+}

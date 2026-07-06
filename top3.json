@@ -1,0 +1,692 @@
+{
+  "ranked_at": "2026-07-06T01:58:05.576565Z",
+  "total_sites_analyzed": 10,
+  "top_n": 5,
+  "top_sites": [
+    {
+      "site": "https://magiceden.io",
+      "category": "solana-dapp",
+      "source": "solana_ecosystem_known",
+      "score": 130,
+      "classification": "high_priority_for_authorized_followup",
+      "detected_features": [
+        "Next.js",
+        "Admin/debug routes",
+        "Crash game indicators",
+        "API URLs (10)",
+        "RPC URLs",
+        "Solana Program IDs (1)",
+        "Potential API keys"
+      ],
+      "score_breakdown": {
+        "react": 10,
+        "nextjs": 20,
+        "phantom": 10,
+        "many_js_files": 5,
+        "admin_routes": 10,
+        "crash_game": 10,
+        "api_urls": 15,
+        "rpc_urls": 10,
+        "websocket_urls": 10,
+        "program_ids": 15,
+        "potential_keys": 15
+      },
+      "technologies": [
+        "Admin-Debug-Routes"
+      ],
+      "frameworks": [
+        "React",
+        "Next.js"
+      ],
+      "web3_indicators": [
+        "Phantom",
+        "Crash-Game-Indicators"
+      ],
+      "js_analysis": {
+        "files_analyzed": 5,
+        "api_urls": [
+          "https://unreal.blockscout.com/api/v2",
+          "https://api.routescan.io/v2/network/testnet/evm/21000001/etherscan/api",
+          "https://juneoscan.io/chain/10/api",
+          "https://api-nova.arbiscan.io/api",
+          "https://api-testnet.bscscan.com/api",
+          "https://api.apescan.io/api",
+          "https://explorer.haqq.network/api",
+          "https://explorer-api.inichain.com/api",
+          "https://block-explorer-api.staging.lens.dev/api",
+          "https://api.memecorescan.io/api"
+        ],
+        "rpc_urls": [
+          "https://cardona-zkevm.polygonscan.com/api",
+          "https://80001.rpc.thirdweb.com\"]}},blockExplorers:{default:{name:\"PolygonScan\",url:\"https://mumbai.polygonscan.com",
+          "https://evm-rpc-testnet.sei-apis.com",
+          "https://mainnet-rpc.lumia.org",
+          "https://rpc.apechain.com/http"
+        ],
+        "websocket_urls": [
+          "wss://metis.drpc.org",
+          "wss://dymension-evm-rpc.publicnode.com",
+          "wss://babel-api.testnet.iotex.io",
+          "wss://prenet.diode.io:8443/ws",
+          "wss://rpcv2-testnet.ancient8.gg"
+        ],
+        "program_ids": [
+          "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        ],
+        "admin_routes": []
+      }
+    },
+    {
+      "site": "https://raydium.io",
+      "category": "solana-dapp",
+      "source": "solana_ecosystem_known",
+      "score": 80,
+      "classification": "high_priority_for_authorized_followup",
+      "detected_features": [
+        "Next.js",
+        "API URLs (10)",
+        "RPC URLs",
+        "Solana Program IDs (1)"
+      ],
+      "score_breakdown": {
+        "react": 10,
+        "nextjs": 20,
+        "api_urls": 15,
+        "rpc_urls": 10,
+        "websocket_urls": 10,
+        "program_ids": 15
+      },
+      "technologies": [],
+      "frameworks": [
+        "React",
+        "Next.js"
+      ],
+      "web3_indicators": [],
+      "js_analysis": {
+        "files_analyzed": 5,
+        "api_urls": [
+          "https://api.basescan.org/api",
+          "https://api-optimistic.etherscan.io/api",
+          "https://api.gnosisscan.io/api",
+          "https://solanacompass.com/api/fees?cacheFreshTime=",
+          "https://api.mainnet-beta.solana.com",
+          "https://api.devnet.solana.com",
+          "https://api.testnet.solana.com",
+          "https://api.polygonscan.com/api",
+          "https://api.bscscan.com/api",
+          "https://api.arbiscan.io/api"
+        ],
+        "rpc_urls": [
+          "https://opbnb-mainnet-rpc.bnbchain.org",
+          "https://wallet.moongate.one\",bu=null,vu=class{constructor({authModeAdapter:e=\"Ethereum\",logoDataURI:t=\"Default\",buttonLogoURI:n=\"https://i.ibb.co/NjxF2zw/Image-3.png",
+          "https://rpc.gnosischain.com",
+          "https://rpc.walletconnect.com/v1",
+          "https://api.devnet.solana.com\",testnet:\"https://api.testnet.solana.com"
+        ],
+        "websocket_urls": [
+          "wss://relay.walletconnect.org",
+          "ws://localhost:${yield",
+          "wss://relay.walletconnect.com",
+          "wss://${null===e||void",
+          "wss://rpc.zora.energy"
+        ],
+        "program_ids": [
+          "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        ],
+        "admin_routes": []
+      }
+    },
+    {
+      "site": "https://jup.ag",
+      "category": "solana-dapp",
+      "source": "solana_ecosystem_known",
+      "score": 80,
+      "classification": "high_priority_for_authorized_followup",
+      "detected_features": [
+        "Vercel",
+        "Next.js",
+        "Solana wallet adapter"
+      ],
+      "score_breakdown": {
+        "vercel": 20,
+        "react": 10,
+        "nextjs": 20,
+        "solana_wallet": 25,
+        "many_js_files": 5
+      },
+      "technologies": [
+        "Vercel"
+      ],
+      "frameworks": [
+        "Next.js",
+        "React",
+        "Next.js"
+      ],
+      "web3_indicators": [
+        "Solana-Wallet-Adapter"
+      ],
+      "js_analysis": {
+        "files_analyzed": 5,
+        "api_urls": [],
+        "rpc_urls": [],
+        "websocket_urls": [],
+        "program_ids": [],
+        "admin_routes": []
+      }
+    },
+    {
+      "site": "https://solend.fi",
+      "category": "solana-dapp",
+      "source": "solana_ecosystem_known",
+      "score": 75,
+      "classification": "interesting_for_authorized_followup",
+      "detected_features": [
+        "API URLs (10)",
+        "RPC URLs",
+        "Solana Program IDs (2)",
+        "Hidden admin routes",
+        "Potential API keys"
+      ],
+      "score_breakdown": {
+        "api_urls": 15,
+        "rpc_urls": 10,
+        "websocket_urls": 10,
+        "program_ids": 15,
+        "admin_routes": 10,
+        "potential_keys": 15
+      },
+      "technologies": [],
+      "frameworks": [],
+      "web3_indicators": [],
+      "js_analysis": {
+        "files_analyzed": 2,
+        "api_urls": [
+          "https://api.apr.dev/api/v0/program/${e.toString()}/latest?limit=${n}`,[i,o]=await",
+          "https://solendf-solendf-67c7.rpcpool.com/",
+          "https://token-list-api.solana.cloud",
+          "https://rpc.helius.xyz/?api-key=96d88c32-e147-4ef8-88b0-18c758ca69df",
+          "https://api.mainnet-beta.solana.com",
+          "https://devnet.helius-rpc.com/?api-key=96d88c32-e147-4ef8-88b0-18c758ca69df",
+          "https://solana-mainnet.g.alchemy.com/v2/ZT3c4pYf1inIrB0GVDNR7nx4LwyED5Ci",
+          "https://devnet.genesysgo.net/",
+          "https://api.devnet.solana.com",
+          "http://127.0.0.1:8899"
+        ],
+        "rpc_urls": [
+          "https://goerli.optimism.io",
+          "https://api.mainnet-beta.solana.com\";return function*(){return Zu(t,Hi.toString(),Gi.toString())}()}))}function Zu(t,e,n){return Nu(this,void 0,void 0,(function*(){const{PublicKey:r,Keypair:i,Connection:o}=Ci.web3,s=new Ki.Z(new i),a=new o(t,\"confirmed\"),u=new r(e),c=new r(n),l=new Ci.AnchorProvider(a,s,{}),d=yield Ci.Program.fetchIdl(u,l),h=new Ci.Program(d,l);return new ji(h,c)}))}function Hu(t){return Nu(this,arguments,void 0,(function(t){let{feedId:e,chainId:n,crossbarUrl:r,minResponses:i,maxVariance:o,numSignatures:s,syncOracles:a,syncGuardians:u}=t;return function*(){return r||(r=\"https://crossbar.switchboard.xyz",
+          "https://mainnet.optimism.io",
+          "https://etherscan.io\"},queues:[],attestationQueues:[{name:\"SwitchboardLabs Attestation Queue\",address:\"\"}]},Ge={chain:\"ethereum\",chainId:5,networkName:\"Goerli\",address:\"\",sbPushOracle:\"\",metadata:{defaultRpcUrl:\"https://ethereum-goerli.publicnode.com",
+          "https://api.devnet.solana.com\"),i=d.Keypair.generate(),o={rpcUrl:n.json_rpc_url,webSocketUrl:n.websocket_url,keypairPath:n.keypair_path,commitment:n.commitment,keypair:n.keypair_path,connection:r,provider:new Ci.AnchorProvider(r,new Ki.Z(i),{}),wallet:new Ki.Z(i),program:null};o.keypair=(yield Su.initWalletFromFile(o.keypairPath))[1],o.connection=new d.Connection(o.rpcUrl,{commitment:\"confirmed\"}),o.wallet=new Ki.Z(o.keypair),o.provider=new Ci.AnchorProvider(o.connection,o.wallet,{preflightCommitment:\"confirmed\",commitment:\"confirmed\"});const s=yield Xi(o.connection);console.log(`Is Mainnet: ${s}`);let a=Hi;s||(a=$i),console.log(`PID: ${a}`);const u=yield Ci.Program.fetchIdl(a,o.provider),c=new Ci.Program(u,o.provider);return o.program=c,o}))}static loggedEvents(t,e){const n=new Ci.BorshEventCoder(t.idl),r=[];return e.forEach((t=>{if(t.startsWith(\"Program data: \")){const i=t.split(\" \");if(3!==i.length)return;try{r.push(n.decode(i[2]))}catch(e){}}})),r}}function Iu(t,e){const n=t.padStart(18,\"0\"),r=n.length-e;if(r<=0)return[\"\",n];return[n.slice(0,r),n.slice(r)]}class Ou{constructor(t){this.raw=t}toRows(){var t,e;const n=[];if(!Array.isArray(null===(e=null===(t=this.raw)||void 0===t?void 0:t.data)||void 0===e?void 0:e.feeds))return n;for(const r in this.raw.data.feeds){const t=this.raw.data.feeds[r];for(const e in this.raw.data.oracles){const i=this.raw.data.oracles[e],o=this.raw.data.values[r][e],s=Iu(o.toString(),18);\"170141183460469231731687303715884105727\"===o.toString()?n.push({feed:t.toString(),oracle:i.toString(),value:null}):n.push({feed:t.toString(),oracle:i.toString(),value:`${s[0]}.${s[1]}`})}}return n}}function Pu(t){let{feedId:e,discriminator:n,result:r,blockNumber:i,r:o,s:s,v:a,timestamp:u}=t;const c=n.toString(16).padStart(2,\"0\"),l=BigInt(r).toString(16).padStart(32,\"0\"),d=BigInt(i).toString(16).padStart(16,\"0\");return`0x${c}${e}${l}${o}${s}${a.toString(16).padStart(2,\"0\")}${d}${u?BigInt(u).toString(16).padStart(16,\"0\"):\"\"}`}function xu(t){let{discriminator:e,oracleId:n,queueId:r,timestamp:i,secp256k1Key:o,r:s,s:a,v:u,blockNumber:c,mrEnclave:l,guardianId:d}=t;const h=e.toString(16).padStart(2,\"0\"),f=BigInt(c).toString(16).padStart(16,\"0\"),p=BigInt(i).toString(16).padStart(16,\"0\");return`0x${h}${n}${r}${l}${o}${f}${s}${a}${u.toString(16).padStart(2,\"0\")}${p}${d}`}function Cu(t){let{discriminator:e,oracleId:n,queueId:r,ed25519Key:i,secp256k1Key:o,r:s,s:a,v:u,blockNumber:c,mrEnclave:l}=t;return`0x${e.toString(16).padStart(2,\"0\")}${n}${r}${l}${i}${o}${BigInt(c).toString(16).padStart(16,\"0\")}${s}${a}${u.toString(16).padStart(2,\"0\")}`}function Du(t){let{discriminator:e,randomnessId:n,result:r,r:i,s:o,v:s}=t;return`0x${e.toString(16).padStart(2,\"0\")}${n}${r}${i}${o}${s.toString(16).padStart(2,\"0\")}`}var Ru=n(40918).Buffer,Nu=function(t,e,n,r){return new(n||(n=Promise))((function(i,o){function s(t){try{u(r.next(t))}catch(e){o(e)}}function a(t){try{u(r.throw(t))}catch(e){o(e)}}function u(t){var e;t.done?i(t.value):(e=t.value,e instanceof n?e:new n((function(t){t(e)}))).then(s,a)}u((r=r.apply(t,e||[])).next())}))};function ju(t){return sn.fromObject(t)}function Bu(t,e){return Nu(this,void 0,void 0,(function*(){var n,r;const i=null!==(n=t.gateway)&&void 0!==n?n:yield e.fetchGateway(),o=(yield i.fetchSignatures(Object.assign(Object.assign({},t),{useTimestamp:!0,recentHash:wi.encode(Ru.from(null!==(r=t.recentHash)&&void 0!==r?r:\"0\".repeat(64),\"hex\"))}))).responses[0];return{result:new c.p(o.success_value).div(new c.p(10).pow(18)).toNumber(),feedId:o.feed_hash,response:o}}))}function Lu(t,e){return Nu(this,void 0,void 0,(function*(){return(yield Fu(t,e)).responses.map((t=>t.encoded))}))}function Fu(t,e){return Nu(this,void 0,void 0,(function*(){var n;const r=null!==(n=t.recentHash)&&void 0!==n?n:\"0\".repeat(64);if(0===t.jobs.length)return{responses:[],failures:[]};return yield Uu(Object.assign(Object.assign({},t),{recentHash:r}),e)}))}function Uu(t,e){return Nu(this,void 0,void 0,(function*(){var n,r,i,o,s;t.recentHash||(t.recentHash=\"0\".repeat(64)),t.recentHash.startsWith(\"0x\")&&(t.recentHash=t.recentHash.slice(2));const a=null!==(n=t.gateway)&&void 0!==n?n:yield e.fetchGateway(),{responses:u,failures:l}=yield a.fetchSignatures(Object.assign(Object.assign({},t),{useTimestamp:!0,recentHash:wi.encode(Ru.from(t.recentHash,\"hex\"))})),d=[];for(const e of u){if(!e.success_value){l.push(e.failure_error.toString());continue}const n=new Uint8Array(Ru.from(e.signature,\"base64\")),a=Ru.from(n.slice(0,32)).toString(\"hex\"),u=Ru.from(n.slice(32,64)).toString(\"hex\"),h=e.recovery_id,f=Pu({discriminator:1,feedId:null!==(r=t.aggregatorId)&&void 0!==r?r:e.feed_hash.toString(),result:e.success_value.toString(),blockNumber:null!==(o=null===(i=t.blockNumber)||void 0===i?void 0:i.toString())&&void 0!==o?o:\"0\",timestamp:null===(s=e.timestamp)||void 0===s?void 0:s.toString(),r:a,s:u,v:h}),p={feedId:e.feed_hash,result:new c.p(e.success_value).div(new c.p(10).pow(18)).toNumber(),encoded:f,response:e};d.push(p)}return d.sort(((t,e)=>t.response.timestamp-e.response.timestamp)),{responses:d,failures:l}}))}function zu(t){return Nu(this,void 0,void 0,(function*(){const{guardianQueue:e,recentHash:n,queueId:r,oracleId:i,gateway:o,blockNumber:s}=t,a=null!==o&&void 0!==o?o:yield e.fetchGateway(),u=n.startsWith(\"0x\")?n.slice(2):n,c=yield a.fetchBridgingMessage({chainHash:u,queuePubkey:r,oraclePubkey:i});t.recentHash||(t.recentHash=\"0\".repeat(64)),t.recentHash.startsWith(\"0x\")&&(t.recentHash=t.recentHash.slice(2));const l=new Uint8Array(Ru.from(c.signature,\"base64\")),d=Ru.from(l.slice(0,32)).toString(\"hex\"),h=Ru.from(l.slice(32,64)).toString(\"hex\"),f=c.recovery_id;if(c.oracle_ed25519_enclave_signer){const t=Cu({discriminator:2,oracleId:i,queueId:r,ed25519Key:c.oracle_ed25519_enclave_signer,secp256k1Key:c.oracle_secp256k1_enclave_signer,r:d,s:h,v:f,mrEnclave:c.mr_enclave,blockNumber:s.toString()});return{oracleId:i,queueId:r,guardian:c.guardian,encoded:t,response:c}}if(c.timestamp){const t=xu({discriminator:2,oracleId:i,queueId:r,secp256k1Key:c.oracle_secp256k1_enclave_signer,timestamp:c.timestamp.toString(),mrEnclave:c.mr_enclave,r:d,s:h,v:f,blockNumber:s.toString(),guardianId:c.guardian});return{oracleId:c.oracle,queueId:c.queue,guardian:c.guardian,encoded:t,response:c}}throw new Error(\"Invalid attestation response\")}))}function Wu(){return Nu(this,arguments,void 0,(function(){let t=arguments.length>0&&void 0!==arguments[0]?arguments[0]:\"https://api.devnet.solana.com"
+        ],
+        "websocket_urls": [
+          "wss://relay.walletconnect.org",
+          "ws://localhost:8546",
+          "wss://relay.walletconnect.com",
+          "ws://localhost:${r}/solana-wallet`;let",
+          "ws://localhost:8080"
+        ],
+        "program_ids": [
+          "11aabc21c23e97b2a31369b87a5ae9c44ee89e2a6dec",
+          "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        ],
+        "admin_routes": [
+          "/admin"
+        ]
+      }
+    },
+    {
+      "site": "https://solanart.io",
+      "category": "solana-dapp",
+      "source": "solana_ecosystem_known",
+      "score": 55,
+      "classification": "moderate_interest",
+      "detected_features": [
+        "Next.js",
+        "RPC URLs"
+      ],
+      "score_breakdown": {
+        "react": 10,
+        "nextjs": 20,
+        "many_js_files": 5,
+        "rpc_urls": 10,
+        "websocket_urls": 10
+      },
+      "technologies": [],
+      "frameworks": [
+        "React",
+        "Next.js"
+      ],
+      "web3_indicators": [],
+      "js_analysis": {
+        "files_analyzed": 5,
+        "api_urls": [],
+        "rpc_urls": [
+          "https://api.mainnet-beta.solana.com/",
+          "https://pythnet.rpcpool.com",
+          "http://api.mainnet-beta.solana.com/",
+          "http://api.devnet.solana.com\",testnet:\"http://api.testnet.solana.com",
+          "https://api.devnet.solana.com\",testnet:\"https://api.testnet.solana.com"
+        ],
+        "websocket_urls": [
+          "ws://localhost:8080"
+        ],
+        "program_ids": [],
+        "admin_routes": []
+      }
+    }
+  ],
+  "all_ranked_sites": [
+    {
+      "site": "https://magiceden.io",
+      "category": "solana-dapp",
+      "source": "solana_ecosystem_known",
+      "score": 130,
+      "classification": "high_priority_for_authorized_followup",
+      "detected_features": [
+        "Next.js",
+        "Admin/debug routes",
+        "Crash game indicators",
+        "API URLs (10)",
+        "RPC URLs",
+        "Solana Program IDs (1)",
+        "Potential API keys"
+      ],
+      "score_breakdown": {
+        "react": 10,
+        "nextjs": 20,
+        "phantom": 10,
+        "many_js_files": 5,
+        "admin_routes": 10,
+        "crash_game": 10,
+        "api_urls": 15,
+        "rpc_urls": 10,
+        "websocket_urls": 10,
+        "program_ids": 15,
+        "potential_keys": 15
+      },
+      "technologies": [
+        "Admin-Debug-Routes"
+      ],
+      "frameworks": [
+        "React",
+        "Next.js"
+      ],
+      "web3_indicators": [
+        "Phantom",
+        "Crash-Game-Indicators"
+      ],
+      "js_analysis": {
+        "files_analyzed": 5,
+        "api_urls": [
+          "https://unreal.blockscout.com/api/v2",
+          "https://api.routescan.io/v2/network/testnet/evm/21000001/etherscan/api",
+          "https://juneoscan.io/chain/10/api",
+          "https://api-nova.arbiscan.io/api",
+          "https://api-testnet.bscscan.com/api",
+          "https://api.apescan.io/api",
+          "https://explorer.haqq.network/api",
+          "https://explorer-api.inichain.com/api",
+          "https://block-explorer-api.staging.lens.dev/api",
+          "https://api.memecorescan.io/api"
+        ],
+        "rpc_urls": [
+          "https://cardona-zkevm.polygonscan.com/api",
+          "https://80001.rpc.thirdweb.com\"]}},blockExplorers:{default:{name:\"PolygonScan\",url:\"https://mumbai.polygonscan.com",
+          "https://evm-rpc-testnet.sei-apis.com",
+          "https://mainnet-rpc.lumia.org",
+          "https://rpc.apechain.com/http"
+        ],
+        "websocket_urls": [
+          "wss://metis.drpc.org",
+          "wss://dymension-evm-rpc.publicnode.com",
+          "wss://babel-api.testnet.iotex.io",
+          "wss://prenet.diode.io:8443/ws",
+          "wss://rpcv2-testnet.ancient8.gg"
+        ],
+        "program_ids": [
+          "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        ],
+        "admin_routes": []
+      }
+    },
+    {
+      "site": "https://raydium.io",
+      "category": "solana-dapp",
+      "source": "solana_ecosystem_known",
+      "score": 80,
+      "classification": "high_priority_for_authorized_followup",
+      "detected_features": [
+        "Next.js",
+        "API URLs (10)",
+        "RPC URLs",
+        "Solana Program IDs (1)"
+      ],
+      "score_breakdown": {
+        "react": 10,
+        "nextjs": 20,
+        "api_urls": 15,
+        "rpc_urls": 10,
+        "websocket_urls": 10,
+        "program_ids": 15
+      },
+      "technologies": [],
+      "frameworks": [
+        "React",
+        "Next.js"
+      ],
+      "web3_indicators": [],
+      "js_analysis": {
+        "files_analyzed": 5,
+        "api_urls": [
+          "https://api.basescan.org/api",
+          "https://api-optimistic.etherscan.io/api",
+          "https://api.gnosisscan.io/api",
+          "https://solanacompass.com/api/fees?cacheFreshTime=",
+          "https://api.mainnet-beta.solana.com",
+          "https://api.devnet.solana.com",
+          "https://api.testnet.solana.com",
+          "https://api.polygonscan.com/api",
+          "https://api.bscscan.com/api",
+          "https://api.arbiscan.io/api"
+        ],
+        "rpc_urls": [
+          "https://opbnb-mainnet-rpc.bnbchain.org",
+          "https://wallet.moongate.one\",bu=null,vu=class{constructor({authModeAdapter:e=\"Ethereum\",logoDataURI:t=\"Default\",buttonLogoURI:n=\"https://i.ibb.co/NjxF2zw/Image-3.png",
+          "https://rpc.gnosischain.com",
+          "https://rpc.walletconnect.com/v1",
+          "https://api.devnet.solana.com\",testnet:\"https://api.testnet.solana.com"
+        ],
+        "websocket_urls": [
+          "wss://relay.walletconnect.org",
+          "ws://localhost:${yield",
+          "wss://relay.walletconnect.com",
+          "wss://${null===e||void",
+          "wss://rpc.zora.energy"
+        ],
+        "program_ids": [
+          "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        ],
+        "admin_routes": []
+      }
+    },
+    {
+      "site": "https://jup.ag",
+      "category": "solana-dapp",
+      "source": "solana_ecosystem_known",
+      "score": 80,
+      "classification": "high_priority_for_authorized_followup",
+      "detected_features": [
+        "Vercel",
+        "Next.js",
+        "Solana wallet adapter"
+      ],
+      "score_breakdown": {
+        "vercel": 20,
+        "react": 10,
+        "nextjs": 20,
+        "solana_wallet": 25,
+        "many_js_files": 5
+      },
+      "technologies": [
+        "Vercel"
+      ],
+      "frameworks": [
+        "Next.js",
+        "React",
+        "Next.js"
+      ],
+      "web3_indicators": [
+        "Solana-Wallet-Adapter"
+      ],
+      "js_analysis": {
+        "files_analyzed": 5,
+        "api_urls": [],
+        "rpc_urls": [],
+        "websocket_urls": [],
+        "program_ids": [],
+        "admin_routes": []
+      }
+    },
+    {
+      "site": "https://solend.fi",
+      "category": "solana-dapp",
+      "source": "solana_ecosystem_known",
+      "score": 75,
+      "classification": "interesting_for_authorized_followup",
+      "detected_features": [
+        "API URLs (10)",
+        "RPC URLs",
+        "Solana Program IDs (2)",
+        "Hidden admin routes",
+        "Potential API keys"
+      ],
+      "score_breakdown": {
+        "api_urls": 15,
+        "rpc_urls": 10,
+        "websocket_urls": 10,
+        "program_ids": 15,
+        "admin_routes": 10,
+        "potential_keys": 15
+      },
+      "technologies": [],
+      "frameworks": [],
+      "web3_indicators": [],
+      "js_analysis": {
+        "files_analyzed": 2,
+        "api_urls": [
+          "https://api.apr.dev/api/v0/program/${e.toString()}/latest?limit=${n}`,[i,o]=await",
+          "https://solendf-solendf-67c7.rpcpool.com/",
+          "https://token-list-api.solana.cloud",
+          "https://rpc.helius.xyz/?api-key=96d88c32-e147-4ef8-88b0-18c758ca69df",
+          "https://api.mainnet-beta.solana.com",
+          "https://devnet.helius-rpc.com/?api-key=96d88c32-e147-4ef8-88b0-18c758ca69df",
+          "https://solana-mainnet.g.alchemy.com/v2/ZT3c4pYf1inIrB0GVDNR7nx4LwyED5Ci",
+          "https://devnet.genesysgo.net/",
+          "https://api.devnet.solana.com",
+          "http://127.0.0.1:8899"
+        ],
+        "rpc_urls": [
+          "https://goerli.optimism.io",
+          "https://api.mainnet-beta.solana.com\";return function*(){return Zu(t,Hi.toString(),Gi.toString())}()}))}function Zu(t,e,n){return Nu(this,void 0,void 0,(function*(){const{PublicKey:r,Keypair:i,Connection:o}=Ci.web3,s=new Ki.Z(new i),a=new o(t,\"confirmed\"),u=new r(e),c=new r(n),l=new Ci.AnchorProvider(a,s,{}),d=yield Ci.Program.fetchIdl(u,l),h=new Ci.Program(d,l);return new ji(h,c)}))}function Hu(t){return Nu(this,arguments,void 0,(function(t){let{feedId:e,chainId:n,crossbarUrl:r,minResponses:i,maxVariance:o,numSignatures:s,syncOracles:a,syncGuardians:u}=t;return function*(){return r||(r=\"https://crossbar.switchboard.xyz",
+          "https://mainnet.optimism.io",
+          "https://etherscan.io\"},queues:[],attestationQueues:[{name:\"SwitchboardLabs Attestation Queue\",address:\"\"}]},Ge={chain:\"ethereum\",chainId:5,networkName:\"Goerli\",address:\"\",sbPushOracle:\"\",metadata:{defaultRpcUrl:\"https://ethereum-goerli.publicnode.com",
+          "https://api.devnet.solana.com\"),i=d.Keypair.generate(),o={rpcUrl:n.json_rpc_url,webSocketUrl:n.websocket_url,keypairPath:n.keypair_path,commitment:n.commitment,keypair:n.keypair_path,connection:r,provider:new Ci.AnchorProvider(r,new Ki.Z(i),{}),wallet:new Ki.Z(i),program:null};o.keypair=(yield Su.initWalletFromFile(o.keypairPath))[1],o.connection=new d.Connection(o.rpcUrl,{commitment:\"confirmed\"}),o.wallet=new Ki.Z(o.keypair),o.provider=new Ci.AnchorProvider(o.connection,o.wallet,{preflightCommitment:\"confirmed\",commitment:\"confirmed\"});const s=yield Xi(o.connection);console.log(`Is Mainnet: ${s}`);let a=Hi;s||(a=$i),console.log(`PID: ${a}`);const u=yield Ci.Program.fetchIdl(a,o.provider),c=new Ci.Program(u,o.provider);return o.program=c,o}))}static loggedEvents(t,e){const n=new Ci.BorshEventCoder(t.idl),r=[];return e.forEach((t=>{if(t.startsWith(\"Program data: \")){const i=t.split(\" \");if(3!==i.length)return;try{r.push(n.decode(i[2]))}catch(e){}}})),r}}function Iu(t,e){const n=t.padStart(18,\"0\"),r=n.length-e;if(r<=0)return[\"\",n];return[n.slice(0,r),n.slice(r)]}class Ou{constructor(t){this.raw=t}toRows(){var t,e;const n=[];if(!Array.isArray(null===(e=null===(t=this.raw)||void 0===t?void 0:t.data)||void 0===e?void 0:e.feeds))return n;for(const r in this.raw.data.feeds){const t=this.raw.data.feeds[r];for(const e in this.raw.data.oracles){const i=this.raw.data.oracles[e],o=this.raw.data.values[r][e],s=Iu(o.toString(),18);\"170141183460469231731687303715884105727\"===o.toString()?n.push({feed:t.toString(),oracle:i.toString(),value:null}):n.push({feed:t.toString(),oracle:i.toString(),value:`${s[0]}.${s[1]}`})}}return n}}function Pu(t){let{feedId:e,discriminator:n,result:r,blockNumber:i,r:o,s:s,v:a,timestamp:u}=t;const c=n.toString(16).padStart(2,\"0\"),l=BigInt(r).toString(16).padStart(32,\"0\"),d=BigInt(i).toString(16).padStart(16,\"0\");return`0x${c}${e}${l}${o}${s}${a.toString(16).padStart(2,\"0\")}${d}${u?BigInt(u).toString(16).padStart(16,\"0\"):\"\"}`}function xu(t){let{discriminator:e,oracleId:n,queueId:r,timestamp:i,secp256k1Key:o,r:s,s:a,v:u,blockNumber:c,mrEnclave:l,guardianId:d}=t;const h=e.toString(16).padStart(2,\"0\"),f=BigInt(c).toString(16).padStart(16,\"0\"),p=BigInt(i).toString(16).padStart(16,\"0\");return`0x${h}${n}${r}${l}${o}${f}${s}${a}${u.toString(16).padStart(2,\"0\")}${p}${d}`}function Cu(t){let{discriminator:e,oracleId:n,queueId:r,ed25519Key:i,secp256k1Key:o,r:s,s:a,v:u,blockNumber:c,mrEnclave:l}=t;return`0x${e.toString(16).padStart(2,\"0\")}${n}${r}${l}${i}${o}${BigInt(c).toString(16).padStart(16,\"0\")}${s}${a}${u.toString(16).padStart(2,\"0\")}`}function Du(t){let{discriminator:e,randomnessId:n,result:r,r:i,s:o,v:s}=t;return`0x${e.toString(16).padStart(2,\"0\")}${n}${r}${i}${o}${s.toString(16).padStart(2,\"0\")}`}var Ru=n(40918).Buffer,Nu=function(t,e,n,r){return new(n||(n=Promise))((function(i,o){function s(t){try{u(r.next(t))}catch(e){o(e)}}function a(t){try{u(r.throw(t))}catch(e){o(e)}}function u(t){var e;t.done?i(t.value):(e=t.value,e instanceof n?e:new n((function(t){t(e)}))).then(s,a)}u((r=r.apply(t,e||[])).next())}))};function ju(t){return sn.fromObject(t)}function Bu(t,e){return Nu(this,void 0,void 0,(function*(){var n,r;const i=null!==(n=t.gateway)&&void 0!==n?n:yield e.fetchGateway(),o=(yield i.fetchSignatures(Object.assign(Object.assign({},t),{useTimestamp:!0,recentHash:wi.encode(Ru.from(null!==(r=t.recentHash)&&void 0!==r?r:\"0\".repeat(64),\"hex\"))}))).responses[0];return{result:new c.p(o.success_value).div(new c.p(10).pow(18)).toNumber(),feedId:o.feed_hash,response:o}}))}function Lu(t,e){return Nu(this,void 0,void 0,(function*(){return(yield Fu(t,e)).responses.map((t=>t.encoded))}))}function Fu(t,e){return Nu(this,void 0,void 0,(function*(){var n;const r=null!==(n=t.recentHash)&&void 0!==n?n:\"0\".repeat(64);if(0===t.jobs.length)return{responses:[],failures:[]};return yield Uu(Object.assign(Object.assign({},t),{recentHash:r}),e)}))}function Uu(t,e){return Nu(this,void 0,void 0,(function*(){var n,r,i,o,s;t.recentHash||(t.recentHash=\"0\".repeat(64)),t.recentHash.startsWith(\"0x\")&&(t.recentHash=t.recentHash.slice(2));const a=null!==(n=t.gateway)&&void 0!==n?n:yield e.fetchGateway(),{responses:u,failures:l}=yield a.fetchSignatures(Object.assign(Object.assign({},t),{useTimestamp:!0,recentHash:wi.encode(Ru.from(t.recentHash,\"hex\"))})),d=[];for(const e of u){if(!e.success_value){l.push(e.failure_error.toString());continue}const n=new Uint8Array(Ru.from(e.signature,\"base64\")),a=Ru.from(n.slice(0,32)).toString(\"hex\"),u=Ru.from(n.slice(32,64)).toString(\"hex\"),h=e.recovery_id,f=Pu({discriminator:1,feedId:null!==(r=t.aggregatorId)&&void 0!==r?r:e.feed_hash.toString(),result:e.success_value.toString(),blockNumber:null!==(o=null===(i=t.blockNumber)||void 0===i?void 0:i.toString())&&void 0!==o?o:\"0\",timestamp:null===(s=e.timestamp)||void 0===s?void 0:s.toString(),r:a,s:u,v:h}),p={feedId:e.feed_hash,result:new c.p(e.success_value).div(new c.p(10).pow(18)).toNumber(),encoded:f,response:e};d.push(p)}return d.sort(((t,e)=>t.response.timestamp-e.response.timestamp)),{responses:d,failures:l}}))}function zu(t){return Nu(this,void 0,void 0,(function*(){const{guardianQueue:e,recentHash:n,queueId:r,oracleId:i,gateway:o,blockNumber:s}=t,a=null!==o&&void 0!==o?o:yield e.fetchGateway(),u=n.startsWith(\"0x\")?n.slice(2):n,c=yield a.fetchBridgingMessage({chainHash:u,queuePubkey:r,oraclePubkey:i});t.recentHash||(t.recentHash=\"0\".repeat(64)),t.recentHash.startsWith(\"0x\")&&(t.recentHash=t.recentHash.slice(2));const l=new Uint8Array(Ru.from(c.signature,\"base64\")),d=Ru.from(l.slice(0,32)).toString(\"hex\"),h=Ru.from(l.slice(32,64)).toString(\"hex\"),f=c.recovery_id;if(c.oracle_ed25519_enclave_signer){const t=Cu({discriminator:2,oracleId:i,queueId:r,ed25519Key:c.oracle_ed25519_enclave_signer,secp256k1Key:c.oracle_secp256k1_enclave_signer,r:d,s:h,v:f,mrEnclave:c.mr_enclave,blockNumber:s.toString()});return{oracleId:i,queueId:r,guardian:c.guardian,encoded:t,response:c}}if(c.timestamp){const t=xu({discriminator:2,oracleId:i,queueId:r,secp256k1Key:c.oracle_secp256k1_enclave_signer,timestamp:c.timestamp.toString(),mrEnclave:c.mr_enclave,r:d,s:h,v:f,blockNumber:s.toString(),guardianId:c.guardian});return{oracleId:c.oracle,queueId:c.queue,guardian:c.guardian,encoded:t,response:c}}throw new Error(\"Invalid attestation response\")}))}function Wu(){return Nu(this,arguments,void 0,(function(){let t=arguments.length>0&&void 0!==arguments[0]?arguments[0]:\"https://api.devnet.solana.com"
+        ],
+        "websocket_urls": [
+          "wss://relay.walletconnect.org",
+          "ws://localhost:8546",
+          "wss://relay.walletconnect.com",
+          "ws://localhost:${r}/solana-wallet`;let",
+          "ws://localhost:8080"
+        ],
+        "program_ids": [
+          "11aabc21c23e97b2a31369b87a5ae9c44ee89e2a6dec",
+          "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        ],
+        "admin_routes": [
+          "/admin"
+        ]
+      }
+    },
+    {
+      "site": "https://solanart.io",
+      "category": "solana-dapp",
+      "source": "solana_ecosystem_known",
+      "score": 55,
+      "classification": "moderate_interest",
+      "detected_features": [
+        "Next.js",
+        "RPC URLs"
+      ],
+      "score_breakdown": {
+        "react": 10,
+        "nextjs": 20,
+        "many_js_files": 5,
+        "rpc_urls": 10,
+        "websocket_urls": 10
+      },
+      "technologies": [],
+      "frameworks": [
+        "React",
+        "Next.js"
+      ],
+      "web3_indicators": [],
+      "js_analysis": {
+        "files_analyzed": 5,
+        "api_urls": [],
+        "rpc_urls": [
+          "https://api.mainnet-beta.solana.com/",
+          "https://pythnet.rpcpool.com",
+          "http://api.mainnet-beta.solana.com/",
+          "http://api.devnet.solana.com\",testnet:\"http://api.testnet.solana.com",
+          "https://api.devnet.solana.com\",testnet:\"https://api.testnet.solana.com"
+        ],
+        "websocket_urls": [
+          "ws://localhost:8080"
+        ],
+        "program_ids": [],
+        "admin_routes": []
+      }
+    },
+    {
+      "site": "https://marinade.finance",
+      "category": "solana-dapp",
+      "source": "solana_ecosystem_known",
+      "score": 50,
+      "classification": "moderate_interest",
+      "detected_features": [
+        "Admin/debug routes",
+        "Crash game indicators"
+      ],
+      "score_breakdown": {
+        "phantom": 10,
+        "many_js_files": 5,
+        "admin_routes": 10,
+        "crash_game": 10,
+        "anchor": 15
+      },
+      "technologies": [
+        "Admin-Debug-Routes"
+      ],
+      "frameworks": [],
+      "web3_indicators": [
+        "Phantom",
+        "Crash-Game-Indicators",
+        "Anchor"
+      ],
+      "js_analysis": {
+        "files_analyzed": 5,
+        "api_urls": [],
+        "rpc_urls": [],
+        "websocket_urls": [],
+        "program_ids": [],
+        "admin_routes": []
+      }
+    },
+    {
+      "site": "https://phantom.app",
+      "category": "solana-dapp",
+      "source": "solana_ecosystem_known",
+      "score": 25,
+      "classification": "low_priority",
+      "detected_features": [],
+      "score_breakdown": {
+        "react": 10,
+        "phantom": 10,
+        "many_js_files": 5
+      },
+      "technologies": [],
+      "frameworks": [
+        "React"
+      ],
+      "web3_indicators": [
+        "Phantom"
+      ],
+      "js_analysis": {
+        "files_analyzed": 5,
+        "api_urls": [],
+        "rpc_urls": [],
+        "websocket_urls": [],
+        "program_ids": [],
+        "admin_routes": []
+      }
+    },
+    {
+      "site": "https://orca.so",
+      "category": "solana-dapp",
+      "source": "solana_ecosystem_known",
+      "score": 10,
+      "classification": "low_priority",
+      "detected_features": [],
+      "score_breakdown": {
+        "phantom": 10
+      },
+      "technologies": [],
+      "frameworks": [],
+      "web3_indicators": [
+        "Phantom"
+      ],
+      "js_analysis": {
+        "files_analyzed": 5,
+        "api_urls": [],
+        "rpc_urls": [],
+        "websocket_urls": [],
+        "program_ids": [],
+        "admin_routes": []
+      }
+    },
+    {
+      "site": "https://solflare.com",
+      "category": "solana-dapp",
+      "source": "solana_ecosystem_known",
+      "score": 10,
+      "classification": "low_priority",
+      "detected_features": [
+        "Admin/debug routes"
+      ],
+      "score_breakdown": {
+        "admin_routes": 10
+      },
+      "technologies": [
+        "Admin-Debug-Routes"
+      ],
+      "frameworks": [],
+      "web3_indicators": [],
+      "js_analysis": {
+        "files_analyzed": 5,
+        "api_urls": [],
+        "rpc_urls": [],
+        "websocket_urls": [],
+        "program_ids": [],
+        "admin_routes": []
+      }
+    },
+    {
+      "site": "https://saber.so",
+      "category": "solana-dapp",
+      "source": "solana_ecosystem_known",
+      "score": 3,
+      "classification": "low_priority",
+      "detected_features": [
+        "API URLs (1)"
+      ],
+      "score_breakdown": {
+        "api_urls": 3
+      },
+      "technologies": [],
+      "frameworks": [],
+      "web3_indicators": [],
+      "js_analysis": {
+        "files_analyzed": 3,
+        "api_urls": [
+          "https://platform.twitter.com"
+        ],
+        "rpc_urls": [],
+        "websocket_urls": [],
+        "program_ids": [],
+        "admin_routes": []
+      }
+    }
+  ]
+}

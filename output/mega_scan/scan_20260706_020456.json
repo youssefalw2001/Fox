@@ -1,0 +1,256 @@
+{
+  "scan_id": "3466ffa2310f",
+  "timestamp": "2026-07-06T02:02:51.454029",
+  "target": "https://jup.ag",
+  "config": {
+    "full_scan": false,
+    "exploit": false,
+    "threads": 10,
+    "timeout": 30
+  },
+  "recon": {
+    "target": "https://jup.ag",
+    "timestamp": "2026-07-06T02:02:51.454081",
+    "subdomains": [
+      "v2.jup.ag",
+      "www.jup.ag",
+      "status.jup.ag",
+      "support.jup.ag",
+      "docs.jup.ag",
+      "api.jup.ag",
+      "portal.jup.ag",
+      "blog.jup.ag",
+      "dev.jup.ag",
+      "static.jup.ag"
+    ],
+    "open_ports": [
+      {
+        "port": 80,
+        "service": "HTTP",
+        "state": "open"
+      },
+      {
+        "port": 443,
+        "service": "HTTPS",
+        "state": "open"
+      },
+      {
+        "port": 8080,
+        "service": "HTTP-Alt",
+        "state": "open"
+      },
+      {
+        "port": 8443,
+        "service": "HTTPS-Alt",
+        "state": "open"
+      }
+    ],
+    "technologies": {
+      "server": [
+        "cloudflare"
+      ],
+      "framework": [
+        "Next.js"
+      ],
+      "cms": [],
+      "cdn": [
+        "Cloudflare"
+      ],
+      "javascript": [],
+      "analytics": []
+    },
+    "dns_records": {
+      "A": [
+        "172.64.144.197",
+        "104.18.43.59"
+      ],
+      "MX": [],
+      "TXT": []
+    },
+    "ssl_info": {
+      "valid": true,
+      "issuer": {
+        "countryName": "US",
+        "organizationName": "Google Trust Services",
+        "commonName": "WE1"
+      },
+      "expiry": "Oct  3 10:40:34 2026 GMT",
+      "subject": {
+        "commonName": "jup.ag"
+      }
+    }
+  },
+  "vulnerabilities": [
+    {
+      "type": "MISSING_SECURITY_HEADER",
+      "severity": "MEDIUM",
+      "location": "HTTP Headers",
+      "payload": null,
+      "evidence": null,
+      "description": "Missing security header: MIME Sniffing Protection",
+      "remediation": "Add X-Content-Type-Options header to responses",
+      "cve": null,
+      "exploitable": false,
+      "exploit_code": null,
+      "timestamp": "2026-07-06T02:03:16.578917"
+    },
+    {
+      "type": "MISSING_SECURITY_HEADER",
+      "severity": "LOW",
+      "location": "HTTP Headers",
+      "payload": null,
+      "evidence": null,
+      "description": "Missing security header: XSS Protection",
+      "remediation": "Add X-XSS-Protection header to responses",
+      "cve": null,
+      "exploitable": false,
+      "exploit_code": null,
+      "timestamp": "2026-07-06T02:03:16.578931"
+    },
+    {
+      "type": "MISSING_SECURITY_HEADER",
+      "severity": "LOW",
+      "location": "HTTP Headers",
+      "payload": null,
+      "evidence": null,
+      "description": "Missing security header: Referrer Policy",
+      "remediation": "Add Referrer-Policy header to responses",
+      "cve": null,
+      "exploitable": false,
+      "exploit_code": null,
+      "timestamp": "2026-07-06T02:03:16.578934"
+    },
+    {
+      "type": "MISSING_SECURITY_HEADER",
+      "severity": "LOW",
+      "location": "HTTP Headers",
+      "payload": null,
+      "evidence": null,
+      "description": "Missing security header: Permissions Policy",
+      "remediation": "Add Permissions-Policy header to responses",
+      "cve": null,
+      "exploitable": false,
+      "exploit_code": null,
+      "timestamp": "2026-07-06T02:03:16.578937"
+    },
+    {
+      "type": "DANGEROUS_HTTP_METHOD",
+      "severity": "MEDIUM",
+      "location": "HTTP Methods",
+      "payload": null,
+      "evidence": "CONNECT returned 400",
+      "description": "Dangerous HTTP method allowed: CONNECT",
+      "remediation": "Disable CONNECT method if not required",
+      "cve": null,
+      "exploitable": true,
+      "exploit_code": null,
+      "timestamp": "2026-07-06T02:03:17.977845"
+    },
+    {
+      "type": "DANGEROUS_HTTP_METHOD",
+      "severity": "MEDIUM",
+      "location": "HTTP Methods",
+      "payload": null,
+      "evidence": "OPTIONS returned 204",
+      "description": "Dangerous HTTP method allowed: OPTIONS",
+      "remediation": "Disable OPTIONS method if not required",
+      "cve": null,
+      "exploitable": true,
+      "exploit_code": null,
+      "timestamp": "2026-07-06T02:03:18.136258"
+    },
+    {
+      "type": "RSA_NO_RATE_LIMITING",
+      "severity": "MEDIUM",
+      "location": "/api/login",
+      "payload": null,
+      "evidence": null,
+      "description": "No rate limiting on authentication endpoint",
+      "remediation": "Implement rate limiting on auth endpoints",
+      "cve": null,
+      "exploitable": true,
+      "exploit_code": null,
+      "timestamp": "2026-07-06T02:03:32.200728"
+    },
+    {
+      "type": "RSA_NO_RATE_LIMITING",
+      "severity": "MEDIUM",
+      "location": "/login",
+      "payload": null,
+      "evidence": null,
+      "description": "No rate limiting on authentication endpoint",
+      "remediation": "Implement rate limiting on auth endpoints",
+      "cve": null,
+      "exploitable": true,
+      "exploit_code": null,
+      "timestamp": "2026-07-06T02:03:34.287294"
+    },
+    {
+      "type": "RSA_NO_RATE_LIMITING",
+      "severity": "MEDIUM",
+      "location": "/api/auth",
+      "payload": null,
+      "evidence": null,
+      "description": "No rate limiting on authentication endpoint",
+      "remediation": "Implement rate limiting on auth endpoints",
+      "cve": null,
+      "exploitable": true,
+      "exploit_code": null,
+      "timestamp": "2026-07-06T02:03:35.867906"
+    },
+    {
+      "type": "RSA_NO_RATE_LIMITING",
+      "severity": "MEDIUM",
+      "location": "/auth/login",
+      "payload": null,
+      "evidence": null,
+      "description": "No rate limiting on authentication endpoint",
+      "remediation": "Implement rate limiting on auth endpoints",
+      "cve": null,
+      "exploitable": true,
+      "exploit_code": null,
+      "timestamp": "2026-07-06T02:03:37.773607"
+    },
+    {
+      "type": "JS_SECRETS_VALIDATED",
+      "severity": "CRITICAL",
+      "location": "JavaScript bundles",
+      "payload": null,
+      "evidence": "Validated 1 secrets from 15 files: FIREBASE_API",
+      "description": "Validated secrets exposed in JavaScript: FIREBASE_API",
+      "remediation": "Never hardcode secrets in client-side code, rotate all exposed credentials",
+      "cve": null,
+      "exploitable": true,
+      "exploit_code": null,
+      "timestamp": "2026-07-06T02:04:54.812236"
+    },
+    {
+      "type": "SUBDOMAIN_TAKEOVER",
+      "severity": "HIGH",
+      "location": "v2.jup.ag",
+      "payload": null,
+      "evidence": "The deployment could not be found on Vercel.\n\nDEPLOYMENT_NOT_FOUND\n\niad1::jkmvn-1783303372572-89fd2457c12a\n",
+      "description": "Subdomain takeover vulnerability via vercel",
+      "remediation": "Remove DNS record or claim vercel account",
+      "cve": null,
+      "exploitable": true,
+      "exploit_code": null,
+      "timestamp": "2026-07-06T02:04:56.416540"
+    },
+    {
+      "type": "SUBDOMAIN_TAKEOVER",
+      "severity": "HIGH",
+      "location": "docs.jup.ag",
+      "payload": null,
+      "evidence": "<!DOCTYPE html><html lang=\"en\" class=\"inter_1d81deff-module__CYM0aG__variable papermono_9db261d6-module__QQJmOa__variable dark\" data-banner-state=\"visible\" data-assistant-state=\"closed\" data-page-mode",
+      "description": "Subdomain takeover vulnerability via vercel",
+      "remediation": "Remove DNS record or claim vercel account",
+      "cve": null,
+      "exploitable": true,
+      "exploit_code": null,
+      "timestamp": "2026-07-06T02:04:56.416559"
+    }
+  ],
+  "exploits": [],
+  "reports": {}
+}
