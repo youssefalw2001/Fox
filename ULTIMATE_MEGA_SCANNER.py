@@ -2643,32 +2643,11 @@ class VulnerabilityScanner:
                 pass
         
         return vulns
-                    
-                    if env_secrets:
-                        print(Colors.critical(f"      [💀 EXTRACTED] {len(env_secrets)} secrets from {env_file}:"))
-                        for key, val in list(env_secrets.items())[:10]:
-                            print(Colors.success(f"        {key}={val[:50]}..."))
-                        
-                        vulns.append(Vulnerability(
-                            type="ENV_FILE_FULL_EXTRACTION",
-                            severity="CRITICAL",
-                            location=env_file,
-                            description=f"Environment file exposed with {len(env_secrets)} secrets extracted",
-                            evidence=f"Extracted keys: {', '.join(list(env_secrets.keys())[:10])}",
-                            remediation="Remove .env files from public directory",
-                            exploitable=True
-                        ))
-                
-                time.sleep(self.config.delay)
-            except:
-                pass
-        
-        # PHASE 3: Download and extract backup files
-        backup_files = [
-            '/backup.zip', '/backup.tar.gz', '/site.zip', '/www.zip',
-            '/db.sql', '/database.sql', '/dump.sql', '/backup.sql',
-            '/backup.tar', '/site.tar', '/source.zip'
-        ]
+    
+    # ─────────────────────────────────────────────────────────────────────
+    # MEMORY SCANNING - AOB (Array of Bytes) Pattern Search - WITH STRICT VALIDATION
+    # ─────────────────────────────────────────────────────────────────────
+    def scan_memory_patterns(self, target: str) -> List[Vulnerability]:
         
         for backup_file in backup_files:
             try:
