@@ -29,7 +29,10 @@ jobs:
           python -m py_compile modules/web3_js_unpacker.py
           python -m py_compile modules/solana_intel.py
           python -m py_compile modules/finding_confidence.py
+          python -m py_compile modules/mega_accuracy_enhancer.py
           python -m py_compile TEST_REAL_EXPLOITS.py
+          python -m py_compile ULTIMATE_MEGA_SCANNER.py
+          python -m py_compile ULTIMATE_MEGA_SCANNER_SMART.py
 
       - name: Run detector tests
         run: pytest
