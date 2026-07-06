@@ -25,6 +25,10 @@ jobs:
         run: |
           python -m py_compile modules/web3_specific_checks.py
           python -m py_compile modules/web3_asset_collector.py
+          python -m py_compile modules/web3_api_mapper.py
+          python -m py_compile modules/web3_js_unpacker.py
+          python -m py_compile modules/solana_intel.py
+          python -m py_compile modules/finding_confidence.py
           python -m py_compile TEST_REAL_EXPLOITS.py
 
       - name: Run detector tests
