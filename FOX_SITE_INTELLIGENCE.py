@@ -20,7 +20,7 @@ import sys
 from pathlib import Path
 
 from modules.data_exposure_intel import build_data_exposure_report
-from modules.fox_site_intelligence import AuthContext, FoxSiteIntelligence, write_reports
+from modules.fox_site_intelligence import AuthContext, FoxSiteIntelligence, severity_rank, summarize_findings, write_reports
 
 
 def collect_data_intel_blobs(scanner: FoxSiteIntelligence) -> tuple[dict, dict]:
@@ -92,8 +92,8 @@ def main() -> None:
                 exposure.get("remediation", "Remove exposed sensitive data and restrict access."),
                 false_positive_risk="MEDIUM" if exposure.get("confidence", 0) < 85 else "LOW",
             )
-        result["findings"] = [f.to_dict() for f in sorted(scanner.findings, key=lambda x: (x.confidence, x.severity), reverse=True)]
-        result["summary"] = result["summary"] | {"data_exposure": data_exposure.get("summary", {})}
+        result["findings"] = [f.to_dict() for f in sorted(scanner.findings, key=lambda x: (x.confidence, severity_rank(x.severity)), reverse=True)]
+        result["summary"] = summarize_findings(scanner.findings) | {"data_exposure": data_exposure.get("summary", {})}
 
     reports = write_reports(result, args.output)
     result["reports"] = reports
