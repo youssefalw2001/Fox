@@ -8,6 +8,7 @@ All-in-one application intelligence scanner for authorized testing:
 - Web3/Solana markers
 - exposure checks
 - data exposure intelligence
+- Gear 3 adversarial proof mode
 - auth/access matrix with provided sessions
 - proof scoring and attacker-value impact report
 """
@@ -20,6 +21,7 @@ import sys
 from pathlib import Path
 
 from modules.data_exposure_intel import build_data_exposure_report
+from modules.gear3_adversarial_intel import build_gear3_report
 from modules.fox_site_intelligence import AuthContext, FoxSiteIntelligence, severity_rank, summarize_findings, write_reports
 
 
@@ -49,6 +51,14 @@ def collect_data_intel_blobs(scanner: FoxSiteIntelligence) -> tuple[dict, dict]:
     return blobs, content_types
 
 
+def merge_scanner_findings(result: dict, scanner: FoxSiteIntelligence) -> None:
+    result["findings"] = [
+        f.to_dict()
+        for f in sorted(scanner.findings, key=lambda x: (x.confidence, severity_rank(x.severity)), reverse=True)
+    ]
+    result["summary"] = summarize_findings(scanner.findings)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Fox Site Intelligence - deep weakness and app intelligence scanner")
     parser.add_argument("--target", "-t", required=True, help="Target URL")
@@ -56,6 +66,7 @@ def main() -> None:
     parser.add_argument("--browser", action="store_true", help="Reserved for future Playwright runtime capture")
     parser.add_argument("--web3", action="store_true", help="Emphasize Web3/Solana findings in report")
     parser.add_argument("--data-intel", action="store_true", help="Run deep data exposure intelligence with redacted proof")
+    parser.add_argument("--gear3", action="store_true", help="Run Gear 3 adversarial proof mode: attack paths, BOLA candidates, business logic, GraphQL/Web3 risk")
     parser.add_argument("--headers", help="JSON file with normal-user headers")
     parser.add_argument("--cookies", help="JSON file with normal-user cookies")
     parser.add_argument("--admin-headers", help="JSON file with authorized admin headers for comparison")
@@ -75,10 +86,14 @@ def main() -> None:
 
     scanner = FoxSiteIntelligence(args.target, timeout=args.timeout, max_pages=args.max_pages, deep=args.deep)
     result = scanner.run(user_ctx=user_ctx, admin_ctx=admin_ctx)
+    blobs = None
+    content_types = None
+
+    if args.data_intel or args.gear3:
+        blobs, content_types = collect_data_intel_blobs(scanner)
 
     if args.data_intel:
-        blobs, content_types = collect_data_intel_blobs(scanner)
-        data_exposure = build_data_exposure_report(blobs, content_types)
+        data_exposure = build_data_exposure_report(blobs or {}, content_types or {})
         result["data_exposure"] = data_exposure
         for exposure in data_exposure.get("findings", [])[:50]:
             scanner.add_finding(
@@ -92,18 +107,47 @@ def main() -> None:
                 exposure.get("remediation", "Remove exposed sensitive data and restrict access."),
                 false_positive_risk="MEDIUM" if exposure.get("confidence", 0) < 85 else "LOW",
             )
-        result["findings"] = [f.to_dict() for f in sorted(scanner.findings, key=lambda x: (x.confidence, severity_rank(x.severity)), reverse=True)]
-        result["summary"] = summarize_findings(scanner.findings) | {"data_exposure": data_exposure.get("summary", {})}
+        merge_scanner_findings(result, scanner)
+        result["summary"] = result["summary"] | {"data_exposure": data_exposure.get("summary", {})}
+
+    if args.gear3:
+        gear3 = build_gear3_report(
+            result.get("site_map", {}),
+            findings=result.get("findings", []),
+            access_matrix=result.get("access_matrix", []),
+            blobs=blobs or scanner.sitemap.js_blobs,
+        )
+        result["gear3"] = gear3
+        for item in gear3.get("findings", [])[:40]:
+            scanner.add_finding(
+                item.get("type", "GEAR3_SIGNAL"),
+                item.get("severity", "MEDIUM"),
+                f"Gear 3: {item.get('title', item.get('type', 'signal'))}",
+                item.get("location", "site intelligence"),
+                item.get("evidence", ""),
+                int(item.get("confidence", 60)),
+                item.get("attacker_value", "Potential abuse path or exploitability signal."),
+                "; ".join(item.get("safe_next_steps", [])) or "Verify server-side authorization, validation, and ownership checks.",
+                false_positive_risk="MEDIUM" if item.get("confidence", 0) < 80 else "LOW",
+            )
+        merge_scanner_findings(result, scanner)
+        result["summary"] = result["summary"] | {"gear3": gear3.get("summary", {})}
+        if "data_exposure" in result:
+            result["summary"] = result["summary"] | {"data_exposure": result["data_exposure"].get("summary", {})}
 
     reports = write_reports(result, args.output)
     result["reports"] = reports
 
+    out = Path(args.output)
+    out.mkdir(parents=True, exist_ok=True)
     if args.data_intel:
-        out = Path(args.output)
-        out.mkdir(parents=True, exist_ok=True)
         data_path = out / "data_exposure.json"
         data_path.write_text(json.dumps(result.get("data_exposure", {}), indent=2), encoding="utf-8")
         reports["data_exposure"] = str(data_path)
+    if args.gear3:
+        gear3_path = out / "gear3_adversarial_report.json"
+        gear3_path.write_text(json.dumps(result.get("gear3", {}), indent=2), encoding="utf-8")
+        reports["gear3"] = str(gear3_path)
 
     print("\n" + "=" * 70)
     print("FOX SITE INTELLIGENCE COMPLETE")
@@ -118,6 +162,13 @@ def main() -> None:
     print(f"Admin surface: {reports['admin_surface']}")
     if args.data_intel:
         print(f"Data exposure: {reports['data_exposure']}")
+    if args.gear3:
+        print(f"Gear 3: {reports['gear3']}")
+
+    if result.get("gear3", {}).get("attack_paths"):
+        print("\nGear 3 attack paths:")
+        for path in result["gear3"]["attack_paths"][:5]:
+            print(f"  {path['severity']:8s} {path['confidence']:3d}%  {path['title']}")
 
     if result.get("findings"):
         print("\nTop findings:")
