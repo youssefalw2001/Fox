@@ -32,10 +32,12 @@ jobs:
           python -m py_compile modules/mega_accuracy_enhancer.py
           python -m py_compile modules/mega_exploit_verifier.py
           python -m py_compile modules/phantom_dapp_catalog.py
+          python -m py_compile modules/fox_site_intelligence.py
           python -m py_compile TEST_REAL_EXPLOITS.py
           python -m py_compile ULTIMATE_MEGA_SCANNER.py
           python -m py_compile ULTIMATE_MEGA_SCANNER_SMART.py
           python -m py_compile FIND_PHANTOM_SITES.py
+          python -m py_compile FOX_SITE_INTELLIGENCE.py
 
       - name: Run detector tests
         run: pytest
