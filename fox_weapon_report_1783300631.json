@@ -1,0 +1,12 @@
+{
+  "target": "https://rugs.fun",
+  "scan_time": "2026-07-06T01:17:11.713738",
+  "total_findings": 0,
+  "by_severity": {
+    "CRITICAL": 0,
+    "HIGH": 0,
+    "MEDIUM": 0,
+    "LOW": 0
+  },
+  "findings": []
+}

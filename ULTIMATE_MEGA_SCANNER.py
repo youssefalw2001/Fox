@@ -1259,7 +1259,7 @@ class WebExploitationArsenal:
     # CSRF ATTACKS - Cross-Site Request Forgery
     # ─────────────────────────────────────────────────────────────────────
     def attack_csrf(self, target: str) -> List[Vulnerability]:
-        """CSRF - test for missing CSRF tokens on state-changing operations"""
+        """CSRF - test for missing CSRF tokens on state-changing operations - STRICT VALIDATION"""
         vulns = []
         
         # State-changing endpoints
@@ -1280,15 +1280,33 @@ class WebExploitationArsenal:
                     timeout=5
                 )
                 
-                # If request accepted (not 403/400), likely CSRF vulnerable
-                if r.status_code not in [404, 403, 400]:
-                    # Double-check by looking for CSRF token requirement
-                    if 'csrf' not in r.text.lower() and 'token' not in r.text.lower():
+                # PHASE 1: Reject HTML responses (SPA fallbacks)
+                if r.status_code not in [404] and not is_html_response(r.text, dict(r.headers)):
+                    
+                    # PHASE 2: Response must indicate action was processed (not error)
+                    # Look for success indicators OR lack of security error
+                    is_processed = False
+                    
+                    # Success indicators
+                    if any(word in r.text.lower() for word in ['success', 'updated', 'deleted', 'changed', 'saved']):
+                        is_processed = True
+                    
+                    # NOT requiring CSRF (missing security error)
+                    if 'csrf' not in r.text.lower() and 'token' not in r.text.lower() and 'unauthorized' not in r.text.lower():
+                        # But response must be structured (JSON/XML, not plain text)
+                        try:
+                            json.loads(r.text)
+                            is_processed = True
+                        except:
+                            pass
+                    
+                    if is_processed and len(r.text) > 10:
                         vulns.append(Vulnerability(
                             type="CSRF_MISSING_TOKEN",
                             severity="HIGH",
                             location=endpoint,
-                            description=f"Endpoint accepts state changes without CSRF token",
+                            evidence=r.text[:300],
+                            description=f"Endpoint accepts state changes without CSRF token (HTTP {r.status_code})",
                             remediation="Implement CSRF tokens on all state-changing operations",
                             exploitable=True,
                             exploit_code=f"<form action='{url}' method='POST'><input name='test' value='data'><input type='submit'></form>"
@@ -1379,7 +1397,7 @@ class WebExploitationArsenal:
     # IDOR ATTACKS - Insecure Direct Object References
     # ─────────────────────────────────────────────────────────────────────
     def attack_idor(self, target: str) -> List[Vulnerability]:
-        """IDOR - unauthorized access to objects by manipulating IDs"""
+        """IDOR - unauthorized access to objects by manipulating IDs - STRICT VALIDATION"""
         vulns = []
         
         idor_endpoints = [
@@ -1394,20 +1412,51 @@ class WebExploitationArsenal:
                     url = urljoin(target, f"{endpoint}{user_id}")
                     r = self.session.get(url, timeout=5)
                     
-                    if r.status_code == 200 and len(r.text) > 50:
-                        # Check if response contains user data
-                        user_indicators = ['email', 'username', 'phone', 'address', 'name']
-                        if any(indicator in r.text.lower() for indicator in user_indicators):
-                            vulns.append(Vulnerability(
-                                type="IDOR_UNAUTHORIZED_ACCESS",
-                                severity="HIGH",
-                                location=f"{endpoint}{{id}}",
-                                description="IDOR allows unauthorized access to user data",
-                                remediation="Implement proper authorization checks on all endpoints",
-                                exploitable=True,
-                                exploit_code=f"curl '{url}'"
-                            ))
-                            break
+                    # PHASE 1: Reject HTML responses (SPA fallbacks)
+                    if r.status_code == 200 and not is_html_response(r.text, dict(r.headers)):
+                        
+                        # PHASE 2: Must be JSON or structured data
+                        if len(r.text) > 100:
+                            try:
+                                # Try parsing as JSON (real API response)
+                                data = json.loads(r.text)
+                                
+                                # PHASE 3: Must contain actual user data fields
+                                if isinstance(data, dict):
+                                    user_fields = ['email', 'phone', 'address', 'ssn', 'password', 'token', 'wallet']
+                                    found_fields = [f for f in user_fields if f in data]
+                                    
+                                    if found_fields:
+                                        vulns.append(Vulnerability(
+                                            type="IDOR_UNAUTHORIZED_ACCESS",
+                                            severity="HIGH",
+                                            location=f"{endpoint}{{id}}",
+                                            evidence=json.dumps(data)[:300],
+                                            description=f"IDOR allows unauthorized access to user data (found: {', '.join(found_fields)})",
+                                            remediation="Implement proper authorization checks on all endpoints",
+                                            exploitable=True,
+                                            exploit_code=f"curl '{url}'"
+                                        ))
+                                        break
+                            except json.JSONDecodeError:
+                                # Not JSON, check for structured data (CSV, XML, etc.)
+                                if '\n' in r.text and (',' in r.text or ':' in r.text):
+                                    # Could be CSV or key:value data
+                                    user_indicators = ['email', 'phone', 'address', 'ssn', 'password']
+                                    if any(indicator in r.text.lower() for indicator in user_indicators):
+                                        # Verify it's not just words in HTML/JS
+                                        if '<' not in r.text[:200] and 'function' not in r.text[:200]:
+                                            vulns.append(Vulnerability(
+                                                type="IDOR_UNAUTHORIZED_ACCESS",
+                                                severity="HIGH",
+                                                location=f"{endpoint}{{id}}",
+                                                evidence=r.text[:300],
+                                                description="IDOR allows unauthorized access to user data (structured format)",
+                                                remediation="Implement proper authorization checks on all endpoints",
+                                                exploitable=True,
+                                                exploit_code=f"curl '{url}'"
+                                            ))
+                                            break
                     
                     time.sleep(self.config.delay)
             except:

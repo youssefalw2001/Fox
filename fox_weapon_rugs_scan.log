@@ -1,0 +1,36 @@
+
+🦊💀 FOX WEAPON SCANNER 💀🦊
+Target: https://rugs.fun
+Mode: AGGRESSIVE
+================================================================================
+
+[Phase 1] Reconnaissance...
+  [+] Detected: Server: cloudflare, Frontend: React
+
+[Phase 2] Secret Hunting (STRICT validation)...
+  [→] Hunting config files...
+  [→] Hunting JavaScript secrets...
+  [→] Hunting memory patterns...
+
+[Phase 3] AGGRESSIVE Exploitation...
+  [→] Exploiting .git exposure...
+  [→] Exploiting backup files...
+  [→] Exploiting SSRF for cloud metadata...
+  [→] Exploiting SQL injection...
+
+[Phase 4] Generating Report...
+
+================================================================================
+SCAN COMPLETE: 0 findings
+================================================================================
+
+💀 CRITICAL: 0
+🔥 HIGH: 0
+⚠️  MEDIUM: 0
+ℹ️  LOW: 0
+
+================================================================================
+DETAILED FINDINGS
+================================================================================
+
+📄 Report saved: fox_weapon_report_1783300631.json
