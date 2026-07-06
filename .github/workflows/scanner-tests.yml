@@ -30,6 +30,7 @@ jobs:
           python -m py_compile modules/solana_intel.py
           python -m py_compile modules/finding_confidence.py
           python -m py_compile modules/mega_accuracy_enhancer.py
+          python -m py_compile modules/mega_exploit_verifier.py
           python -m py_compile TEST_REAL_EXPLOITS.py
           python -m py_compile ULTIMATE_MEGA_SCANNER.py
           python -m py_compile ULTIMATE_MEGA_SCANNER_SMART.py
