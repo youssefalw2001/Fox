@@ -1,0 +1,31 @@
+name: scanner-tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest requests base58
+
+      - name: Compile scanner files
+        run: |
+          python -m py_compile modules/web3_specific_checks.py
+          python -m py_compile modules/web3_asset_collector.py
+          python -m py_compile TEST_REAL_EXPLOITS.py
+
+      - name: Run detector tests
+        run: pytest
