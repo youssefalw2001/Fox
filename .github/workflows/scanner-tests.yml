@@ -35,6 +35,7 @@ jobs:
           python -m py_compile modules/data_exposure_intel.py
           python -m py_compile modules/gear3_adversarial_intel.py
           python -m py_compile modules/redteam_lab_mode.py
+          python -m py_compile modules/judge_review_mode.py
           python -m py_compile modules/fox_site_intelligence.py
           python -m py_compile TEST_REAL_EXPLOITS.py
           python -m py_compile ULTIMATE_MEGA_SCANNER.py
