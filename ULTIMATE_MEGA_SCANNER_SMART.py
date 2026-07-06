@@ -7,6 +7,7 @@ This keeps the original scanner logic unchanged, then post-processes results wit
 - confidence scoring
 - noisy finding warnings
 - evidence redaction in reports
+- optional proof-only exploit verification
 - smarter JSON/HTML/Markdown report output through the original reporter
 """
 
@@ -18,9 +19,14 @@ import time
 
 import ULTIMATE_MEGA_SCANNER as ums
 from modules.mega_accuracy_enhancer import enhance_scan_results
+from modules.mega_exploit_verifier import results_to_dict, verify_findings_proof_only
 
 
 class SmartUltimateMegaScanner(ums.UltimateMegaScanner):
+    def __init__(self, config: ums.ScanConfig, verify_exploits: bool = False):
+        super().__init__(config)
+        self.verify_exploits = verify_exploits
+
     def scan(self, target: str):
         results = super().scan(target)
         enhanced = enhance_scan_results(results)
@@ -43,6 +49,18 @@ class SmartUltimateMegaScanner(ums.UltimateMegaScanner):
             for item in noisy[:10]:
                 warnings = "; ".join(item.get("warnings", [])[:2])
                 print(f"  - {item.get('type')} at {item.get('location')} [{item.get('confidence')}] {warnings}")
+
+        if self.verify_exploits:
+            verification = verify_findings_proof_only(enhanced.get("vulnerabilities", []))
+            enhanced["exploit_verification"] = results_to_dict(verification)
+            verified = [item for item in verification if item.verified]
+            needs_review = [item for item in verification if not item.verified]
+            print("\n" + ums.Colors.nuke("[PROOF-ONLY EXPLOIT VERIFICATION]"))
+            print(f"Verified proof-level findings: {len(verified)}")
+            print(f"Needs manual review:           {len(needs_review)}")
+            for item in needs_review[:10]:
+                note = item.skipped_reason or "; ".join(item.warnings[:2])
+                print(f"  - {item.vulnerability_type} at {item.location} [{item.confidence}] {note}")
 
         # Regenerate reports after smart post-processing so JSON contains accuracy metadata.
         try:
@@ -86,6 +104,7 @@ def main():
 Examples:
   python3 ULTIMATE_MEGA_SCANNER_SMART.py --target https://example.com
   python3 ULTIMATE_MEGA_SCANNER_SMART.py --target https://example.com --full
+  python3 ULTIMATE_MEGA_SCANNER_SMART.py --target https://example.com --verify-exploits
   python3 ULTIMATE_MEGA_SCANNER_SMART.py --target-list targets.txt --threads 5
         """,
     )
@@ -95,6 +114,7 @@ Examples:
     parser.add_argument("--fast", action="store_true", help="Fast scan")
     parser.add_argument("--stealth", action="store_true", help="Stealth mode")
     parser.add_argument("--exploit", action="store_true", help="Pass through original scanner exploit mode")
+    parser.add_argument("--verify-exploits", action="store_true", help="Proof-only exploitability verification; does not add post-exploitation")
     parser.add_argument("--output", "-o", default="output/mega_scan_smart", help="Output directory")
     parser.add_argument("--threads", type=int, default=10, help="Number of threads")
     parser.add_argument("--timeout", type=int, default=30, help="Request timeout")
@@ -112,7 +132,7 @@ Examples:
 
     try:
         if args.target:
-            scanner = SmartUltimateMegaScanner(config)
+            scanner = SmartUltimateMegaScanner(config, verify_exploits=args.verify_exploits)
             scanner.scan(args.target)
         else:
             with open(args.target_list, "r", encoding="utf-8") as f:
@@ -125,7 +145,7 @@ Examples:
                 print(ums.Colors.nuke(f"\n{'='*70}"))
                 print(ums.Colors.nuke(f"TARGET {i}/{len(targets)}"))
                 print(ums.Colors.nuke(f"{'='*70}\n"))
-                scanner = SmartUltimateMegaScanner(config)
+                scanner = SmartUltimateMegaScanner(config, verify_exploits=args.verify_exploits)
                 scanner.scan(target)
                 if i < len(targets):
                     time.sleep(5)
